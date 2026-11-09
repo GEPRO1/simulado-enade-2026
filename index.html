@@ -83,52 +83,9 @@
                 </p>
             </div>
 
-            <!-- ================================================================= -->
-            <!-- LISTA DE SIMULADOS (ADICIONE OU EDITE NOVOS SIMULADOS AQUI)       -->
-            <!-- ================================================================= -->
-            <nav class="space-y-3.5 text-left" aria-label="Lista de Simulados">
-
-                <!-- ------------------------------------------------------------- -->
-                <!-- ITEM 01: SIMULADO GERAL INTEGRADO (ARQUIVO: 01.html)           -->
-                <!-- ------------------------------------------------------------- -->
-                <a href="01.html" 
-                   class="group flex items-center justify-between p-4 rounded-xl border border-ufcnavy-500/20 bg-ufcnavy-50 hover:bg-ufcnavy-700 text-ufcnavy-900 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ufcnavy-500">
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-10 h-10 rounded-lg bg-ufcnavy-700 group-hover:bg-white text-white group-hover:text-ufcnavy-700 flex items-center justify-center font-bold text-sm transition-colors">
-                            01
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h3 class="font-bold text-sm">Simulado Geral Integrado</h3>
-                                <span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Ativo</span>
-                            </div>
-                            <p class="text-xs text-slate-500 group-hover:text-slate-200 transition-colors">45 Questões • Formação Geral + Específica</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
-                </a>
-
-                <!-- ------------------------------------------------------------- -->
-                <!-- TEMPLATE PARA NOVO SIMULADO (COPIE O BLOCO ABAIXO PARA O 02)  -->
-                <!-- ------------------------------------------------------------- -->
-                <!--
-                <a href="02.html" 
-                   class="group flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:bg-ufcnavy-700 text-slate-800 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ufcnavy-500">
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-white text-slate-700 group-hover:text-ufcnavy-700 flex items-center justify-center font-bold text-sm transition-colors">
-                            02
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h3 class="font-bold text-sm">Simulado Módulo II — Qualidade & PCP</h3>
-                            </div>
-                            <p class="text-xs text-slate-500 group-hover:text-slate-200 transition-colors">15 Questões Objetivas</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
-                </a>
-                -->
-
+            <!-- CONTAINER DA LISTA DE SIMULADOS (RENDERIZADO VIA SCRIPT) -->
+            <nav id="simuladosList" class="space-y-3.5 text-left" aria-label="Lista de Simulados">
+                <!-- Os botões serão inseridos automaticamente pelo JavaScript -->
             </nav>
 
             <!-- AVISO DE INSTRUÇÃO E SALVAMENTO -->
@@ -151,5 +108,73 @@
         </div>
     </footer>
 
+    <!-- ================================================================= -->
+    <!-- SCRIPT DE REGISTRO E ADIÇÃO DE NOVOS SIMULADOS                     -->
+    <!-- ================================================================= -->
+    <script>
+        // PARA ADICIONAR UM NOVO SIMULADO: Insira um novo objeto {...} na lista abaixo!
+        const listaSimulados = [
+            {
+                id: "01",
+                arquivo: "01.html",
+                titulo: "Simulado Geral Integrado",
+                descricao: "45 Questões • Formação Geral + Específica",
+                badge: "Ativo",
+                badgeCor: "bg-emerald-500",
+                destaque: true
+            }
+            /* EXEMPLO PARA ADICIONAR O SIMULADO 02 FUTURAMENTE (remova o /* para ativar):
+            ,{
+                id: "02",
+                arquivo: "02.html",
+                titulo: "Simulado Módulo II — Qualidade & PCP",
+                descricao: "15 Questões Objetivas",
+                badge: "Novo",
+                badgeCor: "bg-blue-500",
+                destaque: false
+            }
+            */
+        ];
+
+        // FUNÇÃO DE RENDERIZAÇÃO AUTOMÁTICA DOS BOTÕES
+        function renderizarSimulados() {
+            const container = document.getElementById('simuladosList');
+            container.innerHTML = '';
+
+            listaSimulados.forEach(item => {
+                const link = document.createElement('a');
+                link.href = item.arquivo;
+                
+                const bgEstilo = item.destaque 
+                    ? 'border-ufcnavy-500/20 bg-ufcnavy-50 hover:bg-ufcnavy-700 text-ufcnavy-900 hover:text-white' 
+                    : 'border-slate-200 bg-white hover:bg-ufcnavy-700 text-slate-800 hover:text-white';
+                
+                const numEstilo = item.destaque
+                    ? 'bg-ufcnavy-700 group-hover:bg-white text-white group-hover:text-ufcnavy-700'
+                    : 'bg-slate-100 group-hover:bg-white text-slate-700 group-hover:text-ufcnavy-700';
+
+                link.className = `group flex items-center justify-between p-4 rounded-xl border ${bgEstilo} transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ufcnavy-500`;
+
+                link.innerHTML = `
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-10 h-10 rounded-lg ${numEstilo} flex items-center justify-center font-bold text-sm transition-colors">
+                            ${item.id}
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="font-bold text-sm">${item.titulo}</h3>
+                                ${item.badge ? `<span class="${item.badgeCor} text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">${item.badge}</span>` : ''}
+                            </div>
+                            <p class="text-xs text-slate-500 group-hover:text-slate-200 transition-colors">${item.descricao}</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
+                `;
+                container.appendChild(link);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderizarSimulados);
+    </script>
 </body>
 </html>
