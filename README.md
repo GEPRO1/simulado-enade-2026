@@ -11,7 +11,8 @@ O acesso é gratuito, universal e funciona em computadores, tablets e celulares 
 👉 **[Acessar o Portal de Simulados](https://gepro1.github.io/simulado-enade-2026/)**
 
 
-```
+``` 
+
 <!-- ITEM 02: NOVO SIMULADO (ARQUIVO: 02.html)                     -->
 
 ## 📖 Como Adicionar um Novo Simulado (`02.html`, `03.html`...)
@@ -28,7 +29,7 @@ Para incluir uma nova avaliação no portal sem quebrar o link principal, siga o
 1. Abra o arquivo `index.html` no GitHub e clique no ícone de **Lápis (Edit file)**.
 2. Dentro da tag `<nav class="space-y-3.5 text-left">`, copie e cole o bloco de código abaixo:
 
-```html
+html
 <!-- ------------------------------------------------------------- -->
 <!-- ITEM 02: NOVO SIMULADO (ARQUIVO: 02.html)                     -->
 <!-- ------------------------------------------------------------- -->
@@ -48,7 +49,8 @@ Para incluir uma nova avaliação no portal sem quebrar o link principal, siga o
     </div>
     <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
 </a>
-``` 
+```
+
 # Simulado ENADE 2026 — Engenharia de Produção
 
 Aplicação web interativa para preparação dos estudantes de Engenharia de Produção da UFC Campus Russas para a avaliação do ENADE 2026.
