@@ -12,6 +12,8 @@ O acesso é gratuito, universal e funciona em computadores, tablets e celulares 
 
 
 ---
+<!-- ------------------------------------------------------------- -->
+<!-- ITEM 02: NOVO SIMULADO (ARQUIVO: 02.html)                     -->
 
 ## 📖 Como Adicionar um Novo Simulado (`02.html`, `03.html`...)
 
