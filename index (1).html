@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado ENADE 2026 — Engenharia de Produção</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ufcnavy: {
+                            50: '#f0f5fa',
+                            100: '#e1ebd5',
+                            500: '#004b93',
+                            700: '#003366',
+                            900: '#001e3d'
+                        },
+                        ufcteal: {
+                            50: '#f0fdfa',
+                            500: '#00a896',
+                            600: '#008080',
+                            700: '#006666'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col bg-slate-100 text-slate-800 antialiased selection:bg-ufcteal-600 selection:text-white">
+
+    <!-- CABEÇALHO -->
+    <header class="bg-ufcnavy-700 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white p-2 rounded-lg shadow-sm flex items-center justify-center">
+                        <i class="fa-solid fa-graduation-cap text-ufcnavy-700 text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-ufcteal-600 text-white text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
+                            <span class="text-xs text-slate-300 font-medium hidden sm:inline">Engenharia de Produção</span>
+                        </div>
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">Simulado Interativo (45 Questões)</h1>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <!-- Cronômetro -->
+                    <div class="bg-ufcnavy-900 border border-ufcnavy-500 rounded-xl px-3 py-1.5 flex items-center space-x-2 shadow-inner">
+                        <i class="fa-regular fa-clock text-ufcteal-500 text-base" id="timerIcon"></i>
+                        <div>
+                            <div class="text-[9px] text-slate-400 uppercase font-semibold tracking-wider">Tempo</div>
+                            <div id="timerDisplay" class="font-mono text-sm sm:text-base font-bold text-white">00:00:00</div>
+                        </div>
+                    </div>
+
+                    <!-- Botão Finalizar -->
+                    <button onclick="confirmSubmitSimulado()" class="bg-gradient-to-r from-ufcteal-600 to-teal-600 hover:from-ufcteal-700 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span class="hidden sm:inline">Finalizar Prova</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Barra de Progresso Superior -->
+        <div class="w-full bg-ufcnavy-900 h-1.5">
+            <div id="topProgressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL (LAYOUT 2 COLUNAS) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row gap-6">
+
+        <!-- AREA DAS QUESTÕES -->
+        <section class="flex-1 min-w-0">
+            <!-- CARDS DAS QUESTÕES -->
+            <div id="questionsContainer" class="space-y-6"></div>
+
+            <!-- RESULTADOS -->
+            <div id="resultsContainer" class="hidden space-y-6"></div>
+        </section>
+
+        <!-- CARTÃO RESPOSTA / NAVEGAÇÃO LATERAL -->
+        <aside class="w-full md:w-80 flex-shrink-0 no-print">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 sticky top-24">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-table-cells text-ufcnavy-700"></i>
+                        <h3 class="font-bold text-sm text-slate-800">Cartão Resposta</h3>
+                    </div>
+                    <span id="answeredCounter" class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full">0 / 45</span>
+                </div>
+
+                <!-- Grid com as 45 questões -->
+                <div class="grid grid-cols-5 gap-2 max-h-80 overflow-y-auto custom-scrollbar pr-1 mb-4" id="questionsGrid"></div>
+
+                <!-- Ações -->
+                <div class="pt-4 border-t border-slate-100 space-y-2">
+                    <button onclick="confirmSubmitSimulado()" class="w-full bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Corrigir Simulado</span>
+                    </button>
+                    <button onclick="resetAnswersConfirmation()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2 rounded-xl text-xs transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Limpar Respostas</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- MODAL CONFIRMAÇÃO -->
+    <div id="submitModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-ufcteal-50 text-ufcteal-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">Finalizar o Simulado?</h3>
+                <p class="text-xs text-slate-600 mt-1">Você gerará o seu relatório detalhado de acertos e gabarito comentado.</p>
+                <div id="unansweredWarning" class="hidden mt-3 p-3 bg-amber-50 text-amber-800 rounded-xl text-xs border border-amber-200 text-left">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i>
+                    <span id="unansweredCountText"></span>
+                </div>
+            </div>
+            <div class="mt-6 flex space-x-3">
+                <button onclick="document.getElementById('submitModal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs">Voltar à Prova</button>
+                <button onclick="submitSimulado()" class="flex-1 bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold py-2 rounded-xl text-xs shadow">Corrigir Agora</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+  {
+    "id": 1,
+    "stem": "Q1: Uma fábrica metalmecânica está migrando do modelo de produção empurrada (MRP II) para o modelo de produção puxada (Just-in-Time/Kanban). Considerando a gestão de estoque em processo (WIP) e a sincronização do fluxo produtivo, qual é a principal característica operacional da produção puxada?",
+    "options": {
+      "A": "O sistema Kanban elimina a necessidade de previsão de demanda agregada de longo prazo.",
+      "B": "A produção puxada autoriza a fabricação e movimentação de itens apenas quando há consumo real no posto posterior, controlando rigorosamente o estoque em processo (WIP).",
+      "C": "O sistema MRP II atua com controle visual no chão de fábrica, dispensando dados do plano mestre de produção (MPS).",
+      "D": "O nivelamento da produção (Heijunka) aumenta a variabilidade de lotes no JIT para compensar a falta de estoque de segurança.",
+      "E": "A transição para a produção puxada exige o aumento do tempo de setup (troca de ferramenta) para maximizar o tamanho dos lotes."
+    },
+    "answer": "B",
+    "explanation": "A produção puxada (JIT/Kanban) condiciona a autorização de produção à solicitação do processo cliente, controlando o WIP. Ref: SLACK, N. Administração da Produção. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 2,
+    "stem": "Q2: Uma empresa química fabrica dois fertilizantes, F1 e F2, a partir de dois insumos limitados: Nitrogênio (N) e Fósforo (P). Cada tonelada de F1 consome 2 t de N e 1 t de P, gerando lucro de R$ 300,00. Cada tonelada de F2 consome 1 t de N e 2 t de P, gerando lucro de R$ 400,00. A disponibilidade diária é de 10 t de N e 10 t de P. Formule o modelo Z = 300x1 + 400x2 sujeito a 2x1 + x2 <= 10 e x1 + 2x2 <= 10. Qual é o mix ótimo de produção e o lucro máximo?",
+    "options": {
+      "A": "O mix ótimo é produzir 3,33 t de F1 e 3,33 t de F2, obtendo um lucro máximo de R$ 2.333,33.",
+      "B": "O mix ótimo é produzir 5,00 t de F1 e 0,00 t de F2, obtendo um lucro máximo de R$ 1.500,00.",
+      "C": "O mix ótimo é produzir 0,00 t de F1 e 5,00 t de F2, obtendo um lucro máximo de R$ 2.000,00.",
+      "D": "O problema não possui solução viável devido à sobreposição das restrições de insumos.",
+      "E": "O mix ótimo é produzir 4,00 t de cada fertilizante, resultando em um lucro de R$ 2.800,00."
+    },
+    "answer": "A",
+    "explanation": "Sistema linear: 2x1 + x2 = 10 e x1 + 2x2 = 10 => x1 = 3,33 e x2 = 3,33. Z = 300*(3,33) + 400*(3,33) = R$ 2.333,33. Ref: TAHA, H. A. Pesquisa Operacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 3,
+    "stem": "Q3: Uma equipe de engenharia avalia a modernização de um equipamento com investimento inicial de R$ 100.000,00 (ano 0). A estimativa de entrada líquida de caixa é de R$ 40.000,00 ao ano nos anos 1, 2 e 3. Considerando uma Taxa Mínima de Atratividade (TMA) de 10% a.a., assinale a alternativa correta quanto ao Valor Presente Líquido (VPL) e à viabilidade do projeto.",
+    "options": {
+      "A": "O VPL é de R$ 20.000,00 e o projeto deve ser aceito, pois a soma simples dos fluxos supera o investimento inicial.",
+      "B": "O VPL é de -R$ 525,92 e o projeto inviabiliza-se à TMA de 10% a.a., pois o retorno presente não cobre o investimento.",
+      "C": "O VPL é de R$ 9.474,08 e o projeto deve ser aceito, pois gera saldo positivo após a descapitalização.",
+      "D": "A TIR do projeto é superior a 10% a.a., garantindo lucro líquido de R$ 12.000,00 ao final do terceiro ano.",
+      "E": "O projeto é indiferente à TMA de 10% a.a., pois o payback simples ocorre exatamente no segundo ano."
+    },
+    "answer": "B",
+    "explanation": "VP = 40.000/1,1 + 40.000/1,21 + 40.000/1,331 = R$ 99.474,08. VPL = 99.474,08 - 100.000,00 = -R$ 525,92. Ref: BLANK, L.; TARQUIN, A. Engenharia Econômica. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 4,
+    "stem": "Q4: No Processo de Desenvolvimento de Produtos (PDP), a fase de Planejamento do Produto exige a conversão sistemática da 'Voz do Cliente' em requisitos técnicos de engenharia. Qual ferramenta da qualidade é desenvolvida prioritariamente com essa finalidade através da matriz denominada 'Casa da Qualidade'?",
+    "options": {
+      "A": "Desdobramento da Função Manutenção (FMEA mecânico).",
+      "B": "Análise dos Modos de Falha e seus Efeitos (FMEA pós-lançamento).",
+      "C": "Desdobramento da Função Qualidade (QFD - Quality Function Deployment).",
+      "D": "Engenharia Simultânea para isolamento de equipes de design.",
+      "E": "Design for Manufacture and Assembly (DFMA) para ampliação de peças."
+    },
+    "answer": "C",
+    "explanation": "O QFD utiliza a Casa da Qualidade para correlacionar o 'O QUE' (cliente) com o 'COMO' (engenharia). Ref: ROZENFELD, H. et al. Gestão de Desenvolvimento de Produtos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 5,
+    "stem": "Q5: Uma linha de envase de bebidas opera com Limite Inferior de Especificação (LIE) = 494,00 ml e Limite Superior de Especificação (LSE) = 506,00 ml. A amostra do processo sob controle estatístico revelou média = 500,00 ml e desvio-padrão = 1,00 ml. Qual é o valor dos índices de capabilidade Cp e Cpk deste processo?",
+    "options": {
+      "A": "Cp = 2,00 e Cpk = 2,00, caracterizando um processo centrado e de altíssima capabilidade.",
+      "B": "Cp = 1,00 e Cpk = 0,50, indicando geração contínua de não conformidades.",
+      "C": "Cp = 1,33 e Cpk = 1,00, exigindo ajuste no ponto zero do processo.",
+      "D": "Cp = 0,67 e Cpk = 0,67, o que indica processo totalmente incapaz.",
+      "E": "Cp = 3,00 e Cpk = 1,50, devido à assimetria da curva amostral."
+    },
+    "answer": "A",
+    "explanation": "Cp = (506-494)/(6*1) = 2,00. Cpk = (500-494)/3 = 2,00. Processo de alta capabilidade. Ref: MONTGOMERY, D. C. Controle Estatístico da Qualidade. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 6,
+    "stem": "Q6: Uma empresa distribuidora de componentes eletrônicos apresenta uma demanda anual contínua de 12.000 unidades de um microprocessador. O custo fixo de emissão de cada pedido de compra é de R$ 150,00 e o custo unitário de manutenção de estoque é de R$ 10,00 por unidade ao ano. Considerando o Modelo do Lote Econômico de Compra (LEC / EOQ), determine a quantidade ótima a encomendar em cada pedido e o custo total anual de gestão deste estoque.",
+    "options": {
+      "A": "LEC = 600 unidades; Custo Total Anual de Estoque = R$ 6.000,00.",
+      "B": "LEC = 400 unidades; Custo Total Anual de Estoque = R$ 9.000,00.",
+      "C": "LEC = 600 unidades; Custo Total Anual de Estoque = R$ 12.000,00.",
+      "D": "LEC = 1.200 unidades; Custo Total Anual de Estoque = R$ 3.000,00.",
+      "E": "LEC = 300 unidades; Custo Total Anual de Estoque = R$ 6.000,00."
+    },
+    "answer": "A",
+    "explanation": "LEC = raiz((2*12.000*150)/10) = 600 un. Custo Armazenagem = (600/2)*10 = R$ 3.000,00. Custo Emissão = (12.000/600)*150 = R$ 3.000,00. Total = R$ 6.000,00. Ref: BALLOU, R. H. Gerenciamento da Cadeia de Suprimentos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 7,
+    "stem": "Q7: Uma indústria transformadora produz um único modelo de componente mecânico vendido a R$ 50,00 por unidade. Os custos e despesas variáveis somam R$ 30,00 por unidade e os custos e despesas fixas totalizam R$ 100.000,00 por mês. Com base na análise Relação Custo-Volume-Lucro (CVL), qual é o Ponto de Equilíbrio Contábil (PEC) mensal em unidades e em receita de vendas?",
+    "options": {
+      "A": "PEC = 3.333 unidades e Receita = R$ 166.650,00.",
+      "B": "PEC = 5.000 unidades e Receita = R$ 250.000,00.",
+      "C": "PEC = 2.000 unidades e Receita = R$ 100.000,00.",
+      "D": "PEC = 5.000 unidades e Receita = R$ 150.000,00.",
+      "E": "PEC = 10.000 unidades e Receita = R$ 500.000,00."
+    },
+    "answer": "B",
+    "explanation": "Margem de Contribuição Unitária (MCU) = 50,00 - 30,00 = R$ 20,00. PEC (Q) = 100.000,00 / 20,00 = 5.000 un. PEC (R$) = 5.000 * 50,00 = R$ 250.000,00. Ref: MARTINS, E. Contabilidade de Custos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 8,
+    "stem": "Q8: No projeto ergonômico de postos de trabalho informatizados e linhas de montagem, a antropometria é crucial para prevenir lesões musculoesqueléticas. Ao dimensionar o espaço livre inferior para folga de pernas sob a mesa e a altura máxima de alcance tátil de ferramentas em um painel vertical, quais percentis antropométricos devem ser prioritariamente adotados, respectivamente?",
+    "options": {
+      "A": "Percentil 5 (P5) para a folga das pernas e Percentil 95 (P95) para o alcance máximo.",
+      "B": "Percentil 95 (P95) para a folga das pernas e Percentil 5 (P5) para o alcance máximo.",
+      "C": "Média aritmética (P50) em ambos os casos para atender à maioria dos trabalhadores.",
+      "D": "Percentil 50 (P50) para a folga das pernas e Percentil 95 (P95) para o alcance máximo.",
+      "E": "Percentil 95 (P95) em ambos os casos para garantir dimensionamento máximo universal."
+    },
+    "answer": "B",
+    "explanation": "Folgas adotam o P95 (indivíduo maior) para acomodar a todos; alcances adotam o P5 (menor estatura) para evitar sobreesforço. Ref: IIDA, I. Ergonomia: Projeto e Produção. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 9,
+    "stem": "Q9: Durante o monitoramento de um projeto industrial, aplica-se a Análise do Valor Agregado (EVA). Ao final do sexto mês, os dados recolhidos indicam: Valor Planejado (PV) = R$ 200.000,00; Valor Agregado (EV) = R$ 180.000,00; Custo Real (AC) = R$ 210.000,00. Analisando a Variação de Custo (CV) e a Variação de Prazo (SV), qual é a situação atual do projeto?",
+    "options": {
+      "A": "CV = -R$ 30.000,00 e SV = -R$ 20.000,00; o projeto apresenta estouro de orçamento (custos acima do planejado) e atraso em relação ao cronograma.",
+      "B": "CV = +R$ 30.000,00 e SV = +R$ 20.000,00; o projeto está abaixo do orçamento e adiantado no cronograma.",
+      "C": "CV = -R$ 20.000,00 e SV = -R$ 30.000,00; o projeto apresenta desempenho financeiro favorável, porém atraso físico.",
+      "D": "CV = +R$ 10.000,00 e SV = -R$ 10.000,00; o projeto está em situação neutra.",
+      "E": "CV = -R$ 30.000,00 e SV = +R$ 20.000,00; o projeto estourou o orçamento, mas adiantou as entregas."
+    },
+    "answer": "A",
+    "explanation": "CV = EV - AC = 180.000,00 - 210.000,00 = -R$ 30.000,00 (estouro de custo). SV = EV - PV = 180.000,00 - 200.000,00 = -R$ 20.000,00 (atraso no cronograma). Ref: KERZNER, H. Gestão de Projetos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 10,
+    "stem": "Q10: A integração entre os setores operacionais é fundamental para a manufatura avançada. Em uma arquitetura de gestão integrada orientada à Indústria 4.0, qual é a principal função da integração entre o sistema ERP (Enterprise Resource Planning) e o sistema MES (Manufacturing Execution System)?",
+    "options": {
+      "A": "O MES substitui o módulo financeiro do ERP, eliminando a necessidade de contabilidade analítica.",
+      "B": "O MES atua na camada de chão de fábrica, recolhendo dados de produção em tempo real (estado de máquinas, refugos) e alimentando o ERP para atualizar inventários e ordens de produção.",
+      "C": "O ERP envia dados de marketing direto para os controladores lógicos programáveis (CLP) sem passar pelo MES.",
+      "D": "O MES é responsável pela emissão de faturas e gestão de clientes, enquanto o ERP controla robôs industriais.",
+      "E": "A integração reduz a segurança ao expor o plano estratégico diretamente aos operadores da linha."
+    },
+    "answer": "B",
+    "explanation": "O MES realiza a interface em tempo real entre o nível executivo/estratégico (ERP) e os sistemas de automação do chão de fábrica. Ref: TURBAN, E. Tecnologia da Informação para Gestão. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 11,
+    "stem": "Q11: Em uma linha de montagem automatizada, a equipe de engenharia de manutenção avaliou o desempenho de uma célula robotizada durante um turno de 8 horas (480 minutos). Durante esse período, ocorreram paradas não planejadas para reparos que somaram 30 minutos. O tempo de ciclo padrão de projeto do robô é de 1,00 minuto por peça. Ao final do turno, verificou-se a produção total de 400 peças, das quais 20 foram rejeitadas pelo controle de qualidade por não conformidade dimensional. Considerando os pilares do indicador OEE (Overall Equipment Effectiveness), assinale a opção que apresenta corretamente a Disponibilidade (A), o Desempenho (P), a Qualidade (Q) e o valor final do OEE da célula.",
+    "options": {
+      "A": "Disponibilidade = 93,75%; Desempenho = 88,89%; Qualidade = 95,00%; OEE = 79,17%.",
+      "B": "Disponibilidade = 93,75%; Desempenho = 83,33%; Qualidade = 95,00%; OEE = 74,22%.",
+      "C": "Disponibilidade = 100,00%; Desempenho = 88,89%; Qualidade = 90,00%; OEE = 80,00%.",
+      "D": "Disponibilidade = 93,75%; Desempenho = 100,00%; Qualidade = 80,00%; OEE = 75,00%.",
+      "E": "Disponibilidade = 88,89%; Desempenho = 93,75%; Qualidade = 95,00%; OEE = 79,17%."
+    },
+    "answer": "A",
+    "explanation": "Disp = (480-30)/480 = 93,75%. Des = (400*1)/450 = 88,89%. Qual = (400-20)/400 = 95,00%. OEE = 0,9375 * 0,8889 * 0,9500 = 79,17%. Ref: PALADY, P. Total Productive Maintenance. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 12,
+    "stem": "Q12: Um engenheiro de produção realizou um estudo de tempos em uma operação manual de estampagem. A média dos tempos cronometrados (TC) de uma amostra representativa foi de 2,00 minutos por peça. A avaliação de ritmo do operador (R) foi estimada em 110% (operador trabalhando acima do ritmo normal). As tolerâncias suplementares concedidas pela empresa para necessidades pessoais e fadiga somam 12% sobre o tempo normal. Qual é o Tempo Normal (TN) e o Tempo Padrão (TP) desta operação, respectivamente?",
+    "options": {
+      "A": "TN = 2,00 minutos e TP = 2,240 minutos.",
+      "B": "TN = 2,20 minutos e TP = 2,464 minutos.",
+      "C": "TN = 1,82 minutos e TP = 2,038 minutos.",
+      "D": "TN = 2,20 minutos e TP = 2,224 minutos.",
+      "E": "TN = 2,00 minutos e TP = 2,464 minutos."
+    },
+    "answer": "B",
+    "explanation": "TN = TC * R = 2,00 * 1,10 = 2,20 min. TP = TN * (1 + Tol) = 2,20 * 1,12 = 2,464 min. Ref: BARNES, R. M. Estudo de Tempos e Movimentos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 13,
+    "stem": "Q13: Na avaliação do ambiente laboral de uma caldeiraria, identificou-se que um operador fica exposto a dois níveis de ruído contínuo durante a jornada diária: 2 horas exposto a 90 dBA e 4 horas exposto a 85 dBA. Segundo os limites da Norma Regulamentadora 15 (NR-15), o tempo máximo permitido de exposição diária sem proteção auditiva é de 4 horas para 90 dBA e de 8 horas para 85 dBA. Com base na regra de equivalência e cálculo da Dose de Ruído (D), assinale a alternativa correta sobre a condição de exposição do trabalhador.",
+    "options": {
+      "A": "A dose de ruído calculada é D = 0,75 (75%), estando o ambiente plenamente salubre sem necessidade de medidas corretivas.",
+      "B": "A dose de ruído calculada é D = 1,00 (100%), atingindo exatamente o limite máximo diário de exposição permitido pela legislação.",
+      "C": "A dose de ruído calculada é D = 1,50 (150%), ultrapassando o limite legal em 50% e caracterizando insalubridade.",
+      "D": "Os níveis de ruído não são cumulativos, prevalecendo apenas o nível mais elevado de 90 dBA, que está dentro do limite.",
+      "E": "A dose de ruído calculada é D = 2,00 (200%), dobrando a jornada permissível diária de trabalho."
+    },
+    "answer": "B",
+    "explanation": "Dose = (2/4) + (4/8) = 0,50 + 0,50 = 1,00 (100%). Trabalhador atinge o limite máximo legal diário. Ref: SALIBA, T. M. Manual Prático de Higiene Ocupacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 14,
+    "stem": "Q14: A Avaliação do Ciclo de Vida (ACV), normatizada pela norma ISO 14040, é uma técnica desenvolvida para quantificar os potenciais impactos ambientais associados a um produto ou serviço. Qual é o escopo metodológico completo de uma ACV do tipo 'Berço ao Túmulo' (Cradle-to-Grave)?",
+    "options": {
+      "A": "Acompanha os impactos ambientais apenas durante o processo produtivo dentro dos limites da fábrica.",
+      "B": "Mapeia desde a extração das matérias-primas, passando pelo processamento, transporte, uso do produto, até ao seu descarte final ou reciclagem.",
+      "C": "Restringe-se à etapa de embalagem e logística de distribuição até aos pontos de venda ao consumidor.",
+      "D": "Avalia unicamente a pegada de carbono gerada pelo consumo energético dos equipamentos industriais.",
+      "E": "Concentra-se na etapa de pós-consumo, desconsiderando a fase de extração de recursos naturais."
+    },
+    "answer": "B",
+    "explanation": "A ACV Berço ao Túmulo analisa desde a extração de recursos primários até ao descarte/reciclagem final do produto. Ref: CHEHEBE, J. R. Análise do Ciclo de Vida de Produtos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 15,
+    "stem": "Q15: A Matriz BCG (Boston Consulting Group) classifica as Unidades Estratégicas de Negócio em quatro quadrantes com base em duas variáveis fundamentais. Quais são essas duas variáveis e qual quadrante representa produtos de elevada participação relativa de mercado instalados em setores de baixo crescimento, geradores contínuos de fluxo de caixa?",
+    "options": {
+      "A": "Variáveis: Taxa de Crescimento do Mercado e Participação Relativa de Mercado; Quadrante: Vaca Leiteira (Cash Cow).",
+      "B": "Variáveis: Custo de Produção e Preço de Venda; Quadrante: Estrela (Star).",
+      "C": "Variáveis: Taxa de Inflação e Volume de Vendas; Quadrante: Ponto de Interrogação (Question Mark).",
+      "D": "Variáveis: Rentabilidade Líquida e Nível de Risco; Quadrante: Cão / Abacaxi (Dog).",
+      "E": "Variáveis: Taxa de Crescimento do Mercado e Participação Relativa de Mercado; Quadrante: Ponto de Interrogação (Question Mark)."
+    },
+    "answer": "A",
+    "explanation": "A Matriz BCG cruza Crescimento do Mercado com Participação Relativa de Mercado. Unidades consolidadas em baixo crescimento são Vacas Leiteiras. Ref: MINTZBERG, H. Criando a Estratégia. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 16,
+    "stem": "Q16: Um posto de atendimento de pós-venda opera com um único atendente (modelo M/M/1). As solicitações dos clientes chegam segundo um Processo de Poisson com uma taxa média de chegada lambda = 12 chamadas/hora. O tempo de atendimento segue uma distribuição exponencial com taxa média mu = 15 chamadas/hora. Considerando os modelos estocásticos de filas em regime permanente, determine a taxa de ocupação do atendente (rho), o tempo médio que um cliente espera na fila (Wq) e o número médio de clientes no sistema (L).",
+    "options": {
+      "A": "Ocupação = 80%; Wq = 16 minutos; L = 4 clientes.",
+      "B": "Ocupação = 75%; Wq = 20 minutos; L = 3 clientes.",
+      "C": "Ocupação = 80%; Wq = 20 minutos; L = 5 clientes.",
+      "D": "Ocupação = 85%; Wq = 12 minutos; L = 4 clientes.",
+      "E": "Ocupação = 60%; Wq = 15 minutos; L = 2 clientes."
+    },
+    "answer": "A",
+    "explanation": "Ocupação rho = 12/15 = 80%. L = 12/(15-12) = 4 clientes. Wq = 12/(15*3) = 0,2667 h = 16 min. Ref: TAHA, H. A. Pesquisa Operacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 17,
+    "stem": "Q17: Uma fábrica do setor automotivo implementou um projeto Seis Sigma focado na redução da taxa de defeitos em transmissões mecânicas. A equipe de melhoria concluiu a fase de mapeamento de processos e medição do nível Sigma atual. No momento, a equipe utiliza ferramentas estatísticas (tais como Testes de Hipóteses e Análise de Regressão) para confirmar experimentalmente as causas-raiz dos defeitos antes de propor alterações produtivas. Em qual etapa do método DMAIC a equipe se encontra?",
+    "options": {
+      "A": "Definição (Define).",
+      "B": "Medição (Measure).",
+      "C": "Análise (Analyze).",
+      "D": "Melhoria (Improve).",
+      "E": "Controle (Control)."
+    },
+    "answer": "C",
+    "explanation": "A etapa Analyze dedica-se à identificação e validação estatística das causas-raiz que influenciam o desempenho do processo. Ref: MONTGOMERY, D. C. Controle Estatístico da Qualidade. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 18,
+    "stem": "Q18: Uma fábrica metalmecânica pretende reorganizar o seu arranjo físico (layout), migrando de uma disposição funcional (por processo) para um layout celular com aplicação da Tecnologia de Grupo (TG). Qual é a principal vantagem operacional obtida com a implementação do layout celular em relação ao funcional?",
+    "options": {
+      "A": "Redução drástica do estoque em processo (WIP), dos tempos de setup e das distâncias de transporte pelo agrupamento de máquinas para famílias de peças similares.",
+      "B": "Aumento da flexibilidade para processar qualquer tipo de peça sem necessidade de padronização de roteiros produtivos.",
+      "C": "Eliminação da necessidade de manutenção preventiva devido à simplificação dos fluxos de trabalho.",
+      "D": "Menor vulnerabilidade a paradas de máquinas, visto que a quebra de um equipamento celular não afeta os demais postos da célula.",
+      "E": "Redução do nível de qualificação exigido dos operadores, promovendo a alienação do trabalho repetitivo."
+    },
+    "answer": "A",
+    "explanation": "O layout celular otimiza o fluxo de produção agrupando famílias de produtos, reduzindo WIP, movimentação e tempo de setup. Ref: SLACK, N. Administração da Produção. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 19,
+    "stem": "Q19: Na gestão da cadeia de suprimentos, observa-se frequentemente que pequenas oscilações na demanda do consumidor final geram distorções e amplificações crescentes dos pedidos à medida que se avança a montante na cadeia (atacadistas, distribuidores e fabricantes). Como se denomina este fenômeno de variabilidade e qual iniciativa colaborativa é amplamente recomendada para a sua mitigação?",
+    "options": {
+      "A": "Efeito Gargalo; implementação do método Push Production.",
+      "B": "Efeito Chicote (Bullwhip Effect); compartilhamento de dados de vendas no Ponto de Venda (POS) e adoção do Vendor Managed Inventory (VMI).",
+      "C": "Efeito Trade-off; aumento dos lotes mínimos de compra para proteção contra incertezas.",
+      "D": "Efeito Kanban; substituição da produção puxada por previsões estatísticas estáticas de longo prazo.",
+      "E": "Efeito Teia de Aranha; descentralização de centros de distribuição sem integração de sistemas ERP."
+    },
+    "answer": "B",
+    "explanation": "O Efeito Chicote descreve a amplificação da demanda ao longo da cadeia de suprimentos, sendo mitigado por visibilidade de dados (POS) e VMI. Ref: BALLOU, R. H. Gerenciamento da Cadeia de Suprimentos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 20,
+    "stem": "Q20: A incorporação dos critérios ESG (Environmental, Social, and Governance) e os princípios da Responsabilidade Social Corporativa (RSC) transformaram a atuação das organizações industriais contemporâneas. Qual é a diferença fundamental entre a Responsabilidade Social Corporativa e a filantropia empresarial tradicional?",
+    "options": {
+      "A": "A RSC é integrada de forma estratégica ao modelo de negócios e às decisões operacionais para gerar impacto sustentável contínuo, enquanto a filantropia tradicional consiste em doações pontuais sem vínculo direto com a estratégia da empresa.",
+      "B": "A RSC visa exclusivamente a obtenção de isenções fiscais de curto prazo, enquanto a filantropia tradicional não possui benefícios tributários.",
+      "C": "A RSC aplica-se apenas ao setor público, enquanto a filantropia é restrita a empresas privadas lucrativas.",
+      "D": "Não há diferença conceitual ou prática, constituindo termos sinônimos utilizados apenas por razões de marketing.",
+      "E": "A filantropia exige prestação de contas aos acionistas (shareholders), enquanto a RSC foca no lucro líquido imediato."
+    },
+    "answer": "A",
+    "explanation": "A RSC integra ações sociais e ambientais diretamente ao modelo estratégico do negócio, ao passo que a filantropia é reativa e pontual. Ref: ETHOS. Indicadores Ethos para Negócios Sustentáveis. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 21,
+    "stem": "Q21: Uma fábrica de eletrodomésticos utiliza o método de Suavização Exponencial Simples para prever a demanda mensal de lavadoras de louça. No mês de abril, a demanda prevista foi de 100 unidades, mas a demanda real observada foi de 120 unidades. Sabendo que a constante de suavização alfa = 0,3 é adotada pela empresa, assinale a alternativa que indica a previsão de demanda para o mês de maio.",
+    "options": {
+      "A": "106 unidades.",
+      "B": "110 unidades.",
+      "C": "114 unidades.",
+      "D": "100 unidades.",
+      "E": "120 unidades."
+    },
+    "answer": "A",
+    "explanation": "F_maio = 100 + 0,3 * (120 - 100) = 106 unidades. Ref: MOREIRA, D. A. Administração da Produção e Operações. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 22,
+    "stem": "Q22: Uma empresa adquiria uma máquina industrial por R$ 50.000,00, com vida útil estimada em 5 anos e valor residual previsto de R$ 5.000,00. A equipe financeira precisa escolher entre o Método da Depreciação Linear e o Método da Soma dos Dígitos dos Anos (SDA - regressivo). Qual é o valor da depreciação acumulada ao final do segundo ano utilizando o Método Linear e o Método SDA, respectivamente?",
+    "options": {
+      "A": "Linear = R$ 18.000,00; SDA = R$ 27.000,00.",
+      "B": "Linear = R$ 20.000,00; SDA = R$ 30.000,00.",
+      "C": "Linear = R$ 9.000,00; SDA = R$ 15.000,00.",
+      "D": "Linear = R$ 18.000,00; SDA = R$ 18.000,00.",
+      "E": "Linear = R$ 27.000,00; SDA = R$ 18.000,00."
+    },
+    "answer": "A",
+    "explanation": "Base = 45.000,00. Linear: 9.000,00 * 2 = R$ 18.000,00. SDA: Soma = 15. Ano 1 = 15.000,00, Ano 2 = 12.000,00. Acumulado SDA = R$ 27.000,00. Ref: PUCCINI, A. L. Matemática Financeira. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 23,
+    "stem": "Q23: Numa empresa de fabricação de embalagens plásticas, realizou-se um estudo para a construção de um gráfico de controle por atributos do tipo p (fração de peças não conformes). Coletaram-se 20 amostras de tamanho n = 100 unidades cada, registrando-se um total de 100 peças não conformes no conjunto das 20 amostras. Com base nesses dados, assinale a opção que apresenta a fração média de não conformes (p_media) e o Limite Superior de Controle (LSC), considerando limites de 3 desvios-padrão.",
+    "options": {
+      "A": "p_media = 0,05 e LSC = 0,1154.",
+      "B": "p_media = 0,05 e LSC = 0,0825.",
+      "C": "p_media = 0,10 e LSC = 0,1900.",
+      "D": "p_media = 0,05 e LSC = 0,0500.",
+      "E": "p_media = 0,01 e LSC = 0,0318."
+    },
+    "answer": "A",
+    "explanation": "Total peças = 2.000. p_media = 100/2.000 = 0,05. desvio_p = raiz((0,05*0,95)/100) = 0,0218. LSC = 0,05 + 3(0,0218) = 0,1154. Ref: MONTGOMERY, D. C. Controle Estatístico da Qualidade. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 24,
+    "stem": "Q24: Durante a análise ergonômica de um posto de trabalho industrial, aplicou-se a Equação do NIOSH para calcular o Limite de Carga Recomendado (RWL) para tarefas de levantamento manual de caixas. O cálculo resultou em um RWL = 21,20 kg para as condições observadas. No entanto, os operadores rotineiramente levantam caixas com massa real de 30,00 kg. Qual é o Índice de Levantamento (LI) desta tarefa e qual é a recomendação ergonômica cabível?",
+    "options": {
+      "A": "LI = 1,42; a tarefa apresenta risco ergonômico excessivo (LI > 1), exigindo intervenção para redução do peso ou introdução de auxílio mecânico de elevação.",
+      "B": "LI = 0,71; a tarefa está em conformidade ergonômica perfeita, dispensando qualquer alteração.",
+      "C": "LI = 1,00; o posto atinge exatamente a capacidade biomecânica máxima sem risco à saúde do trabalhador.",
+      "D": "LI = 2,12; o índice indica risco iminente de colapso estrutural, devendo a linha ser interditada imediatamente.",
+      "E": "LI = 0,88; a carga situa-se dentro da margem de segurança individual de cada operador."
+    },
+    "answer": "A",
+    "explanation": "LI = 30,00 / 21,20 = 1,42. Como LI > 1,0, há risco biomecânico de lesão lombar, exigindo auxílio mecânico ou redução de peso. Ref: IIDA, I. Ergonomia: Projeto e Produção. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 25,
+    "stem": "Q25: O conceito de Desenho Universal (Universal Design) visa à concepção de produtos, ambientes, programas e serviços que possam ser utilizados por todas as pessoas, na sua máxima extensão possível, sem a necessidade de adaptação ou projeto reabilitador específico. Na gestão de instalações industriais e corporativas, qual é o princípio do Desenho Universal que assegura que o ambiente possa ser utilizado de forma eficiente e confortável, com o mínimo de fadiga física para os colaboradores e visitantes?",
+    "options": {
+      "A": "Uso Flexível.",
+      "B": "Baixo Esforço Físico.",
+      "C": "Uso Equitativo.",
+      "D": "Informação de Fácil Percepção.",
+      "E": "Tolerância ao Erro."
+    },
+    "answer": "B",
+    "explanation": "O princípio do 'Baixo Esforço Físico' orienta o projeto a minimizar a fadiga corporal repetitiva e o esforço durante a utilização. Ref: CAMBRIA, M. Acessibilidade e Desenho Universal. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 26,
+    "stem": "Q26: Na resolução de um problema de Programação Linear pelo Método Simplex para maximização do lucro, a análise de sensibilidade fornece o chamado Preço Sombra (Shadow Price ou Preço Dual) associado a cada restrição de recurso. Se o preço sombra da restrição de capacidade da máquina de usinagem é de R$ 15,00/hora e o seu intervalo de sensibilidade permite uma variação de +20 horas, o que representa esse valor econômico para a tomada de decisão do engenheiro de produção?",
+    "options": {
+      "A": "Corresponde ao custo fixo de depreciação por hora da máquina de usinagem, independentemente da demanda.",
+      "B": "Representa o acréscimo no valor da função objetivo (lucro total) para cada hora adicional disponibilizada do recurso usinagem, dentro do limite de validade de +20 horas.",
+      "C": "Indica o valor do desconto necessário no preço final do produto para vender uma unidade adicional no mercado.",
+      "D": "Trata-se do custo marginal de contratação de mão de obra direta para operar a máquina em turno extra.",
+      "E": "Define o limite mínimo de produção abaixo do qual a empresa opera com prejuízo operacional."
+    },
+    "answer": "B",
+    "explanation": "O Preço Sombra indica a taxa de variação da função objetivo (lucro) por unidade de incremento do recurso escasso. Ref: TAHA, H. A. Pesquisa Operacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 27,
+    "stem": "Q27: Uma célula de manufatura precisa sequenciar 4 tarefas (A, B, C e D) que passam obrigatoriamente por duas máquinas em série (M1 e M2). Os tempos em horas são: A (M1=2, M2=5); B (M1=4, M2=1); C (M1=3, M2=3); D (M1=1, M2=4). Aplicando a Regra de Johnson para minimizar o tempo total de fabricação (Makespan), qual é a sequência ótima de produção e o valor do Makespan obtido?",
+    "options": {
+      "A": "Sequência D -> A -> C -> B com Makespan de 14 horas.",
+      "B": "Sequência B -> C -> A -> D com Makespan de 16 horas.",
+      "C": "Sequência A -> B -> C -> D com Makespan de 18 horas.",
+      "D": "Sequência D -> C -> A -> B com Makespan de 15 horas.",
+      "E": "Sequência C -> A -> D -> B com Makespan de 14 horas."
+    },
+    "answer": "A",
+    "explanation": "Regra de Johnson: D em 1º, B em último, A em 2º, C em 3º. Sequência D->A->C->B. Makespan = 14 horas. Ref: MOREIRA, D. A. Administração da Produção e Operações. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 28,
+    "stem": "Q28: Uma empresa avalia a substituição de um equipamento. O modelo novo exige um investimento inicial de R$ 100.000,00 e possui custos anuais de operação e manutenção de R$ 10.000,00 durante sua vida útil de 5 anos (sem valor residual). Considerando uma Taxa Mínima de Atratividade (TMA) de 10% a.a. e o fator de recuperação de capital (A/P, 10%, 5) = 0,2638, qual é o Custo Anual Uniforme Equivalente (CAUE) deste equipamento?",
+    "options": {
+      "A": "R$ 36.380,00/ano.",
+      "B": "R$ 26.380,00/ano.",
+      "C": "R$ 30.000,00/ano.",
+      "D": "R$ 20.000,00/ano.",
+      "E": "R$ 110.000,00/ano."
+    },
+    "answer": "A",
+    "explanation": "CAUE_inv = 100.000,00 * 0,2638 = R$ 26.380,00. CAUE_total = 26.380,00 + 10.000,00 = R$ 36.380,00/ano. Ref: BLANK, L.; TARQUIN, A. Engenharia Econômica. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 29,
+    "stem": "Q29: Na Análise dos Modos de Falha e seus Efeitos (FMEA), a priorização das ações corretivas é realizada pelo Número de Prioridade de Risco (RPN). Durante a análise do sistema de travamento de um veículo, identificou-se uma falha com Severidade S = 8, Ocorrência O = 5 e Detecção D = 6 (escala de 1 a 10). Qual é o valor do RPN calculated e como ele orienta a equipe de desenvolvimento?",
+    "options": {
+      "A": "RPN = 240; o valor elevado exige ações de engenharia prioritárias para reduzir a severidade, a ocorrência ou melhorar a detecção da falha.",
+      "B": "RPN = 19; indica falha de baixo impacto que não necessita de modificação do projeto.",
+      "C": "RPN = 40; exige apenas revisão no manual do proprietário sem alteração física no componente.",
+      "D": "RPN = 400; ultrapassa o limite máximo da escala FMEA, exigindo o cancelamento imediato do projeto.",
+      "E": "RPN = 120; indica que o componente está aprovado para produção em massa sem restrições."
+    },
+    "answer": "A",
+    "explanation": "RPN = S * O * D = 8 * 5 * 6 = 240. RPNs elevados exigem ações mitigatórias imediatas de projeto. Ref: ROZENFELD, H. Gestão de Desenvolvimento de Produtos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 30,
+    "stem": "Q30: A Declaração Universal dos Direitos Humanos e as diretrizes de diversidade, equidade e inclusão (DEI) têm moldado as políticas de Gestão de Pessoas nas organizações industriais modernizadas. Como a promoção de ambientes de trabalho inclusivos e diversos impacta o desempenho das equipes de engenharia e inovação?",
+    "options": {
+      "A": "Estimula a proliferação de pontos de vista distintos, favorecendo a criatividade, a resolução de problemas complexos e a inovação de processos e produtos.",
+      "B": "Aumenta o tempo necessário para tomada de decisões operacionais sem trazer benefícios mensuráveis à organização.",
+      "C": "Restringe-se ao cumprimento de cotas legais, não apresentando correlação com indicadores de produtividade ou clima organizacional.",
+      "D": "Reduz a coesão do grupo, gerando conflitos insolúveis que comprometem o cumprimento de prazos de projetos.",
+      "E": "Desvia o foco técnico dos engenheiros para questões exclusivamente assistenciais e não produtivas."
+    },
+    "answer": "A",
+    "explanation": "Ambientes diversos e inclusivos enriquecem a geração de ideias, estimulando a inovação e soluções técnicas mais abrangentes. Ref: FLEURY, M. T. L. Gestão de Pessoas e Cultura Organizacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 31,
+    "stem": "Q31: A Política Nacional de Resíduos Sólidos (PNRS - Lei nº 12.305/2010) estabelece diretrizes para a implementação de sistemas de Logística Reversa em cadeias industriais. No contexto da Economia Circular, qual é o principal objetivo estratégico da estruturação de canais reversos de pós-consumo e pós-venda?",
+    "options": {
+      "A": "Maximizar o volume de resíduos descartados em aterros sanitários controlados de custo reduzido.",
+      "B": "Reincorporar componentes e materiais descartados nos ciclos produtivos (reuso, remanufatura ou reciclagem), reduzindo a extração de matérias-primas virgens e o impacto ambiental.",
+      "C": "Transferir integralmente para o poder público municipal a responsabilidade pelo recolhimento e pela destinação de produtos eletrônicos obsoletos.",
+      "D": "Isentar as empresas produtoras do pagamento de taxas ambientais mediante a doação esporádica de recipientes de recolha.",
+      "E": "Substituir todos os embalamentos plásticos por embalamentos de uso único não recicláveis para acelerar o fluxo produtivo."
+    },
+    "answer": "B",
+    "explanation": "A Logística Reversa viabiliza o retorno de materiais de pós-venda e pós-consumo ao ciclo produtivo, promovendo a sustentabilidade. Ref: LEITE, P. R. Logística Reversa. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 32,
+    "stem": "Q32: Em um estudo de Simulação de Eventos Discretos pelo Método de Monte Carlo, o tempo de atendimento (em minutos) de um posto de triagem possui a seguinte distribuição: 1 min (p=0,20, números 00-19); 2 min (p=0,50, números 20-69); 3 min (p=0,30, números 70-99). Utilizando a sequência de números aleatórios de dois dígitos: 15, 82, 45, 08 e 73, qual é a média do tempo de atendimento simulado para estas 5 observações?",
+    "options": {
+      "A": "Média = 2,00 minutos.",
+      "B": "Média = 1,80 minutos.",
+      "C": "Média = 2,40 minutos.",
+      "D": "Média = 2,20 minutos.",
+      "E": "Média = 1,50 minutos."
+    },
+    "answer": "A",
+    "explanation": "Mapeamento: 15 -> 1 min; 82 -> 3 min; 45 -> 2 min; 08 -> 1 min; 73 -> 3 min. Média = (1+3+2+1+3)/5 = 2,00 minutos. Ref: CHWIF, L. Modelagem e Simulação de Eventos Discretos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 33,
+    "stem": "Q33: Na Metodologia da Análise do Valor / Engenharia do Valor (EV), o valor é definido por Valor = Função / Custo. Um componente mecânico atual possui custo de produção de R$ 120,00 e pontuação funcional de 80 pontos. O componente foi reprojetado, reduzindo seu custo para R$ 90,00 e elevando o desempenho para 90 pontos. Qual foi a variação percentual no Índice de Valor deste componente após o reprojeto?",
+    "options": {
+      "A": "Aumento de 50,0% no Índice de Valor.",
+      "B": "Aumento de 25,0% no Índice de Valor.",
+      "C": "Redução de 12,5% no Índice de Valor.",
+      "D": "Aumento de 33,3% no Índice de Valor.",
+      "E": "Manutenção do Índice de Valor sem alteração significativa."
+    },
+    "answer": "A",
+    "explanation": "Valor Inicial = 80/120 = 0,667. Valor Novo = 90/90 = 1,000. Variação = (1,000 - 0,667)/0,667 = +50,0%. Ref: ROZENFELD, H. Gestão de Desenvolvimento de Produtos. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 34,
+    "stem": "Q34: A avaliação da exposição ocupacional ao calor em ambientes internos sem carga solar direta utiliza o IBUTG (NR-15 e NHO 06). Em uma área de forjaria, registraram-se: Temperatura de Bulbo Úmido Natural (tbn) = 24,0 °C e Temperatura de Globo (tg) = 30,0 °C. Qual é o valor do IBUTG calculado para este ambiente?",
+    "options": {
+      "A": "IBUTG = 25,8 °C.",
+      "B": "IBUTG = 27,0 °C.",
+      "C": "IBUTG = 28,2 °C.",
+      "D": "IBUTG = 24,0 °C.",
+      "E": "IBUTG = 30,0 °C."
+    },
+    "answer": "A",
+    "explanation": "IBUTG = 0,7 * tbn + 0,3 * tg = 0,7*(24,0) + 0,3*(30,0) = 16,8 + 9,0 = 25,8 °C. Ref: SALIBA, T. M. Manual Prático de Higiene Ocupacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 35,
+    "stem": "Q35: No ecossistema de inovação e desenvolvimento tecnológico, a proteção da Propriedade Intelectual assegura direitos legais sobre invenções industriais. Qual modalidade de proteção é concedida pelo INPI para garantir exclusividade sobre uma nova solução técnica aplicada a um produto ou processo com novidade, atividade inventiva e aplicação industrial?",
+    "options": {
+      "A": "Patente de Invenção (PI).",
+      "B": "Registro de Marca Comercial.",
+      "C": "Direito Autoral (Copyright).",
+      "D": "Certificado de Utilidade Pública.",
+      "E": "Licenciamento Aberto de Domínio Público."
+    },
+    "answer": "A",
+    "explanation": "A Patente de Invenção (PI) concede direito exclusivo de exploração de criações tecnológicas com novidade e aplicação industrial. Ref: JUNGMANN, D. M. A Caminho da Inovação. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 36,
+    "stem": "Q36: Em um sistema de Planejamento das Necessidades de Materiais (MRP), o cálculo das necessidades líquidas orienta a emissão de ordens de compra e de fabricação. Considere os seguintes dados para um componente metálico no Período 1: Demanda Bruta = 120 unidades; Estoque Inicial = 50 unidades; Recebimentos Programados = 30 unidades; Estoque de Segurança exigido = 20 unidades. Qual é a Necessidade Líquida de produção para esse período?",
+    "options": {
+      "A": "60 unidades.",
+      "B": "40 unidades.",
+      "C": "70 unidades.",
+      "D": "90 unidades.",
+      "E": "20 unidades."
+    },
+    "answer": "A",
+    "explanation": "Necessidade Líquida = Demanda Bruta + Estoque Segurança - (Estoque Inicial + Recebimentos Programados) = 120 + 20 - (50 + 30) = 60 unidades. Ref: CORRÊA, H. L. Planejamento, Programação e Controle da Produção. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 37,
+    "stem": "Q37: Uma empresa estuda a aquisição de um equipamento no valor de R$ 50.000,00 que gerará entradas líquidas de caixa de R$ 20.000,00 ao ano nos anos 1, 2, 3 e 4. Sabendo que a taxa de desconto (TMA) da empresa é de 10% a.a., qual é o período de Payback Descontado aproximado desse investimento?",
+    "options": {
+      "A": "3,02 anos (aproximadamente 3 anos).",
+      "B": "2,50 anos.",
+      "C": "4,00 anos.",
+      "D": "1,85 anos.",
+      "E": "3,50 anos."
+    },
+    "answer": "A",
+    "explanation": "VP Ano 1 = 18.181,82; VP Ano 2 = 16.528,93; VP Ano 3 = 15.026,30 (Soma = 49.737,04). Faltam 262,96 no Ano 4. Payback Descontado = 3 + (262,96 / 13.660,27) = 3,02 anos. Ref: BLANK, L.; TARQUIN, A. Engenharia Econômica. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 38,
+    "stem": "Q38: Considere o seguinte problema de Programação Linear para maximizar o lucro total Z: Maximizar Z = 5x1 + 4x2, sujeito a: x1 + x2 <= 8; 2x1 + x2 <= 10; x1 >= 0, x2 >= 0. Utilizando o Método Gráfico, determine o ponto ótimo (x1, x2) e o valor do lucro máximo Z.",
+    "options": {
+      "A": "Ponto ótimo (x1 = 2, x2 = 6) e Z = R$ 34,00.",
+      "B": "Ponto ótimo (x1 = 5, x2 = 0) e Z = R$ 25,00.",
+      "C": "Ponto ótimo (x1 = 0, x2 = 8) e Z = R$ 32,00.",
+      "D": "Ponto ótimo (x1 = 4, x2 = 4) e Z = R$ 36,00.",
+      "E": "Ponto ótimo (x1 = 3, x2 = 4) e Z = R$ 31,00."
+    },
+    "answer": "A",
+    "explanation": "Sistema de restrições ativas: 2x1 + x2 = 10 e x1 + x2 = 8 => x1 = 2, x2 = 6. Z = 5(2) + 4(6) = R$ 34,00. Ref: TAHA, H. A. Pesquisa Operacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 39,
+    "stem": "Q39: Numa linha de usinagem, monitora-se o diâmetro de uma peça cilíndrica através de um gráfico de controle para média (X-barra) e amplitude (R). Coletaram-se amostras de tamanho n = 5 (fator A2 = 0,577). A média global apurada foi X_media_global = 50,00 mm e a média das amplitudes foi R_media = 2,00 mm. Quais são os Limites Superior (LSC) e Inferior (LIC) de Controle do gráfico da média (X-barra)?",
+    "options": {
+      "A": "LSC = 51,154 mm e LIC = 48,846 mm.",
+      "B": "LSC = 52,000 mm e LIC = 48,000 mm.",
+      "C": "LSC = 50,577 mm e LIC = 49,423 mm.",
+      "D": "LSC = 51,500 mm e LIC = 48,500 mm.",
+      "E": "LSC = 53,154 mm e LIC = 46,846 mm."
+    },
+    "answer": "A",
+    "explanation": "LSC = 50,00 + 0,577 * 2,00 = 51,154 mm. LIC = 50,00 - 0,577 * 2,00 = 48,846 mm. Ref: MONTGOMERY, D. C. Controle Estatístico da Qualidade. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 40,
+    "stem": "Q40: O Objetivo de Desenvolvimento Sustentável 12 (ODS 12) da Agenda 2030 da ONU estabelece diretrizes para Garantir padrões de consumo e de produção sustentáveis. No contexto da Engenharia de Produção, qual prática operacional contribui diretamente para o alcance do ODS 12 ao focar na eliminação de desperdícios de matérias-primas e energia desde a concepção do produto?",
+    "options": {
+      "A": "Adoção do Ecodesign e do Planejamento do Ciclo de Vida do Produto.",
+      "B": "Aumento do volume de descarte em aterros sanitários sem tratamento prévio.",
+      "C": "Incentivo ao consumo de embalagens de uso único sem reciclagem.",
+      "D": "Maximização de inventários intermediários para cobrir perdas no processo produtivo.",
+      "E": "Substituição de matrizes energéticas renováveis por fontes fósseis de menor custo inicial."
+    },
+    "answer": "A",
+    "explanation": "O Ecodesign e a Gestão do Ciclo de Vida reduzem resíduos e otimizam insumos desde a etapa de projeto do produto. Ref: ONU. Objetivos de Desenvolvimento Sustentável - ODS 12. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 41,
+    "stem": "Q41: A Lei Geral de Proteção de Dados Pessoais (LGPD - Lei nº 13.709/2018) regulamenta o tratamento de dados pessoais no Brasil, impactando os sistemas de informação e a gestão de pessoas nas indústrias. Qual é o princípio da LGPD que estabelece que o tratamento de dados deve ser limitado ao mínimo necessário para a realização de suas finalidades, com abrangência dos dados pertinentes, proporcionais e não excessivos?",
+    "options": {
+      "A": "Princípio da Necessidade (ou Mínima Coleta).",
+      "B": "Princípio do Livre Acesso.",
+      "C": "Princípio da Transparência Passiva.",
+      "D": "Princípio da Não Discriminação Aleatória.",
+      "E": "Princípio da Qualidade dos Dados Estáticos."
+    },
+    "answer": "A",
+    "explanation": "O Princípio da Necessidade limita a coleta e o tratamento de dados pessoais ao mínimo estritamente exigido para a finalidade pretendida. Ref: BRASIL. Lei nº 13.709/2018. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 42,
+    "stem": "Q42: Uma célula de usinagem possui três ordens de produção (T1, T2 e T3) aguardando processamento numa única máquina. Os tempos de processamento são: T1 = 3 dias, T2 = 5 dias e T3 = 2 dias. O gestor precisa escolher entre a regra de sequenciamento FIFO (T1 -> T2 -> T3) e a regra SPT (Shortest Processing Time). Qual é o Tempo Médio de Fluxo obtido com a regra SPT e com a regra FIFO, respectivamente?",
+    "options": {
+      "A": "SPT = 5,67 dias; FIFO = 7,00 dias.",
+      "B": "SPT = 4,00 dias; FIFO = 6,50 dias.",
+      "C": "SPT = 7,00 dias; FIFO = 5,67 dias.",
+      "D": "SPT = 3,33 dias; FIFO = 8,00 dias.",
+      "E": "SPT = 2,00 dias; FIFO = 3,00 dias."
+    },
+    "answer": "A",
+    "explanation": "SPT (T3 -> T1 -> T2): Conclusões em 2, 5 e 10 dias. Média = (2+5+10)/3 = 5,67 dias. FIFO (T1 -> T2 -> T3): Conclusões em 3, 8 e 10 dias. Média = (3+8+10)/3 = 7,00 dias. Ref: SLACK, N. Administração da Produção. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 43,
+    "stem": "Q43: Uma indústria avalia duas alternativas tecnológicas para a fabricação de um dispositivo: a Tecnologia A (semiautomática) possui Custo Fixo de R$ 20.000,00/ano e Custo Variável de R$ 15,00/unidade; a Tecnologia B (automatizada) possui Custo Fixo de R$ 80.000,00/ano e Custo Variável de R$ 5,00/unidade. A partir de qual volume anual de produção (Q) a Tecnologia B passa a ser financeiramente mais vantajosa que a Tecnologia A?",
+    "options": {
+      "A": "Para volumes superiores a Q = 6.000 unidades/ano.",
+      "B": "Para volumes superiores a Q = 4.000 unidades/ano.",
+      "C": "Para volumes superiores a Q = 10.000 unidades/ano.",
+      "D": "Para volumes inferiores a Q = 6.000 unidades/ano.",
+      "E": "Para volumes exatamente iguais a Q = 8.000 unidades/ano."
+    },
+    "answer": "A",
+    "explanation": "Ponto de indiferença: 20.000,00 + 15,00Q = 80.000,00 + 5,00Q => 10,00Q = 60.000,00 => Q = 6.000 unidades/ano. Acima deste volume, a Tecnologia B apresenta menor custo total. Ref: BLANK, L.; TARQUIN, A. Engenharia Econômica. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 44,
+    "stem": "Q44: O estado de um equipamento crítico é modelado por uma Cadeia de Markov de tempo discreto com dois estados: Operando (O) e Em Manutenção (M). As probabilidades de transição diárias são: se está Operando hoje, a probabilidade de continuar Operando amanhã é 0,90 (e de ir para Manutenção é 0,10); se está Em Manutenção hoje, a probabilidade de voltar a Operar amanhã é 0,80 (e de continuar em Manutenção é 0,20). A longo prazo (estado estacionário), qual é a probabilidade do equipamento estar Em Manutenção (pi_M)?",
+    "options": {
+      "A": "pi_M = 11,11% (1/9).",
+      "B": "pi_M = 20,00% (1/5).",
+      "C": "pi_M = 88,89% (8/9).",
+      "D": "pi_M = 10,00% (1/10).",
+      "E": "pi_M = 50,00% (1/2)."
+    },
+    "answer": "A",
+    "explanation": "Sistema de equações: 0,10*pi_O = 0,80*pi_M => pi_O = 8*pi_M. Como pi_O + pi_M = 1 => 9*pi_M = 1 => pi_M = 1/9 = 11,11%. Ref: TAHA, H. A. Pesquisa Operacional. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  },
+  {
+    "id": 45,
+    "stem": "Q45: A Metodologia 8D (Eight Disciplines) é amplamente adotada na indústria automotiva e aeroespacial para a resolução sistêmica de problemas complexos de qualidade e contenção de falhas repetitivas. Qual é a ordem correta das etapas iniciais de contenção e análise de causa-raiz no método 8D?",
+    "options": {
+      "A": "Formar a equipe (D1) -> Descrever o problema (D2) -> Implementar ações de contenção provisórias (D3) -> Identificar e verificar as causas-raiz (D4).",
+      "B": "Identificar causas-raiz (D1) -> Formar a equipe (D2) -> Aplicar ações corretivas permanentes (D3) -> Prevenir reincidência (D4).",
+      "C": "Descrever o problema (D1) -> Paralisar a fábrica (D2) -> Demitir os responsáveis (D3) -> Alterar o projeto original (D4).",
+      "D": "Implementar ações permanentes (D1) -> Validar soluções (D2) -> Reconhecer a equipe (D3) -> Encerrar o processo (D4).",
+      "E": "Formar a equipe (D1) -> Modificar o manual (D2) -> Comprar novos equipamentos (D3) -> Calcular os custos do refugo (D4)."
+    },
+    "answer": "A",
+    "explanation": "A estrutura do 8D inicia com D1 (Equipe), D2 (Descrição do Problema), D3 (Contenção Imediata) e D4 (Causa-Raiz). Ref: PALADY, P. FMEA. Minha Biblioteca UFC: https://minhabiblioteca.ufc.br"
+  }
+];
+
+        let state = {
+            userAnswers: {},
+            flagged: new Set(),
+            isFinished: false,
+            timerSeconds: 0,
+            timerInterval: null
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLocalStorage();
+            startTimer();
+            renderQuestions();
+            renderGrid();
+            updateProgressBar();
+        });
+
+        function startTimer() {
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(() => {
+                if (!state.isFinished) {
+                    state.timerSeconds++;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hrs = String(Math.floor(state.timerSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((state.timerSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(state.timerSeconds % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            questionsData.forEach(q => {
+                const card = document.createElement('div');
+                card.id = `q_card_${q.id}`;
+                card.className = 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative transition hover:shadow-md';
+
+                const isFlagged = state.flagged.has(q.id);
+                const selectedOpt = state.userAnswers[q.id];
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between border-b border-slate-100 pb-3 mb-4">
+                        <span class="bg-ufcnavy-50 text-ufcnavy-700 text-xs font-bold px-3 py-1 rounded-full">Questão ${q.id} de 45</span>
+                        <button onclick="toggleFlag(${q.id})" class="text-slate-400 hover:text-amber-500 text-sm">
+                            <i class="${isFlagged ? 'fa-solid fa-bookmark text-amber-500' : 'fa-regular fa-bookmark'}"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed mb-5 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        ${q.stem}
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${['A', 'B', 'C', 'D', 'E'].map(opt => `
+                            <label class="flex items-start p-3 rounded-xl border cursor-pointer transition text-xs sm:text-sm ${
+                                selectedOpt === opt 
+                                    ? 'bg-ufcnavy-50 border-ufcnavy-500 text-ufcnavy-900 font-semibold ring-2 ring-ufcnavy-500/20' 
+                                    : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
+                            }">
+                                <input type="radio" name="q_${q.id}" value="${opt}" ${selectedOpt === opt ? 'checked' : ''} 
+                                    onchange="selectOption(${q.id}, '${opt}')" class="mt-0.5 h-4 w-4 text-ufcnavy-700 focus:ring-ufcnavy-500 border-slate-300">
+                                <span class="ml-3 font-bold mr-2">${opt})</span>
+                                <span class="flex-1">${q.options[opt]}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectOption(qId, opt) {
+            state.userAnswers[qId] = opt;
+            saveLocalStorage();
+            renderGrid();
+            updateProgressBar();
+            renderQuestions();
+        }
+
+        function toggleFlag(qId) {
+            if (state.flagged.has(qId)) state.flagged.delete(qId);
+            else state.flagged.add(qId);
+            saveLocalStorage();
+            renderGrid();
+            renderQuestions();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('questionsGrid');
+            grid.innerHTML = '';
+            let count = 0;
+
+            questionsData.forEach(q => {
+                const isAnswered = !!state.userAnswers[q.id];
+                const isFlagged = state.flagged.has(q.id);
+                if (isAnswered) count++;
+
+                const btn = document.createElement('button');
+                btn.onclick = () => {
+                    document.getElementById(`q_card_${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                };
+
+                let bg = 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200';
+                if (isAnswered) bg = 'bg-emerald-500 text-white font-bold hover:bg-emerald-600 shadow-sm';
+                if (isFlagged) bg = 'bg-amber-400 text-amber-950 font-bold hover:bg-amber-500 shadow-sm';
+
+                btn.className = `w-full h-8 rounded-lg text-xs font-semibold transition flex items-center justify-center ${bg}`;
+                btn.innerText = String(q.id).padStart(2, '0');
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('answeredCounter').innerText = `${count} / 45`;
+        }
+
+        function updateProgressBar() {
+            const total = questionsData.length;
+            const answered = Object.keys(state.userAnswers).length;
+            const pct = Math.round((answered / total) * 100);
+            document.getElementById('topProgressBar').style.width = `${pct}%`;
+        }
+
+        function confirmSubmitSimulado() {
+            const total = questionsData.length;
+            const answered = Object.keys(state.userAnswers).length;
+            const unanswered = total - answered;
+
+            const warning = document.getElementById('unansweredWarning');
+            if (unanswered > 0) {
+                document.getElementById('unansweredCountText').innerText = `Atenção: Existem ${unanswered} questão(ões) sem resposta.`;
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+            document.getElementById('submitModal').classList.remove('hidden');
+        }
+
+        function submitSimulado() {
+            document.getElementById('submitModal').classList.add('hidden');
+            state.isFinished = true;
+            saveLocalStorage();
+            generateResultsReport();
+        }
+
+        function generateResultsReport() {
+            document.getElementById('questionsContainer').classList.add('hidden');
+            const resContainer = document.getElementById('resultsContainer');
+            resContainer.classList.remove('hidden');
+            resContainer.innerHTML = '';
+
+            let correctCount = 0;
+            questionsData.forEach(q => {
+                if (state.userAnswers[q.id] === q.answer) correctCount++;
+            });
+
+            const scorePct = Math.round((correctCount / questionsData.length) * 100);
+
+            const header = document.createElement('div');
+            header.className = 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200';
+            header.innerHTML = `
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
+                    <div>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Simulado Concluído</span>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800 mt-2">Relatório de Desempenho</h2>
+                        <p class="text-xs text-slate-500">Gabarito comentado e justificativas técnicas</p>
+                    </div>
+                    <div class="flex items-center space-x-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="text-center">
+                            <div class="text-[10px] text-slate-400 uppercase font-bold">Nota Final</div>
+                            <div class="text-3xl font-black text-ufcnavy-700">${scorePct}%</div>
+                        </div>
+                        <div class="h-10 w-px bg-slate-200"></div>
+                        <div class="text-center">
+                            <div class="text-[10px] text-slate-400 uppercase font-bold">Acertos</div>
+                            <div class="text-2xl font-bold text-emerald-600">${correctCount} / 45</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end space-x-2 no-print">
+                    <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">Imprimir / Salvar PDF</button>
+                    <button onclick="resetAnswersConfirmation()" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Refazer Simulado</button>
+                </div>
+            `;
+            resContainer.appendChild(header);
+
+            questionsData.forEach(q => {
+                const userAns = state.userAnswers[q.id];
+                const isCorrect = userAns === q.answer;
+
+                const qCard = document.createElement('div');
+                qCard.className = 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4';
+                qCard.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <span class="font-bold text-sm text-slate-800">Questão ${q.id}</span>
+                        ${isCorrect 
+                            ? '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-check mr-1"></i>Correta</span>'
+                            : '<span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-xmark mr-1"></i>Incorreta</span>'
+                        }
+                    </div>
+                    <div class="text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">${q.stem}</div>
+                    
+                    <div class="space-y-2 text-xs">
+                        ${['A', 'B', 'C', 'D', 'E'].map(opt => {
+                            let style = 'bg-white border-slate-200 text-slate-700';
+                            if (opt === q.answer) style = 'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold';
+                            else if (opt === userAns && !isCorrect) style = 'bg-rose-50 border-rose-300 text-rose-900 line-through';
+                            return `
+                                <div class="p-2.5 rounded-lg border flex items-start space-x-2 ${style}">
+                                    <span class="font-bold">${opt})</span>
+                                    <span>${q.options[opt]}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="bg-ufcnavy-50 border-l-4 border-ufcnavy-700 p-3.5 rounded-r-xl text-xs text-ufcnavy-900">
+                        <div class="font-bold mb-1"><i class="fa-solid fa-chalkboard-user mr-1"></i>Gabarito e Justificativa:</div>
+                        <div>${q.explanation}</div>
+                    </div>
+                `;
+                resContainer.appendChild(qCard);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveLocalStorage() {
+            const data = {
+                userAnswers: state.userAnswers,
+                flagged: Array.from(state.flagged),
+                timerSeconds: state.timerSeconds,
+                isFinished: state.isFinished
+            };
+            localStorage.setItem('simulado_enade_2026_data', JSON.stringify(data));
+        }
+
+        function loadLocalStorage() {
+            const saved = localStorage.getItem('simulado_enade_2026_data');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.userAnswers = parsed.userAnswers || {};
+                    state.flagged = new Set(parsed.flagged || []);
+                    state.timerSeconds = parsed.timerSeconds || 0;
+                    state.isFinished = parsed.isFinished || false;
+                    if (state.isFinished) generateResultsReport();
+                } catch(e){}
+            }
+        }
+
+        function resetAnswersConfirmation() {
+            if (confirm('Deseja realmente reiniciar o simulado e apagar suas respostas?')) {
+                localStorage.removeItem('simulado_enade_2026_data');
+                state.userAnswers = {};
+                state.flagged.clear();
+                state.timerSeconds = 0;
+                state.isFinished = false;
+                document.getElementById('resultsContainer').classList.add('hidden');
+                document.getElementById('questionsContainer').classList.remove('hidden');
+                renderQuestions();
+                renderGrid();
+                updateProgressBar();
+            }
+        }
+    </script>
+</body>
+</html>
