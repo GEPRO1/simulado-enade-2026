@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#003366">
-    <meta name="description" content="Simulado Avaliativo ENADE 2026 — Engenharia de Produção (UFC Campus Russas)">
     <title>Simulado 02 — ENADE 2026 | Engenharia de Produção</title>
 
     <!-- Tailwind CSS CDN -->
@@ -14,87 +13,47 @@
             theme: {
                 extend: {
                     colors: {
-                        ufcnavy: {
-                            50: '#f0f5fa',
-                            100: '#e1ebd5',
-                            500: '#004b93',
-                            700: '#003366',
-                            900: '#001e3d'
-                        },
-                        ufcteal: {
-                            50: '#f0fdfa',
-                            500: '#00a896',
-                            600: '#008080',
-                            700: '#006666'
-                        }
+                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebd5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
 
-    <!-- Fontes Google & FontAwesome -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Fontes & Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leitor de Excel (SheetJS CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
         .font-mono-code { font-family: 'Fira Code', monospace; }
 
-        /* ================================================================= */
-        /* REGRAS DE IMPRESSÃO FORMATO A4 (PROVA ESCRITA IMPRESSA)           */
-        /* ================================================================= */
         @media print {
-            /* Oculta interface interativa da web */
-            header, footer, nav, button, .no-print, #quizContainer, #gridModal, #resultsContainer, .sticky {
+            header, footer, nav, button, #quizContainer, #gridModal, #resultsContainer, #loadingScreen {
                 display: none !important;
             }
-
-            /* Exibe o container formatado para a prova em papel */
-            #printExamContainer {
-                display: block !important;
-            }
-
-            @page {
-                size: A4 portrait;
-                margin: 1.5cm 1.5cm 1.5cm 1.5cm;
-            }
-
-            body {
-                background: #ffffff !important;
-                color: #000000 !important;
-                font-size: 10pt;
-                line-height: 1.35;
-            }
-
-            .page-break-avoid {
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-
-            .font-mono-code {
-                background: #f8f9fa !important;
-                color: #000000 !important;
-                border: 1px solid #cccccc !important;
-                padding: 8px !important;
-                border-radius: 4px !important;
-            }
+            #printExamContainer { display: block !important; }
+            @page { size: A4 portrait; margin: 1.5cm; }
+            body { background: #fff !important; color: #000 !important; font-size: 10pt; }
+            .page-break-avoid { break-inside: avoid; }
         }
-
-        /* Oculta o container da prova impressa durante o uso em tela */
-        #printExamContainer {
-            display: none;
-        }
+        #printExamContainer { display: none; }
     </style>
 </head>
-<body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased selection:bg-ufcteal-600 selection:text-white">
+<body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
 
-    <!-- CABEÇALHO INSTITUCIONAL DA TELA -->
+    <!-- TELA DE CARREGAMENTO DAS QUESTÕES -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-4">
+        <div class="w-12 h-12 border-4 border-ufcnavy-700 border-t-ufcteal-500 rounded-full animate-spin"></div>
+        <p class="text-sm font-semibold text-slate-700">Carregando questões do simulado...</p>
+    </div>
+
+    <!-- CABEÇALHO -->
     <header class="bg-ufcnavy-700 text-white shadow-md sticky top-0 z-30">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -107,199 +66,154 @@
                 </div>
             </div>
 
-            <!-- CONTROLES DO CABEÇALHO (CRONÔMETRO, IMPRESSÃO A4 E NAVEGADOR) -->
-            <div class="flex items-center space-x-2 sm:space-x-3 text-xs">
+            <div class="flex items-center space-x-2 text-xs">
                 <div class="bg-ufcnavy-900/60 px-3 py-1.5 rounded-lg flex items-center space-x-2 border border-white/10">
                     <i class="fa-regular fa-clock text-ufcteal-500"></i>
                     <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
                 </div>
-
-                <!-- BOTÃO PARA IMPRIMIR EM FORMATO A4 -->
-                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium" title="Imprimir Prova Completa em A4">
+                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
                     <i class="fa-solid fa-print"></i>
                     <span class="hidden sm:inline">Imprimir A4</span>
                 </button>
-
                 <button id="btnOpenGrid" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors">
                     <i class="fa-solid fa-th"></i>
                     <span class="hidden sm:inline font-medium">Questões</span>
                 </button>
             </div>
         </div>
-
-        <!-- BARRA DE PROGRESSO -->
         <div class="w-full bg-ufcnavy-900 h-1.5">
             <div id="progressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300" style="width: 0%;"></div>
         </div>
     </header>
 
-    <!-- CONTAINER DESTINADO EXCLUSIVAMENTE À IMPRESSÃO A4 (GERADO VIA JS) -->
     <div id="printExamContainer"></div>
 
-    <!-- CONTEÚDO PRINCIPAL (INTERFATIVO EM TELA) -->
+    <!-- CONTEÚDO DA PROVA -->
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
-
         <div id="quizContainer" class="space-y-5">
-
-            <!-- CARD SUPERIOR: METADADOS DA QUESTÃO & CORPO DA QUESTÃO -->
+            
             <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
-                
-                <!-- BADGES DE CLASSIFICAÇÃO ENADE -->
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div class="flex flex-wrap items-center gap-2">
-                        <span id="badgeNum" class="bg-ufcnavy-700 text-white text-xs font-bold px-2.5 py-1 rounded-lg">Questão 01 de 45</span>
+                        <span id="badgeNum" class="bg-ufcnavy-700 text-white text-xs font-bold px-2.5 py-1 rounded-lg">Questão 01</span>
                         <span id="badgeCat" class="bg-blue-100 text-blue-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Formação Geral</span>
-                        <span id="badgeDisc" class="bg-slate-100 text-slate-700 text-[11px] font-medium px-2.5 py-0.5 rounded-full">PCP</span>
-                        <span id="badgeDif" class="bg-amber-100 text-amber-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Dificuldade: Médio</span>
-                        <span id="badgeTipo" class="bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Asserção e Razão</span>
+                        <span id="badgeDisc" class="bg-slate-100 text-slate-700 text-[11px] font-medium px-2.5 py-0.5 rounded-full">Disciplina</span>
+                        <span id="badgeDif" class="bg-amber-100 text-amber-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Médio</span>
+                        <span id="badgeTipo" class="bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Tipo</span>
                     </div>
 
-                    <!-- BOTÃO TOGGLE MATRIZ MEC -->
-                    <button id="btnToggleMec" class="text-xs text-ufcteal-700 hover:text-ufcteal-600 font-semibold flex items-center space-x-1 focus:outline-none">
+                    <button id="btnToggleMec" class="text-xs text-ufcteal-700 hover:text-ufcteal-600 font-semibold flex items-center space-x-1">
                         <i class="fa-solid fa-circle-info"></i>
                         <span>Diretrizes MEC</span>
                         <i id="iconToggleMec" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
                     </button>
                 </div>
 
-                <!-- PAINEL RECOLHÍVEL DE COMPETÊNCIAS E HABILIDADES (MEC) -->
                 <div id="panelMec" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
                     <div>
-                        <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Competência Avaliada (MEC/DCNs):</span>
+                        <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Competência (MEC):</span>
                         <p id="textComp" class="text-slate-700 mt-0.5">...</p>
                     </div>
                     <div class="grid sm:grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
                         <div>
-                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Habilidade Trabalhada:</span>
+                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Habilidade:</span>
                             <p id="textHab" class="text-slate-700 mt-0.5">...</p>
                         </div>
                         <div>
-                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Objeto de Conhecimento:</span>
+                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Conteúdo:</span>
                             <p id="textConteudo" class="text-slate-700 mt-0.5">...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- TEXTO-BASE / CONTEXTUALIZAÇÃO -->
-                <div id="textoBase" class="text-sm text-slate-800 leading-relaxed space-y-3 font-normal">
-                    <!-- Conteúdo injetado via JS -->
-                </div>
+                <div id="textoBase" class="text-sm text-slate-800 leading-relaxed space-y-3"></div>
 
-                <!-- AFIRMATIVAS / ASSERÇÕES -->
                 <div id="containerAfirmativas" class="hidden bg-slate-50 border-l-4 border-ufcteal-600 p-4 rounded-r-xl my-4">
-                    <div id="textoAfirmativas" class="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line font-medium">
-                        <!-- Afirmativas injetadas via JS -->
-                    </div>
+                    <div id="textoAfirmativas" class="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line font-medium"></div>
                 </div>
 
-                <!-- COMANDO DA QUESTÃO -->
                 <div class="pt-1 border-t border-slate-100">
-                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed">
-                        <!-- Comando injetado via JS -->
-                    </p>
+                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed"></p>
                 </div>
-
             </div>
 
-            <!-- CARD DE OPÇÕES DE RESPOSTA -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-                <div id="containerOpcoes" class="space-y-2.5">
-                    <!-- Opções renderizadas dinamicamente -->
-                </div>
+                <div id="containerOpcoes" class="space-y-2.5"></div>
             </div>
 
-            <!-- CARD DE GABARITO & FEEDBACK PEDAGÓGICO -->
             <div id="cardFeedback" class="hidden bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                 <div id="statusFeedbackHeader" class="flex items-center space-x-2 p-3 rounded-xl">
                     <i id="statusFeedbackIcon" class="text-lg"></i>
                     <span id="statusFeedbackTitle" class="font-bold text-sm"></span>
                 </div>
-
                 <div class="space-y-3 text-xs sm:text-sm">
                     <div>
-                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Análise de Distratores:</span>
-                        <div id="feedbackTexto" class="text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                            <!-- Feedback detalhado -->
-                        </div>
+                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica:</span>
+                        <div id="feedbackTexto" class="text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200"></div>
                     </div>
-
-                    <!-- FUNDAMENTAÇÃO TEÓRICA / FONTE ABNT -->
                     <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200/60 flex items-start space-x-2 text-xs">
                         <i class="fa-solid fa-book-bookmark text-ufcnavy-700 mt-0.5"></i>
                         <div>
-                            <span class="font-bold text-ufcnavy-900 block">Fundamentação Teórica (Referência ABNT de Apoio):</span>
+                            <span class="font-bold text-ufcnavy-900 block">Referência ABNT:</span>
                             <span id="fonteAbnt" class="text-slate-600 italic">...</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- CONTROLES DE NAVEGAÇÃO -->
             <div class="flex items-center justify-between pt-2">
-                <button id="btnPrev" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                <button id="btnPrev" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
                     <i class="fa-solid fa-chevron-left text-xs"></i>
                     <span>Anterior</span>
                 </button>
-
-                <div class="flex items-center space-x-2">
-                    <button id="btnConfirmar" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-all focus:ring-2 focus:ring-ufcteal-500">
-                        Confirmar Resposta
-                    </button>
-                </div>
-
-                <button id="btnNext" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                <button id="btnConfirmar" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
+                    Confirmar Resposta
+                </button>
+                <button id="btnNext" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
                     <span>Próxima</span>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
             </div>
-
         </div>
 
-        <!-- TELA FINAL DE RESULTADOS -->
         <div id="resultsContainer" class="hidden bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center space-y-6">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-ufcteal-50 text-ufcteal-600 rounded-full">
                 <i class="fa-solid fa-trophy text-2xl"></i>
             </div>
-            
             <div class="space-y-1">
-                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Simulado Concluído!</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Confira abaixo o seu desempenho detalhado segundo os critérios do ENADE 2026.</p>
+                <h2 class="text-2xl font-extrabold text-slate-900">Simulado Concluído!</h2>
+                <p class="text-xs sm:text-sm text-slate-500">Desempenho detalhado registrado no sistema.</p>
             </div>
-
-            <!-- ESTATÍSTICAS DE DESEMPENHO -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nota Global</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota Global</span>
                     <span id="resNota" class="text-xl font-extrabold text-ufcnavy-700">0.0 / 10</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Acertos Totais</span>
-                    <span id="resAcertos" class="text-xl font-extrabold text-emerald-600">0 / 45</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Acertos Totais</span>
+                    <span id="resAcertos" class="text-xl font-extrabold text-emerald-600">0</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Formação Geral</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Formação Geral</span>
                     <span id="resFg" class="text-xl font-extrabold text-blue-600">0%</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Comp. Específico</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Comp. Específico</span>
                     <span id="resCe" class="text-xl font-extrabold text-purple-600">0%</span>
                 </div>
             </div>
-
-            <!-- BOTÕES DE AÇÃO -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-                <button id="btnRevisarProvas" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm transition-colors">
-                    Revisar Gabarito e Justificativas
+                <button id="btnRevisarProvas" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm">
+                    Revisar Gabarito
                 </button>
-                <a href="index.html" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm transition-colors">
+                <a href="index.html" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm">
                     Voltar ao Portal
                 </a>
             </div>
         </div>
-
     </main>
 
-    <!-- MODAL DRAWER COM NAVEGADOR DE QUESTÕES -->
+    <!-- MODAL GRID -->
     <div id="gridModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex justify-end">
         <div class="bg-white w-full max-w-sm h-full shadow-2xl p-6 flex flex-col justify-between">
             <div class="space-y-4">
@@ -309,184 +223,105 @@
                         <i class="fa-solid fa-xmark text-base"></i>
                     </button>
                 </div>
-                <p class="text-xs text-slate-500">Clique em uma questão para navegar diretamente:</p>
-                
-                <!-- GRID DE BOTÕES -->
-                <div id="gridQuestaoBtns" class="grid grid-cols-5 gap-2 max-h-[60vh] overflow-y-auto p-1">
-                    <!-- Botões gerados via JS -->
-                </div>
+                <div id="gridQuestaoBtns" class="grid grid-cols-5 gap-2 max-h-[60vh] overflow-y-auto p-1"></div>
             </div>
-
-            <button id="btnFinalizarSimulado" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm transition-colors">
+            <button id="btnFinalizarSimulado" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm">
                 Finalizar e Entregar Simulado
             </button>
         </div>
     </div>
 
-    <!-- RODAPÉ INSTITUCIONAL -->
     <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
-        <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1">
-            <p class="font-semibold text-slate-700">UFC Campus Russas — Engenharia de Produção</p>
-            <p class="text-[11px] text-slate-400">Simulado Ajustado às Portarias MEC nº 154, 163 e 273</p>
-        </div>
+        <p class="font-semibold text-slate-700">UFC Campus Russas — Engenharia de Produção</p>
     </footer>
 
-    <!-- SCRIPT DE EXECUÇÃO E DADOS DO SIMULADO -->
+    <!-- SCRIPT DE LEITURA AUTOMÁTICA DA PLANILHA EXCEL -->
     <script>
-        // DATASET COMPLETO DAS QUESTÕES (100% INÉDITAS COM TODOS OS NOVOS CAMPOS)
-        const questaoData = [
-            {
-                num: "Q01",
-                cat: "Formação Geral",
-                disc: "Sustentabilidade & Transição Energética",
-                dif: "Médio",
-                tipo: "Asserção e Razão",
-                comp: "Atuar de forma ética, sustentável, inclusiva e socialmente responsável na solução de problemas complexos.",
-                hab: "Interpretar textos, gráficos e indicadores de impacto socioambiental e tecnológico para tomada de decisão.",
-                conteudo: "Ecodesign e Análise de Pegada de Carbono em Redes Logísticas",
-                texto: `Uma empresa de logística industrial realizou a auditoria de sua pegada de carbono em três modais de transporte. O gráfico a seguir apresenta as emissões específicas em gramas de CO2 equivalente por tonelada-quilômetro transportada (g CO2e / t.km):
-                
-                <div class="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono-code text-xs my-2 leading-relaxed">
-                INTENSIDADE DE EMISSÕES DE CO2e POR MODAL LOGÍSTICO:<br>
-                [Modal Rodoviário]  : |||||||||||||||||||||| (110 g CO2e / t.km)<br>
-                [Modal Ferroviário] : ||||| (22 g CO2e / t.km)<br>
-                [Modal Hidroviário] : |||| (18 g CO2e / t.km)
-                </div>
-                
-                Diante do compromisso institucional de atingir emissões líquidas zero (Net-Zero) até 2030, a diretoria planeja a migração progressiva da frota.`,
-                comando: "Considerando a transição para modais de menor pegada de carbono e a dinâmica de eficiência energética nos transportes, avalie as asserções a seguir e a relação proposta entre elas.",
-                afirmativas: `I. A substituição do modal rodoviário por rotas intermodais ferro-hidroviárias reduz as emissões operacionais de gases de efeito estufa em mais de 75% por tonelada-quilômetro transportada.
+        // NOME DA SUA PLANILHA NO GITHUB:
+        const ARQUIVO_EXCEL = 'simulado02.xlsx';
 
-PORQUE
-
-II. O modal rodoviário apresenta menor eficiência energética por tonelada movimentada devido à maior resistência física ao rolamento e à menor capacidade de carga unitária frente aos modais de grande escala.`,
-                opcoes: {
-                    "A": "As asserções I e II são proposições verdadeiras, e a II é uma justificativa correta da I.",
-                    "B": "As asserções I e II são proposições verdadeiras, mas a II não é uma justificativa correta da I.",
-                    "C": "A asserção I é uma proposição verdadeira, e a II é uma proposição falsa.",
-                    "D": "A asserção I é uma proposição falsa, e a II é uma proposição verdadeira.",
-                    "E": "As asserções I e II são proposições falsas."
-                },
-                gab: "A",
-                justificativa: "<b>Correta (A):</b> A asserção I é verdadeira, pois a redução de emissões ao migrar de 110 g CO2e para a faixa de 18-22 g CO2e excede 80% (superior ao limiar de 75%). A asserção II é verdadeira e justifica o ganho físico e energético dos modais de alta capacidade por unidade de tração.",
-                fonte: "SANTOS, Marco Aurélio et al. Logística Sustentável e Transição Energética. Rio de Janeiro: LTC, 2024."
-            },
-            {
-                num: "Q02",
-                cat: "Componente Específico",
-                disc: "Planejamento e Controle da Produção (PCP)",
-                dif: "Médio",
-                tipo: "Asserção e Razão",
-                comp: "Conceber, projetar e otimizar sistemas de produção e operações industriais.",
-                hab: "Analisar e comparar filosofias de gestão da produção, identificando o impacto operacional do controle de estoques em processo (WIP).",
-                conteudo: "Sistemas Puxados vs. Empurrados, Controle de WIP e Heijunka",
-                texto: `Uma fábrica de componentes automotivos reestruturou uma linha de usinagem para mitigar a alta variabilidade de lead time. O gráfico abaixo apresenta o perfil de estoque em processo (Work-In-Process - WIP) antes e após a implementação do sistema Kanban de 2 cartões:
-
-                <div class="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono-code text-xs my-2 leading-relaxed">
-                PERFIL DE ESTOQUE EM PROCESSO (WIP Médio por Posto):<br>
-                Modelo MRP II (Empurrado) : [P1: 120 un] ---> [P2: 250 un] ---> [P3: 180 un] (WIP = 550 un)<br>
-                Modelo JIT/Kanban (Puxado): [P1: 30 un]  ---> [P2: 30 un]  ---> [P3: 30 un]  (WIP = 90 un)
-                </div>`,
-                comando: "Considerando a gestão do fluxo de valor e a limitação de superprodução, avalie as asserções a seguir e a relação proposta entre elas.",
-                afirmativas: `I. A migração para a produção puxada estabilizou o estoque em processo no teto máximo de 90 unidades, reduzindo o tempo de atravessamento (lead time) total da linha em proporção direta à redução do WIP.
-
-PORQUE
-
-II. No sistema Kanban, a autorização para fabricação no posto fornecedor (montante) é deflagrada estritamente pelo consumo real verificado no posto cliente (jusante), eliminando a necessidade de estoques intermediários excessivos.`,
-                opcoes: {
-                    "A": "As asserções I e II são proposições verdadeiras, e a II é uma justificativa correta da I.",
-                    "B": "As asserções I e II são proposições verdadeiras, mas a II não é uma justificativa correta da I.",
-                    "C": "A asserção I é uma proposição verdadeira, e a II é uma proposição falsa.",
-                    "D": "A asserção I é uma proposição falsa, e a II é uma proposição verdadeira.",
-                    "E": "As asserções I e II são proposições falsas."
-                },
-                gab: "A",
-                justificativa: "<b>Correta (A):</b> A asserção I é verdadeira (pela Lei de Little, Lead Time = WIP / Throughput; a redução de 550 para 90 unidades reduz proporcionalmente o lead time). A asserção II é verdadeira e justifica o mecanismo cliente-fornecedor a jusante/montante.",
-                fonte: "SLACK, Nigel; BRANDON-JONES, Alistair. Administração da Produção. 9. ed. São Paulo: Atlas, 2023."
-            },
-            {
-                num: "Q03",
-                cat: "Componente Específico",
-                disc: "Pesquisa Operacional",
-                dif: "Difícil",
-                tipo: "Alternativa Simples",
-                comp: "Formular e resolver modelos matemáticos de otimização para tomada de decisão sobre alocação de recursos escassos.",
-                hab: "Interpretar o relatório de sensibilidade do Método Simplex e o significado econômico das variáveis duais (Preço Sombra).",
-                conteudo: "Programação Linear, Método Simplex e Teoria da Dualidade",
-                texto: `Uma refinaria otimiza a margem de contribuição diária Z = 300x1 + 500x2 (em milhares de R$), em que x1 é o volume de Biodiesel e x2 de Eletrocombustível, sujeita a três restrições operacionais (R1: Reator, R2: Destilação, R3: Hidrotratamento). O tableau final do Simplex é apresentado a seguir:
-
-                <div class="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono-code text-xs my-2 leading-relaxed">
-                TABLEAU FINAL DO MÉTODO SIMPLEX:<br>
-                Z  + 0x1 + 0x2 + 40s1 + 0s2 + 70s3 = 1.800 (Lucro Máximo)<br>
-                x2 + 0x1 + 1x2 + 0.2s1 + 0s2 - 0.1s3 = 2.4<br>
-                s2 + 0x1 + 0x2 - 0.5s1 + 1s2 + 0.8s3 = 5.0  (Folga de R2)<br>
-                x1 + 1x1 + 0x2 - 0.1s1 + 0s2 + 0.3s3 = 2.0
-                </div>`,
-                comando: "Com base nas informações do tableau final do Simplex e na teoria da Dualidade, qual é a interpretação correta dos Preços Sombra (Shadow Prices) das restrições R1, R2 e R3?",
-                afirmativas: "",
-                opcoes: {
-                    "A": "O preço sombra de R1 é R$ 40,00/h; o de R2 é R$ 0,00/h (recurso abundante); e o de R3 é R$ 70,00/h.",
-                    "B": "Os preços sombra de todos os recursos são nulos, pois a função objetivo atingiu o máximo de R$ 1.800,00.",
-                    "C": "O preço sombra de R2 é R$ 5,00/h, pois a variável de folga s2 permanece na base com valor positivo.",
-                    "D": "A inclusão de uma hora adicional no recurso R2 incrementará o lucro total em R$ 40,00.",
-                    "E": "Os recursos R1 e R3 são abundantes, apresentando folga operacional no final do turno."
-                },
-                gab: "A",
-                justificativa: "<b>Correta (A):</b> Na linha Z do Simplex, os coeficientes das variáveis de folga fornecem os preços sombra: s1 = 40, s2 = 0 (pois s2 > 0 na base indica recurso abundante com valor marginal nulo) e s3 = 70.",
-                fonte: "TAHA, Hamdy A. Pesquisa Operacional: Uma Visão Geral. 10. ed. São Paulo: Pearson, 2017."
-            },
-            {
-                num: "Q04",
-                cat: "Componente Específico",
-                disc: "Gerência da Manutenção",
-                dif: "Difícil",
-                tipo: "Assertivas",
-                comp: "Gerenciar indicadores de desempenho de ativos industriais.",
-                hab: "Decompor e calcular os pilares do Overall Equipment Effectiveness (OEE) a partir de dados de telemetria.",
-                conteudo: "Manutenção Produtiva Total (TPM) e Indicadores de Eficiência (OEE)",
-                texto: `Um sistema MES (Manufacturing Execution System) registrou os seguintes dados operacionais de uma célula robótica durante um turno regular de 8 horas (480 minutos):
-
-                <div class="bg-slate-900 text-emerald-400 p-3 rounded-xl font-mono-code text-xs my-2 leading-relaxed">
-                TELEMETRIA MES — CÉLULA ROBÓTICA:<br>
-                - Tempo de Turno Planejado     : 480 minutos<br>
-                - Paradas por Manutenção Não Planejada: 40 minutos<br>
-                - Tempo de Ciclo Padrão Nominal: 0,80 min/peça<br>
-                - Produção Total no Turno       : 500 peças<br>
-                - Peças Rejeitadas na Inspeção : 25 peças
-                </div>`,
-                comando: "Com base nos pilares de cálculo do indicador OEE, avalie as afirmativas a seguir.",
-                afirmativas: `I. A Disponibilidade do equipamento no turno foi de 91,67%.
-II. O Desempenho da célula operou a 90,91% da sua capacidade nominal teórica.
-III. O valor final apurado para o indicador OEE da célula foi de 79,17%.`,
-                opcoes: {
-                    "A": "Estão corretas apenas as afirmativas I e II.",
-                    "B": "Estão corretas apenas as afirmativas I e III.",
-                    "C": "Estão corretas apenas as afirmativas II e III.",
-                    "D": "Apenas a afirmativa I está correta.",
-                    "E": "Estão corretas todas as afirmativas (I, II e III)."
-                },
-                gab: "E",
-                justificativa: "<b>Correta (E):</b><br>1. Disponibilidade = (480-40)/480 = 440/480 = 91,67%.<br>2. Desempenho = (500 * 0,80)/440 = 400/440 = 90,91%.<br>3. Qualidade = (500-25)/500 = 475/500 = 95,00%.<br>4. OEE = 0,9167 * 0,9091 * 0,9500 = 79,17%. Todas as afirmativas são exatas.",
-                fonte: "PALADY, Paul. TPM: Total Productive Maintenance. São Paulo: Bookman, 2021."
-            }
-        ];
-
-        // ESTADO DA APLICAÇÃO
+        let questaoData = [];
         let currentIndex = 0;
         let userAnswers = {};
         let timerSeconds = 0;
         let timerInterval = null;
 
-        // INICIALIZAÇÃO
-        document.addEventListener('DOMContentLoaded', () => {
-            initTimer();
-            renderQuestion(currentIndex);
-            renderGridButtons();
-            setupPrintMode();
-            setupEventListeners();
-        });
+        document.addEventListener('DOMContentLoaded', carregarExcel);
 
-        // CONTROLADOR DO CRONÔMETRO
+        async function carregarExcel() {
+            try {
+                const response = await fetch(ARQUIVO_EXCEL);
+                const data = await response.arrayBuffer();
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                // Pula linhas de cabeçalho e lê a partir da linha 5
+                questaoData = [];
+                for (let r = 4; r < rawRows.length; r++) {
+                    const row = rawRows[r];
+                    if (!row || !row[0]) continue;
+
+                    let opObj = parseOpcoesString(String(row[11] || ''));
+
+                    questaoData.push({
+                        num: String(row[0] || ''),
+                        cat: String(row[1] || 'Formação Geral'),
+                        disc: String(row[2] || ''),
+                        dif: String(row[3] || 'Médio'),
+                        tipo: String(row[4] || 'Alternativa Simples'),
+                        comp: String(row[5] || ''),
+                        hab: String(row[6] || ''),
+                        conteudo: String(row[7] || ''),
+                        texto: String(row[8] || '').replace(/\n/g, '<br>'),
+                        comando: String(row[9] || ''),
+                        afirmativas: String(row[10] || ''),
+                        opcoes: opObj,
+                        gab: String(row[12] || 'A').trim().toUpperCase(),
+                        justificativa: String(row[13] || ''),
+                        fonte: String(row[14] || '')
+                    });
+                }
+
+                document.getElementById('loadingScreen').classList.add('hidden');
+                initTimer();
+                renderQuestion(currentIndex);
+                renderGridButtons();
+                setupPrintMode();
+                setupEventListeners();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div class="text-center text-rose-600 space-y-2">
+                        <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+                        <p class="font-bold text-sm">Não foi possível carregar o arquivo "${ARQUIVO_EXCEL}".</p>
+                        <p class="text-xs text-slate-500">Verifique se o arquivo está com este nome na raiz do GitHub.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function parseOpcoesString(str) {
+            let ops = {};
+            let lines = str.split('\n');
+            let curr = null;
+
+            lines.forEach(line => {
+                line = line.trim();
+                let m = line.match(/^([A-E])[\)\.-]\s*(.*)/);
+                if (m) {
+                    curr = m[1];
+                    ops[curr] = m[2];
+                } else if (curr) {
+                    ops[curr] += " " + line;
+                }
+            });
+            return ops;
+        }
+
         function initTimer() {
             timerInterval = setInterval(() => {
                 timerSeconds++;
@@ -497,142 +332,53 @@ III. O valor final apurado para o indicador OEE da célula foi de 79,17%.`,
             }, 1000);
         }
 
-        // MONTA O CADERNO IMPRESSO COMPLETO FORMATADO EM A4
-        function setupPrintMode() {
-            const printContainer = document.getElementById('printExamContainer');
-            if (!printContainer) return;
-
-            let printHTML = `
-                <div class="print-header mb-6 pb-4 border-b-2 border-slate-900 text-slate-900">
-                    <div class="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
-                        <div>
-                            <h1 class="text-base font-bold uppercase tracking-tight">UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS RUSSAS</h1>
-                            <h2 class="text-xs font-semibold text-slate-700">CURSO DE ENGENHARIA DE PRODUÇÃO — SÉRIE GEPRO 2026</h2>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">SIMULADO ENADE 2026</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 text-xs font-medium pt-1">
-                        <div><b>NOME DO ALUNO(A):</b> ____________________________________________________</div>
-                        <div><b>MATRÍCULA:</b> ____________________ <b>TURMA:</b> ____________</div>
-                        <div><b>DATA DE APLICAÇÃO:</b> ___/___/2026</div>
-                        <div><b>NOTA OBTIDA:</b> _________ / 10,0</div>
-                    </div>
-                </div>
-                <div class="space-y-6">
-            `;
-
-            questaoData.forEach((q, idx) => {
-                let optionsHTML = '';
-                Object.keys(q.opcoes).forEach(letra => {
-                    optionsHTML += `
-                        <div class="flex items-start space-x-2 my-1 text-xs">
-                            <span class="font-bold border border-slate-400 rounded w-5 h-5 flex items-center justify-center shrink-0">(${letra})</span>
-                            <span>${q.opcoes[letra]}</span>
-                        </div>
-                    `;
-                });
-
-                let afmHTML = '';
-                if (q.afirmativas && q.afirmativas !== "N/A" && q.afirmativas.trim() !== "") {
-                    afmHTML = `
-                        <div class="my-2 p-2.5 bg-slate-50 border-l-2 border-slate-400 text-xs font-medium whitespace-pre-line">
-                            ${q.afirmativas}
-                        </div>
-                    `;
-                }
-
-                printHTML += `
-                    <div class="page-break-avoid border-b border-slate-200 pb-4 mb-4">
-                        <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase mb-1">
-                            <span>QUESTÃO ${String(idx + 1).padStart(2, '0')} • ${q.cat} (${q.disc})</span>
-                            <span>[${q.tipo}]</span>
-                        </div>
-                        <div class="text-xs text-slate-900 leading-relaxed space-y-2 mb-2">
-                            ${q.texto}
-                        </div>
-                        ${afmHTML}
-                        <div class="text-xs font-semibold text-slate-900 mb-2">
-                            ${q.comando}
-                        </div>
-                        <div class="space-y-1">
-                            ${optionsHTML}
-                        </div>
-                    </div>
-                `;
-            });
-
-            printHTML += `</div>`;
-            printContainer.innerHTML = printHTML;
-        }
-
-        // RENDERIZAÇÃO DA QUESTÃO ATUAL (TELA)
         function renderQuestion(index) {
             const q = questaoData[index];
             if (!q) return;
 
-            // Badges
             document.getElementById('badgeNum').textContent = `Questão ${index + 1} de ${questaoData.length}`;
             document.getElementById('badgeCat').textContent = q.cat;
             document.getElementById('badgeDisc').textContent = q.disc;
             document.getElementById('badgeDif').textContent = `Dificuldade: ${q.dif}`;
             document.getElementById('badgeTipo').textContent = q.tipo;
 
-            // Cores da Categoria
-            const catElem = document.getElementById('badgeCat');
-            if (q.cat === "Formação Geral") {
-                catElem.className = "bg-blue-100 text-blue-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full";
-            } else {
-                catElem.className = "bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full";
-            }
-
-            // Diretrizes MEC (Painel Recolhível)
             document.getElementById('textComp').textContent = q.comp;
             document.getElementById('textHab').textContent = q.hab;
             document.getElementById('textConteudo').textContent = q.conteudo;
 
-            // Conteúdo (Texto-Base)
             document.getElementById('textoBase').innerHTML = q.texto;
             document.getElementById('comandoQuestao').textContent = q.comando;
 
-            // Afirmativas (Se existirem)
             const afmContainer = document.getElementById('containerAfirmativas');
-            if (q.afirmativas && q.afirmativas.trim() !== "" && q.afirmativas !== "N/A") {
-                document.getElementById('textoAfirmativas').innerHTML = q.afirmativas;
+            if (q.afirmativas && q.afirmativas !== "N/A" && q.afirmativas.trim() !== "") {
+                document.getElementById('textoAfirmativas').textContent = q.afirmativas;
                 afmContainer.classList.remove('hidden');
             } else {
                 afmContainer.classList.add('hidden');
             }
 
-            // Opções A-E
             const opcoesContainer = document.getElementById('containerOpcoes');
             opcoesContainer.innerHTML = '';
-            
             const selectedOpt = userAnswers[index];
 
-            Object.keys(q.opcoes).forEach(letra => {
-                const isSelected = selectedOpt === letra;
-                const optBtn = document.createElement('button');
-                
-                let borderStyle = isSelected ? 'border-ufcteal-600 bg-ufcteal-50/50 text-slate-900' : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800';
-                let circleStyle = isSelected ? 'bg-ufcteal-600 text-white font-bold' : 'bg-slate-100 text-slate-600 font-semibold';
+            if (q.opcoes) {
+                Object.keys(q.opcoes).forEach(letra => {
+                    const isSelected = selectedOpt === letra;
+                    const optBtn = document.createElement('button');
+                    let borderStyle = isSelected ? 'border-ufcteal-600 bg-ufcteal-50/50 text-slate-900' : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800';
+                    let circleStyle = isSelected ? 'bg-ufcteal-600 text-white font-bold' : 'bg-slate-100 text-slate-600 font-semibold';
 
-                optBtn.className = `w-full text-left p-3.5 rounded-xl border ${borderStyle} transition-all flex items-start space-x-3 focus:outline-none focus:ring-2 focus:ring-ufcteal-500`;
-                optBtn.onclick = () => selectOption(index, letra);
+                    optBtn.className = `w-full text-left p-3.5 rounded-xl border ${borderStyle} transition-all flex items-start space-x-3`;
+                    optBtn.onclick = () => selectOption(index, letra);
 
-                optBtn.innerHTML = `
-                    <div class="w-7 h-7 rounded-lg ${circleStyle} flex items-center justify-center text-xs shrink-0 mt-0.5">
-                        ${letra}
-                    </div>
-                    <div class="text-xs sm:text-sm leading-relaxed font-medium pt-0.5">
-                        ${q.opcoes[letra]}
-                    </div>
-                `;
-                opcoesContainer.appendChild(optBtn);
-            });
+                    optBtn.innerHTML = `
+                        <div class="w-7 h-7 rounded-lg ${circleStyle} flex items-center justify-center text-xs shrink-0 mt-0.5">${letra}</div>
+                        <div class="text-xs sm:text-sm leading-relaxed font-medium pt-0.5">${q.opcoes[letra]}</div>
+                    `;
+                    opcoesContainer.appendChild(optBtn);
+                });
+            }
 
-            // Feedback Card
             const cardFeedback = document.getElementById('cardFeedback');
             if (q.answered) {
                 showFeedback(q, selectedOpt);
@@ -640,94 +386,49 @@ III. O valor final apurado para o indicador OEE da célula foi de 79,17%.`,
                 cardFeedback.classList.add('hidden');
             }
 
-            // Atualiza botões e progresso
             document.getElementById('btnPrev').disabled = index === 0;
             document.getElementById('btnNext').disabled = index === questaoData.length - 1;
-            
-            const progress = ((index + 1) / questaoData.length) * 100;
-            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressBar').style.width = `${((index + 1) / questaoData.length) * 100}%`;
         }
 
-        // SELEÇÃO DA OPÇÃO
         function selectOption(qIndex, letra) {
             userAnswers[qIndex] = letra;
             renderQuestion(qIndex);
             updateGridButtons();
         }
 
-        // CONFIRMAÇÃO DE RESPOSTA E FEEDBACK
         function confirmAnswer() {
             const q = questaoData[currentIndex];
             const userAns = userAnswers[currentIndex];
-            if (!userAns) {
-                alert("Por favor, selecione uma alternativa antes de confirmar.");
-                return;
-            }
+            if (!userAns) { alert("Selecione uma alternativa."); return; }
             q.answered = true;
             showFeedback(q, userAns);
             updateGridButtons();
         }
 
-        // EXIBE FEEDBACK COM ANÁLISE DE DISTRATORES E ABNT
         function showFeedback(q, selectedOpt) {
             const cardFeedback = document.getElementById('cardFeedback');
-            const statusHeader = document.getElementById('statusFeedbackHeader');
-            const statusIcon = document.getElementById('statusFeedbackIcon');
-            const statusTitle = document.getElementById('statusFeedbackTitle');
-            const feedbackTexto = document.getElementById('feedbackTexto');
-            const fonteAbnt = document.getElementById('fonteAbnt');
-
             const isCorrect = selectedOpt === q.gab;
 
-            if (isCorrect) {
-                statusHeader.className = "flex items-center space-x-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800";
-                statusIcon.className = "fa-solid fa-circle-check text-emerald-600 text-lg";
-                statusTitle.textContent = `Resposta Correta! (Gabarito: ${q.gab})`;
-            } else {
-                statusHeader.className = "flex items-center space-x-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800";
-                statusIcon.className = "fa-solid fa-circle-xmark text-rose-600 text-lg";
-                statusTitle.textContent = `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito Oficial: ${q.gab}`;
-            }
-
-            feedbackTexto.innerHTML = q.justificativa;
-            fonteAbnt.textContent = q.fonte;
+            document.getElementById('statusFeedbackHeader').className = `flex items-center space-x-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}`;
+            document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
+            document.getElementById('statusFeedbackTitle').textContent = isCorrect ? `Resposta Correta! (${q.gab})` : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            document.getElementById('feedbackTexto').innerHTML = q.justificativa;
+            document.getElementById('fonteAbnt').textContent = q.fonte;
 
             cardFeedback.classList.remove('hidden');
         }
 
-        // EVENT LISTENERS E NAVEGAÇÃO
         function setupEventListeners() {
-            document.getElementById('btnPrev').onclick = () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    renderQuestion(currentIndex);
-                }
-            };
-
-            document.getElementById('btnNext').onclick = () => {
-                if (currentIndex < questaoData.length - 1) {
-                    currentIndex++;
-                    renderQuestion(currentIndex);
-                }
-            };
-
+            document.getElementById('btnPrev').onclick = () => { if (currentIndex > 0) { currentIndex--; renderQuestion(currentIndex); } };
+            document.getElementById('btnNext').onclick = () => { if (currentIndex < questaoData.length - 1) { currentIndex++; renderQuestion(currentIndex); } };
             document.getElementById('btnConfirmar').onclick = confirmAnswer;
-
-            // Toggle Diretrizes MEC
             document.getElementById('btnToggleMec').onclick = () => {
-                const panel = document.getElementById('panelMec');
-                const icon = document.getElementById('iconToggleMec');
-                panel.classList.toggle('hidden');
-                icon.classList.toggle('rotate-180');
+                document.getElementById('panelMec').classList.toggle('hidden');
+                document.getElementById('iconToggleMec').classList.toggle('rotate-180');
             };
-
-            // Modal Grid
-            document.getElementById('btnOpenGrid').onclick = () => {
-                document.getElementById('gridModal').classList.remove('hidden');
-            };
-            document.getElementById('btnCloseGrid').onclick = () => {
-                document.getElementById('gridModal').classList.add('hidden');
-            };
+            document.getElementById('btnOpenGrid').onclick = () => document.getElementById('gridModal').classList.remove('hidden');
+            document.getElementById('btnCloseGrid').onclick = () => document.getElementById('gridModal').classList.add('hidden');
             document.getElementById('btnFinalizarSimulado').onclick = finishSimulado;
             document.getElementById('btnRevisarProvas').onclick = () => {
                 document.getElementById('resultsContainer').classList.add('hidden');
@@ -737,11 +438,9 @@ III. O valor final apurado para o indicador OEE da célula foi de 79,17%.`,
             };
         }
 
-        // RENDERIZA GRID DE QUESTÕES NO MODAL
         function renderGridButtons() {
             const container = document.getElementById('gridQuestaoBtns');
             container.innerHTML = '';
-
             questaoData.forEach((q, idx) => {
                 const btn = document.createElement('button');
                 btn.id = `gridBtn_${idx}`;
@@ -755,66 +454,80 @@ III. O valor final apurado para o indicador OEE da célula foi de 79,17%.`,
             updateGridButtons();
         }
 
-        // ATUALIZA ESTADO DOS BOTÕES NO GRID
         function updateGridButtons() {
             questaoData.forEach((q, idx) => {
                 const btn = document.getElementById(`gridBtn_${idx}`);
                 if (!btn) return;
-                
                 const isCurrent = idx === currentIndex;
                 const userAns = userAnswers[idx];
-                
                 let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
                 if (userAns) {
                     bgClass = q.answered 
                         ? (userAns === q.gab ? "bg-emerald-500 text-white font-bold" : "bg-rose-500 text-white font-bold")
                         : "bg-ufcnavy-700 text-white font-bold";
                 }
-
-                if (isCurrent) {
-                    bgClass += " ring-2 ring-offset-2 ring-ufcteal-500";
-                }
-
-                btn.className = `w-10 h-10 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${bgClass}`;
+                if (isCurrent) bgClass += " ring-2 ring-offset-2 ring-ufcteal-500";
+                btn.className = `w-10 h-10 rounded-lg text-xs font-bold flex items-center justify-center ${bgClass}`;
                 btn.textContent = String(idx + 1).padStart(2, '0');
             });
         }
 
-        // FINALIZAR SIMULADO E EXIBIR SCORE
         function finishSimulado() {
             clearInterval(timerInterval);
             document.getElementById('gridModal').classList.add('hidden');
             document.getElementById('quizContainer').classList.add('hidden');
 
-            let totalAcertos = 0;
-            let fgAcertos = 0, fgTotal = 0;
-            let ceAcertos = 0, ceTotal = 0;
-
+            let totalAcertos = 0, fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
             questaoData.forEach((q, idx) => {
-                const userAns = userAnswers[idx];
-                const isCorrect = userAns === q.gab;
-
-                if (q.cat === "Formação Geral") {
-                    fgTotal++;
-                    if (isCorrect) fgAcertos++;
-                } else {
-                    ceTotal++;
-                    if (isCorrect) ceAcertos++;
-                }
-
+                const isCorrect = userAnswers[idx] === q.gab;
+                if (q.cat === "Formação Geral") { fgTotal++; if (isCorrect) fgAcertos++; } 
+                else { ceTotal++; if (isCorrect) ceAcertos++; }
                 if (isCorrect) totalAcertos++;
             });
 
-            const notaFinal = ((totalAcertos / questaoData.length) * 10).toFixed(1);
-            const percFg = fgTotal > 0 ? ((fgAcertos / fgTotal) * 100).toFixed(0) : 0;
-            const percCe = ceTotal > 0 ? ((ceAcertos / ceTotal) * 100).toFixed(0) : 0;
-
-            document.getElementById('resNota').textContent = `${notaFinal} / 10`;
+            document.getElementById('resNota').textContent = `${((totalAcertos / questaoData.length) * 10).toFixed(1)} / 10`;
             document.getElementById('resAcertos').textContent = `${totalAcertos} / ${questaoData.length}`;
-            document.getElementById('resFg').textContent = `${percFg}%`;
-            document.getElementById('resCe').textContent = `${percCe}%`;
-
+            document.getElementById('resFg').textContent = `${fgTotal > 0 ? ((fgAcertos / fgTotal) * 100).toFixed(0) : 0}%`;
+            document.getElementById('resCe').textContent = `${ceTotal > 0 ? ((ceAcertos / ceTotal) * 100).toFixed(0) : 0}%`;
             document.getElementById('resultsContainer').classList.remove('hidden');
+        }
+
+        function setupPrintMode() {
+            const printContainer = document.getElementById('printExamContainer');
+            if (!printContainer) return;
+            let printHTML = `
+                <div class="print-header mb-6 pb-4 border-b-2 border-slate-900 text-slate-900">
+                    <div class="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
+                        <div>
+                            <h1 class="text-base font-bold uppercase">UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS RUSSAS</h1>
+                            <h2 class="text-xs font-semibold text-slate-700">ENGENHARIA DE PRODUÇÃO — SÉRIE GEPRO 2026</h2>
+                        </div>
+                        <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">SIMULADO ENADE</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-xs font-medium">
+                        <div><b>NOME:</b> ____________________________________________________</div>
+                        <div><b>MATRÍCULA:</b> ____________________</div>
+                    </div>
+                </div><div class="space-y-6">`;
+
+            questaoData.forEach((q, idx) => {
+                let optionsHTML = '';
+                if (q.opcoes) {
+                    Object.keys(q.opcoes).forEach(letra => {
+                        optionsHTML += `<div class="flex items-start space-x-2 my-1 text-xs"><span class="font-bold border border-slate-400 rounded w-5 h-5 flex items-center justify-center shrink-0">(${letra})</span><span>${q.opcoes[letra]}</span></div>`;
+                    });
+                }
+                printHTML += `
+                    <div class="page-break-avoid border-b border-slate-200 pb-4 mb-4">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">QUESTÃO ${String(idx + 1).padStart(2, '0')} • ${q.cat} (${q.disc})</div>
+                        <div class="text-xs text-slate-900 leading-relaxed my-2">${q.texto}</div>
+                        ${q.afirmativas && q.afirmativas !== "N/A" ? `<div class="my-2 p-2 bg-slate-50 border-l-2 border-slate-400 text-xs">${q.afirmativas}</div>` : ''}
+                        <div class="text-xs font-semibold text-slate-900 mb-2">${q.comando}</div>
+                        <div class="space-y-1">${optionsHTML}</div>
+                    </div>`;
+            });
+            printHTML += `</div>`;
+            printContainer.innerHTML = printHTML;
         }
     </script>
 </body>
