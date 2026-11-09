@@ -10,7 +10,7 @@ O acesso é gratuito, universal e funciona em qualquer navegador (computador, ta
 
 👉 **[Acessar o Portal de Simulados ENADE 2026](https://gepro1.github.io/simulado-enade-2026/)**
 
-👉 **[Acessar a cartilha do ENADE 2026](https://github.com/marcelacostaaraujo21/enade-compass-2026.git).**
+👉 **[Acessar o aplicativo e a cartilha do ENADE 2026](https://enade-compass-2026.lovable.app/).**
 
 ---
 
