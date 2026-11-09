@@ -5,4 +5,4 @@ Aplicação web interativa para preparação dos estudantes de Engenharia de Pro
 
 ### 🚀 Link de Acesso ao Aplicativo:
 Clique no link abaixo para acessar a plataforma:
-👉 [Acessar o Simulado ENADE 2026]
+👉 [Acessar o Simulado ENADE 2026] https://gepro1.github.io/simulado-enade-2026/
