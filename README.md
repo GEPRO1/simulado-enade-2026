@@ -10,7 +10,6 @@ O acesso é gratuito, universal e funciona em computadores, tablets e celulares 
 
 👉 **[Acessar o Portal de Simulados](https://gepro1.github.io/simulado-enade-2026/)**
 
-> **Nota para administradores:** Se o repositório for transferido para a organização da Instituição, atualize o endereço acima substituindo `marcelacostaaraujo21` pelo nome de usuário ou organização no GitHub.
 
 ---
 
