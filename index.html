@@ -1,31 +1,155 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full bg-slate-50">
 <head>
+    <!-- ================================================================= -->
+    <!-- METADADOS E CONFIGURAÇÕES DE CABEÇALHO (SEO, Acessibilidade e PWA) -->
+    <!-- ================================================================= -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Simulados ENADE 2026</title>
+    <meta name="theme-color" content="#003366">
+    <meta name="description" content="Portal Institucional de Simulados ENADE — Engenharia de Produção (UFC Campus Russas)">
+    <title>Portal de Simulados ENADE — Engenharia de Produção</title>
+
+    <!-- Tailwind CSS CDN para Estilização Responsiva -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ufcnavy: {
+                            50: '#f0f5fa',
+                            100: '#e1ebd5',
+                            500: '#004b93',
+                            700: '#003366',
+                            900: '#001e3d'
+                        },
+                        ufcteal: {
+                            50: '#f0fdfa',
+                            500: '#00a896',
+                            600: '#008080',
+                            700: '#006666'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fontes Google & FontAwesome (Ícones) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-6 text-slate-800 font-sans flex flex-col items-center justify-center">
+<body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased selection:bg-ufcteal-600 selection:text-white">
 
-    <div class="max-w-md w-full bg-white p-6 rounded-2xl shadow-md text-center space-y-6 border border-slate-200">
-        <div>
-            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Engenharia de Produção</span>
-            <h1 class="text-xl font-bold mt-2 text-slate-900">Portal de Simulados ENADE 2026</h1>
-            <p class="text-xs text-slate-500 mt-1">Selecione o simulado que deseja realizar:</p>
+    <!-- CABEÇALHO INSTITUCIONAL -->
+    <header class="bg-ufcnavy-700 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-xl shadow-sm text-ufcnavy-700 flex items-center justify-center">
+                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                </div>
+                <div>
+                    <span class="bg-ufcteal-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">UFC Campus Russas</span>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight">Engenharia de Produção</h1>
+                </div>
+            </div>
+            <span class="text-xs text-slate-300 font-medium hidden sm:inline-block">Série GEPRO 2026</span>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL (PORTAL HUB) -->
+    <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
+        
+        <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center space-y-6">
+            
+            <!-- APRESENTAÇÃO DO PORTAL -->
+            <div class="space-y-2">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-ufcnavy-50 text-ufcnavy-700 rounded-full mb-1">
+                    <i class="fa-solid fa-list-check text-xl"></i>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Portal de Simulados ENADE</h2>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                    Selecione abaixo a avaliação ou módulo que deseja realizar para iniciar a sua preparação.
+                </p>
+            </div>
+
+            <!-- ================================================================= -->
+            <!-- LISTA DE SIMULADOS (ADICIONE OU EDITE NOVOS SIMULADOS AQUI)       -->
+            <!-- ================================================================= -->
+            <nav class="space-y-3.5 text-left" aria-label="Lista de Simulados">
+
+                <!-- ------------------------------------------------------------- -->
+                <!-- ITEM 01: SIMULADO GERAL INTEGRADO (ARQUIVO: 01.html)           -->
+                <!-- ------------------------------------------------------------- -->
+                <a href="01.html" 
+                   class="group flex items-center justify-between p-4 rounded-xl border border-ufcnavy-500/20 bg-ufcnavy-50 hover:bg-ufcnavy-700 text-ufcnavy-900 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ufcnavy-500">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-10 h-10 rounded-lg bg-ufcnavy-700 group-hover:bg-white text-white group-hover:text-ufcnavy-700 flex items-center justify-center font-bold text-sm transition-colors">
+                            01
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="font-bold text-sm">Simulado Geral Integrado</h3>
+                                <span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Ativo</span>
+                            </div>
+                            <p class="text-xs text-slate-500 group-hover:text-slate-200 transition-colors">45 Questões • Formação Geral + Específica</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
+                </a>
+
+                <!-- ------------------------------------------------------------- -->
+                <!-- TEMPLATE PARA NOVO SIMULADO (COPIE O BLOCO ABAIXO PARA O 02)  -->
+                <!-- ------------------------------------------------------------- -->
+                <!--
+                <a href="02.html" 
+                   class="group flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white hover:bg-ufcnavy-700 text-slate-800 hover:text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ufcnavy-500">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-white text-slate-700 group-hover:text-ufcnavy-700 flex items-center justify-center font-bold text-sm transition-colors">
+                            02
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="font-bold text-sm">Simulado Módulo II — Qualidade & PCP</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 group-hover:text-slate-200 transition-colors">15 Questões Objetivas</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
+                </a>
+                -->
+
+            </nav>
+
+            <!-- AVISO DE INSTRUÇÃO E SALVAMENTO -->
+            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-left flex items-start space-x-3">
+                <i class="fa-solid fa-shield-halved text-ufcteal-600 text-sm mt-0.5"></i>
+                <p class="text-[11px] text-slate-600 leading-normal">
+                    <b>Progresso salvo automaticamente:</b> Você pode interromper e retornar ao simulado no mesmo dispositivo a qualquer momento.
+                </p>
+            </div>
+
         </div>
 
-        <div class="space-y-3">
-            <!-- Botão apontando para a prova de 45 questões -->
-            <a href="01.html" class="block w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 px-4 rounded-xl text-sm transition shadow">
-                📝 Simulado Geral Integrado (45 Questões)
-            </a>
-        </div>
+    </main>
 
-        <p class="text-[11px] text-slate-400 border-t border-slate-100 pt-4">
-            Universidade Federal do Ceará — Campus Russas
-        </p>
-    </div>
+    <!-- RODAPÉ INSTITUCIONAL -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus Russas</p>
+            <p class="mt-0.5 text-[11px] text-slate-400">Curso de Engenharia de Produção | Organização Didática 2026</p>
+        </div>
+    </footer>
 
 </body>
 </html>
