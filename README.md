@@ -6,37 +6,21 @@ Plataforma web interativa desenvolvida para apoiar a preparação dos estudantes
 
 ## 🚀 Link de Acesso Público
 
-O acesso é gratuito, universal e funciona em qualquer navegador (computador, tablet ou celular) sem necessidade de instalação:
-
 👉 **[Acessar o Portal de Simulados ENADE 2026](https://gepro1.github.io/simulado-enade-2026/)**
 
-👉 **[Acessar o aplicativo e a cartilha do ENADE 2026](https://enade-compass-2026.lovable.app/).**
+👉 **[Acessar o aplicativo e a cartilha do ENADE 2026](https://enade-compass-2026.lovable.app/)**
 
 ---
 
-## 📖 Como Adicionar um Novo Simulado (`02.html`, `03.html`...)
+## 📖 Como Adicionar um Novo Simulado (`simulado04.xlsx`, `simulado05.xlsx`...)
 
-Como o portal gera os botões dinamicamente via JavaScript, adicionar uma nova avaliação é muito simples e evita erros de formatação na página.
+A plataforma conta com um leitor automático e genérico de planilhas. Adicionar uma nova avaliação não exige programação de arquivos `.html` adicionais.
 
-### Passo 1: Enviar o novo arquivo para o GitHub
-1. No repositório, clique no botão **Add file** > **Upload files**.
-2. Selecione o arquivo `.html` do novo simulado do seu computador.
-3. Certifique-se de que o nome do arquivo seja curto e padronizado (exemplo: `02.html`).
-4. Clique no botão verde **Commit changes**.
+### Passo 1: Enviar a planilha Excel para o GitHub
+1. No repositório, clique em **Add file** > **Upload files**.
+2. Envie o arquivo Excel no formato `.xlsx` padronizado (exemplo: `simulado04.xlsx`).
+3. Clique em **Commit changes**.
 
-### Passo 2: Cadastrar o simulado no `index.html`
-1. Abra o arquivo **`index.html`** no GitHub e clique no ícone de lápis ✏️ (**Edit file**).
-2. Role até o final do arquivo, na seção dentro da tag `<script>`.
-3. Localize a lista `listaSimulados` e adicione o bloco do novo simulado separado por uma vírgula `,`:
-
-```javascript
-// Adicione este bloco dentro da listaSimulados = [ ... ]:
-{
-    id: "02",
-    arquivo: "02.html",
-    titulo: "Simulado Módulo II — Qualidade & PCP",
-    descricao: "15 Questões Objetivas",
-    badge: "Novo",
-    badgeCor: "bg-blue-500",
-    destaque: false
-}
+### Passo 2: Adicionar a opção no `index.html` e `simulado.html`
+1. No `index.html`, crie um novo cartão apontando para `simulado.html?prova=simulado04.xlsx`.
+2. No `simulado.html`, adicione a linha `<option value="simulado04.xlsx">Simulado 04</option>` dentro da tag `<select id="selectSimuladoUrl">`.
