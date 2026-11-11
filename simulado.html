@@ -47,53 +47,27 @@
         <p id="loadingText" class="text-sm font-semibold text-slate-700">Carregando Caderno de Questões...</p>
     </div>
 
-    <!-- Header Principal -->
-    <header class="bg-ufcnavy-700 text-white shadow-md sticky top-0 z-30">
-        <div class="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
-            <div class="flex items-center space-x-3 shrink-0">
-                <a href="index.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors" title="Voltar ao Portal">
-                    <i class="fa-solid fa-arrow-left text-sm"></i>
-                </a>
-                <div>
-                    <span id="badgeHeaderSimulado" class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Simulado</span>
-                    <h1 class="text-xs sm:text-sm font-bold tracking-tight">ENADE Engenharia de Produção</h1>
-                </div>
-            </div>
-
-            <!-- Controles do Topo -->
-            <div class="flex items-center space-x-2 text-xs">
-                <!-- Seletor de Simulado Integrado -->
-                <select id="selectSimuladoUrl" class="bg-ufcnavy-900 border border-white/20 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
-                    <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
-                    <option value="simulado02.xlsx">Simulado 02 (Completo 45Q)</option>
-                    <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
-                </select>
-
-                <!-- Timer -->
-                <div class="bg-ufcnavy-900/60 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 border border-white/10 shrink-0">
-                    <i class="fa-regular fa-clock text-ufcteal-500 text-xs"></i>
-                    <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
-                </div>
-
-                <!-- Botão Imprimir -->
-                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
-                    <i class="fa-solid fa-print"></i>
-                    <span class="hidden sm:inline">Imprimir A4</span>
-                </button>
-
-                <!-- Botão Grade -->
-                <button id="btnOpenGrid" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors">
-                    <i class="fa-solid fa-th"></i>
-                    <span class="hidden sm:inline font-medium">Questões</span>
-                </button>
+    <!-- Header com Logótipos Oficiais (UFC Russas + GEPRO) -->
+<header class="bg-ufcnavy-700 text-white shadow-md">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        
+        <!-- Esquerda: Logo UFC + Título -->
+        <div class="flex items-center space-x-3">
+            <img src="logo-ufc.png" alt="UFC Campus Russas" class="h-11 w-auto bg-white p-1 rounded-lg object-contain shadow-sm">
+            <div>
+                <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
+                <h1 class="text-xs sm:text-sm font-bold tracking-tight">Engenharia de Produção</h1>
+                <p class="text-[11px] text-slate-200">UFC — Campus Russas</p>
             </div>
         </div>
 
-        <!-- Barra de Progresso -->
-        <div class="w-full bg-ufcnavy-900 h-1.5">
-            <div id="progressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300" style="width: 0%;"></div>
+        <!-- Direita: Logo GEPRO -->
+        <div class="flex items-center space-x-2">
+            <img src="logo-gepro.png" alt="GEPRO" class="h-9 w-auto bg-white p-1 rounded-lg object-contain shadow-sm">
         </div>
-    </header>
+
+    </div>
+</header>
 
     <!-- Barra Auxiliar (Upload Local) -->
     <div id="fileUploadBar" class="bg-slate-200 border-b border-slate-300 px-4 py-1.5 text-xs text-slate-700 flex items-center justify-between">
