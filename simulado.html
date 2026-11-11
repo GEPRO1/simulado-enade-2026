@@ -66,6 +66,7 @@
                 <select id="selectSimuladoUrl" class="bg-ufcnavy-900 border border-white/20 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
                     <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
                     <option value="simulado02.xlsx">Simulado 02 (Completo 45Q)</option>
+                    <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
                 </select>
 
                 <!-- Timer -->
@@ -94,7 +95,7 @@
         </div>
     </header>
 
-    <!-- Barra Auxiliar: Carregar Planilha do Computador (Upload) -->
+    <!-- Barra Auxiliar (Upload Local) -->
     <div id="fileUploadBar" class="bg-slate-200 border-b border-slate-300 px-4 py-1.5 text-xs text-slate-700 flex items-center justify-between">
         <div class="flex items-center space-x-2">
             <i class="fa-solid fa-file-excel text-emerald-700"></i>
@@ -264,7 +265,7 @@
         <p class="font-semibold text-slate-700">UFC Campus Russas — Engenharia de Produção</p>
     </footer>
 
-    <!-- LÓGICA JAVASCRIPT GENÉRICA -->
+    <!-- LÓGICA JAVASCRIPT CORRIGIDA E COMPLETA -->
     <script>
         let questaoData = [];
         let currentIndex = 0;
@@ -274,7 +275,6 @@
         let arquivoAtual = '';
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Identifica o arquivo selecionado na URL (ex: ?prova=simulado02.xlsx) ou no padrão
             const urlParams = new URLSearchParams(window.location.search);
             let provaParam = urlParams.get('prova') || urlParams.get('arquivo') || 'simulado01.xlsx';
 
@@ -283,18 +283,19 @@
             }
 
             arquivoAtual = provaParam;
-            document.getElementById('selectSimuladoUrl').value = provaParam;
+            const selectEl = document.getElementById('selectSimuladoUrl');
+            if (selectEl) selectEl.value = provaParam;
             document.getElementById('nomeArquivoAtivo').textContent = provaParam;
 
             carregarExcelRemote(arquivoAtual);
 
-            // Ouvinte de mudança no dropdown
-            document.getElementById('selectSimuladoUrl').addEventListener('change', (e) => {
-                const novoArquivo = e.target.value;
-                window.location.search = `?prova=${novoArquivo}`;
-            });
+            if (selectEl) {
+                selectEl.addEventListener('change', (e) => {
+                    const novoArquivo = e.target.value;
+                    window.location.search = `?prova=${novoArquivo}`;
+                });
+            }
 
-            // Ouvinte de upload local de arquivo .xlsx
             document.getElementById('inputLocalExcel').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
@@ -304,7 +305,6 @@
             });
         });
 
-        // Carrega via servidor/GitHub (fetch)
         async function carregarExcelRemote(filename) {
             document.getElementById('loadingText').textContent = `Carregando ${filename}...`;
             document.getElementById('loadingScreen').classList.remove('hidden');
@@ -320,13 +320,12 @@
                     <div class="text-center text-rose-600 space-y-2 p-6 max-w-md">
                         <i class="fa-solid fa-triangle-exclamation text-4xl"></i>
                         <p class="font-bold text-base">Arquivo "${filename}" não localizado.</p>
-                        <p class="text-xs text-slate-500">Certifique-se de enviar o arquivo <strong>${filename}</strong> para o repositório no GitHub ou faça o upload direto usando o botão abaixo.</p>
+                        <p class="text-xs text-slate-500">Certifique-se de enviar o arquivo <strong>${filename}</strong> para a raiz do repositório no GitHub.</p>
                     </div>
                 `;
             }
         }
 
-        // Carrega via upload direto do computador
         function carregarExcelBuffer(file) {
             document.getElementById('loadingText').textContent = `Processando ${file.name}...`;
             document.getElementById('loadingScreen').classList.remove('hidden');
@@ -336,14 +335,12 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // --- NÚCLEO DO LEITOR GENÉRICO ---
         function processarWorkbookBuffer(arrayBuffer) {
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-            // 1. Mapeamento dinâmico da linha de cabeçalho
             let headerRowIndex = -1;
             let colMap = {};
 
@@ -363,11 +360,10 @@
                 return;
             }
 
-            // 2. Extração genérica das questões
             questaoData = [];
             for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
                 const row = rawRows[r];
-                if (!row || !row[colMap.num || 0]) continue;
+                if (!row || row[colMap.num] === undefined || row[colMap.num] === null) continue;
 
                 let numVal = String(row[colMap.num] || '').trim();
                 if (!numVal) continue;
@@ -408,31 +404,33 @@
             setupEventListeners();
         }
 
-        // Mapeia onde está cada coluna buscando por palavras-chave
+        // MAPEAMENTO COM ORDEM DE PRIORIDADE CORRIGIDA
         function mapearCabecalhosDinamicos(headerRow) {
-            const map = {};
+            const colMap = {};
             headerRow.forEach((colName, colIdx) => {
                 if (!colName) return;
-                const name = String(colName).toLowerCase();
+                const name = String(colName).toLowerCase().trim();
 
-                if (name.includes('nº') || name.includes('questão') || name.includes('num')) map.num = colIdx;
-                else if (name.includes('categoria')) map.cat = colIdx;
-                else if (name.includes('disciplina') || name.includes('área')) map.disc = colIdx;
-                else if (name.includes('dificuldade')) map.dif = colIdx;
-                else if (name.includes('tipo')) map.tipo = colIdx;
-                else if (name.includes('competência')) map.comp = colIdx;
-                else if (name.includes('habilidade')) map.hab = colIdx;
-                else if (name.includes('objeto') || name.includes('conteúdo')) map.conteudo = colIdx;
-                else if (name.includes('texto')) map.texto = colIdx;
-                else if (name.includes('comando')) map.comando = colIdx;
-                else if (name.includes('afirmativa') || name.includes('asserções')) map.afirmativas = colIdx;
-                else if (name.includes('opções') || name.includes('resposta')) map.opcoes = colIdx;
-                else if (name.includes('gabarito')) map.gab = colIdx;
-                else if (name.includes('justificativa') || name.includes('distrator')) map.justificativa = colIdx;
-                else if (name.includes('fundamentação') || name.includes('abnt') || name.includes('referência')) map.fonte = colIdx;
+                if (name.includes('gabarito')) colMap.gab = colIdx;
+                else if (name.includes('justificativa') || name.includes('distrator')) colMap.justificativa = colIdx;
+                else if (name.includes('fundamentação') || name.includes('abnt') || name.includes('referência')) colMap.fonte = colIdx;
+                else if (name.includes('opções') || name.includes('resposta')) colMap.opcoes = colIdx;
+                else if (name.includes('afirmativa') || name.includes('asserções')) colMap.afirmativas = colIdx;
+                else if (name.includes('comando')) colMap.comando = colIdx;
+                else if (name.includes('texto')) colMap.texto = colIdx;
+                else if (name.includes('objeto') || name.includes('conteúdo')) colMap.conteudo = colIdx;
+                else if (name.includes('habilidade')) colMap.hab = colIdx;
+                else if (name.includes('competência')) mapComp(colMap, colIdx);
+                else if (name.includes('tipo')) colMap.tipo = colIdx;
+                else if (name.includes('dificuldade')) colMap.dif = colIdx;
+                else if (name.includes('disciplina') || name.includes('área')) colMap.disc = colIdx;
+                else if (name.includes('categoria')) colMap.cat = colIdx;
+                else if (name.includes('nº') || name.includes('num') || name === 'questão' || name.startsWith('nº')) colMap.num = colIdx;
             });
-            return map;
+            return colMap;
         }
+
+        function mapComp(colMap, colIdx) { colMap.comp = colIdx; }
 
         function parseOpcoesString(str) {
             let ops = {};
@@ -479,7 +477,6 @@
             document.getElementById('textHab').textContent = q.hab || 'Não especificado';
             document.getElementById('textConteudo').textContent = q.conteudo || 'Não especificado';
 
-            // --- TRATAMENTO CONTRA DUPLICAÇÃO DE ENUNCIADO ---
             const textoElem = document.getElementById('textoBase');
             const comandoElem = document.getElementById('comandoQuestao');
 
