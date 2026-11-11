@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003366">
+    <title>Plataforma de Simulados ENADE | Engenharia de Produção</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebd5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            header, footer, nav, button, #quizContainer, #gridModal, #resultsContainer, #loadingScreen, #fileUploadBar {
+                display: none !important;
+            }
+            #printExamContainer { display: block !important; }
+            @page { size: A4 portrait; margin: 1.5cm; }
+            body { background: #fff !important; color: #000 !important; font-size: 10pt; line-height: 1.35; }
+            .page-break-avoid { break-inside: avoid; page-break-inside: avoid; }
+        }
+        #printExamContainer { display: none; }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-4">
+        <div class="w-12 h-12 border-4 border-ufcnavy-700 border-t-ufcteal-500 rounded-full animate-spin"></div>
+        <p id="loadingText" class="text-sm font-semibold text-slate-700">Carregando Caderno de Questões...</p>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="bg-ufcnavy-700 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 shrink-0">
+                <a href="index.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors" title="Voltar ao Portal">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <span id="badgeHeaderSimulado" class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Simulado</span>
+                    <h1 class="text-xs sm:text-sm font-bold tracking-tight">ENADE Engenharia de Produção</h1>
+                </div>
+            </div>
+
+            <!-- Controles do Topo -->
+            <div class="flex items-center space-x-2 text-xs">
+                <!-- Seletor de Simulado Integrado -->
+                <select id="selectSimuladoUrl" class="bg-ufcnavy-900 border border-white/20 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                    <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
+                    <option value="simulado02.xlsx">Simulado 02 (Completo 45Q)</option>
+                </select>
+
+                <!-- Timer -->
+                <div class="bg-ufcnavy-900/60 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 border border-white/10 shrink-0">
+                    <i class="fa-regular fa-clock text-ufcteal-500 text-xs"></i>
+                    <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
+                </div>
+
+                <!-- Botão Imprimir -->
+                <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden sm:inline">Imprimir A4</span>
+                </button>
+
+                <!-- Botão Grade -->
+                <button id="btnOpenGrid" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors">
+                    <i class="fa-solid fa-th"></i>
+                    <span class="hidden sm:inline font-medium">Questões</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Barra de Progresso -->
+        <div class="w-full bg-ufcnavy-900 h-1.5">
+            <div id="progressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300" style="width: 0%;"></div>
+        </div>
+    </header>
+
+    <!-- Barra Auxiliar: Carregar Planilha do Computador (Upload) -->
+    <div id="fileUploadBar" class="bg-slate-200 border-b border-slate-300 px-4 py-1.5 text-xs text-slate-700 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-file-excel text-emerald-700"></i>
+            <span class="font-medium">Arquivo ativo: <strong id="nomeArquivoAtivo" class="text-slate-900">simulado01.xlsx</strong></span>
+        </div>
+        <label class="cursor-pointer bg-white hover:bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-md text-[11px] font-semibold text-slate-700 shadow-sm flex items-center space-x-1 transition-colors">
+            <i class="fa-solid fa-upload text-slate-500"></i>
+            <span>Carregar outro .xlsx</span>
+            <input type="file" id="inputLocalExcel" accept=".xlsx, .xls" class="hidden">
+        </label>
+    </div>
+
+    <div id="printExamContainer"></div>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+        <!-- Container das Questões -->
+        <div id="quizContainer" class="space-y-5">
+            
+            <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="badgeNum" class="bg-ufcnavy-700 text-white text-xs font-bold px-2.5 py-1 rounded-lg">Questão 01</span>
+                        <span id="badgeCat" class="bg-blue-100 text-blue-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Categoria</span>
+                        <span id="badgeDisc" class="bg-slate-100 text-slate-700 text-[11px] font-medium px-2.5 py-0.5 rounded-full">Disciplina</span>
+                        <span id="badgeDif" class="bg-amber-100 text-amber-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Médio</span>
+                        <span id="badgeTipo" class="bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Tipo</span>
+                    </div>
+
+                    <button id="btnToggleMec" class="text-xs text-ufcteal-700 hover:text-ufcteal-600 font-semibold flex items-center space-x-1">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Matriz MEC</span>
+                        <i id="iconToggleMec" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+                    </button>
+                </div>
+
+                <!-- Painel Matriz MEC -->
+                <div id="panelMec" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
+                    <div>
+                        <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Competência Avaliada:</span>
+                        <p id="textComp" class="text-slate-700 mt-0.5">...</p>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
+                        <div>
+                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Habilidade:</span>
+                            <p id="textHab" class="text-slate-700 mt-0.5">...</p>
+                        </div>
+                        <div>
+                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Objeto de Conhecimento:</span>
+                            <p id="textConteudo" class="text-slate-700 mt-0.5">...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Texto Base -->
+                <div id="textoBase" class="text-sm text-slate-800 leading-relaxed space-y-3"></div>
+
+                <!-- Afirmativas / Asserções -->
+                <div id="containerAfirmativas" class="hidden bg-slate-50 border-l-4 border-ufcteal-600 p-4 rounded-r-xl my-4">
+                    <div id="textoAfirmativas" class="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line font-medium"></div>
+                </div>
+
+                <!-- Comando da Questão -->
+                <div class="pt-1 border-t border-slate-100">
+                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Alternativas (A - E) -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                <div id="containerOpcoes" class="space-y-2.5"></div>
+            </div>
+
+            <!-- Card de Feedback e Gabarito Comentado -->
+            <div id="cardFeedback" class="hidden bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                <div id="statusFeedbackHeader" class="flex items-center space-x-2 p-3 rounded-xl">
+                    <i id="statusFeedbackIcon" class="text-lg"></i>
+                    <span id="statusFeedbackTitle" class="font-bold text-sm"></span>
+                </div>
+                <div class="space-y-3 text-xs sm:text-sm">
+                    <div>
+                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Análise de Distratores:</span>
+                        <div id="feedbackTexto" class="text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200"></div>
+                    </div>
+                    <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200/60 flex items-start space-x-2 text-xs">
+                        <i class="fa-solid fa-book-bookmark text-ufcnavy-700 mt-0.5"></i>
+                        <div>
+                            <span class="font-bold text-ufcnavy-900 block">Referência Teórica (ABNT):</span>
+                            <span id="fonteAbnt" class="text-slate-600 italic">...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação Inferior -->
+            <div class="flex items-center justify-between pt-2">
+                <button id="btnPrev" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                    <span>Anterior</span>
+                </button>
+                <button id="btnConfirmar" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
+                    Confirmar Resposta
+                </button>
+                <button id="btnNext" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
+                    <span>Próxima</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela de Resultados -->
+        <div id="resultsContainer" class="hidden bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center space-y-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-ufcteal-50 text-ufcteal-600 rounded-full">
+                <i class="fa-solid fa-trophy text-2xl"></i>
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-2xl font-extrabold text-slate-900">Simulado Concluído!</h2>
+                <p class="text-xs sm:text-sm text-slate-500">Confira abaixo a apuração do seu desempenho.</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota Global</span>
+                    <span id="resNota" class="text-xl font-extrabold text-ufcnavy-700">0.0 / 10</span>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Acertos Totais</span>
+                    <span id="resAcertos" class="text-xl font-extrabold text-emerald-600">0</span>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Formação Geral</span>
+                    <span id="resFg" class="text-xl font-extrabold text-blue-600">0%</span>
+                </div>
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Comp. Específico</span>
+                    <span id="resCe" class="text-xl font-extrabold text-purple-600">0%</span>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+                <button id="btnRevisarProvas" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm">
+                    Revisar Gabarito e Justificativas
+                </button>
+                <a href="index.html" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm">
+                    Voltar ao Portal
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Navegador de Questões (Grade) -->
+    <div id="gridModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-sm h-full shadow-2xl p-6 flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm">Navegador de Questões</h3>
+                    <button id="btnCloseGrid" class="text-slate-400 hover:text-slate-600 p-1">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+                <div id="gridQuestaoBtns" class="grid grid-cols-5 gap-2 max-h-[60vh] overflow-y-auto p-1"></div>
+            </div>
+            <button id="btnFinalizarSimulado" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm">
+                Finalizar e Entregar Simulado
+            </button>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p class="font-semibold text-slate-700">UFC Campus Russas — Engenharia de Produção</p>
+    </footer>
+
+    <!-- LÓGICA JAVASCRIPT GENÉRICA -->
+    <script>
+        let questaoData = [];
+        let currentIndex = 0;
+        let userAnswers = {};
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let arquivoAtual = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Identifica o arquivo selecionado na URL (ex: ?prova=simulado02.xlsx) ou no padrão
+            const urlParams = new URLSearchParams(window.location.search);
+            let provaParam = urlParams.get('prova') || urlParams.get('arquivo') || 'simulado01.xlsx';
+
+            if (!provaParam.endsWith('.xlsx') && !provaParam.endsWith('.xls')) {
+                provaParam = `simulado${provaParam.padStart(2, '0')}.xlsx`;
+            }
+
+            arquivoAtual = provaParam;
+            document.getElementById('selectSimuladoUrl').value = provaParam;
+            document.getElementById('nomeArquivoAtivo').textContent = provaParam;
+
+            carregarExcelRemote(arquivoAtual);
+
+            // Ouvinte de mudança no dropdown
+            document.getElementById('selectSimuladoUrl').addEventListener('change', (e) => {
+                const novoArquivo = e.target.value;
+                window.location.search = `?prova=${novoArquivo}`;
+            });
+
+            // Ouvinte de upload local de arquivo .xlsx
+            document.getElementById('inputLocalExcel').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    document.getElementById('nomeArquivoAtivo').textContent = file.name;
+                    carregarExcelBuffer(file);
+                }
+            });
+        });
+
+        // Carrega via servidor/GitHub (fetch)
+        async function carregarExcelRemote(filename) {
+            document.getElementById('loadingText').textContent = `Carregando ${filename}...`;
+            document.getElementById('loadingScreen').classList.remove('hidden');
+
+            try {
+                const response = await fetch(filename);
+                if (!response.ok) throw new Error(`Não foi possível abrir ${filename}`);
+                const buffer = await response.arrayBuffer();
+                processarWorkbookBuffer(buffer);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div class="text-center text-rose-600 space-y-2 p-6 max-w-md">
+                        <i class="fa-solid fa-triangle-exclamation text-4xl"></i>
+                        <p class="font-bold text-base">Arquivo "${filename}" não localizado.</p>
+                        <p class="text-xs text-slate-500">Certifique-se de enviar o arquivo <strong>${filename}</strong> para o repositório no GitHub ou faça o upload direto usando o botão abaixo.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carrega via upload direto do computador
+        function carregarExcelBuffer(file) {
+            document.getElementById('loadingText').textContent = `Processando ${file.name}...`;
+            document.getElementById('loadingScreen').classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (e) => processarWorkbookBuffer(e.target.result);
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- NÚCLEO DO LEITOR GENÉRICO ---
+        function processarWorkbookBuffer(arrayBuffer) {
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // 1. Mapeamento dinâmico da linha de cabeçalho
+            let headerRowIndex = -1;
+            let colMap = {};
+
+            for (let r = 0; r < Math.min(10, rawRows.length); r++) {
+                const row = rawRows[r];
+                if (!row) continue;
+                const rowStr = row.map(c => String(c || '').toLowerCase()).join(' ');
+                if (rowStr.includes('gabarito') || rowStr.includes('comando') || rowStr.includes('questão')) {
+                    headerRowIndex = r;
+                    colMap = mapearCabecalhosDinamicos(row);
+                    break;
+                }
+            }
+
+            if (headerRowIndex === -1) {
+                alert("Erro: Não foi possível identificar o cabeçalho das colunas na planilha Excel.");
+                return;
+            }
+
+            // 2. Extração genérica das questões
+            questaoData = [];
+            for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
+                const row = rawRows[r];
+                if (!row || !row[colMap.num || 0]) continue;
+
+                let numVal = String(row[colMap.num] || '').trim();
+                if (!numVal) continue;
+
+                let opObj = parseOpcoesString(String(row[colMap.opcoes] || ''));
+                let textoRaw = String(row[colMap.texto] || '').trim();
+                let comandoRaw = String(row[colMap.comando] || '').trim();
+
+                let textoLimpo = textoRaw.replace(/Cenário inédito de avaliação/gi, 'Estudo de caso').replace(/\n/g, '<br>');
+
+                questaoData.push({
+                    num: numVal,
+                    cat: String(row[colMap.cat] || 'Componente Específico').trim(),
+                    disc: String(row[colMap.disc] || '').trim(),
+                    dif: String(row[colMap.dif] || 'Médio').trim(),
+                    tipo: String(row[colMap.tipo] || 'Alternativa Simples').trim(),
+                    comp: String(row[colMap.comp] || '').trim(),
+                    hab: String(row[colMap.hab] || '').trim(),
+                    conteudo: String(row[colMap.conteudo] || '').trim(),
+                    texto: textoLimpo,
+                    comando: comandoRaw,
+                    afirmativas: String(row[colMap.afirmativas] || '').trim(),
+                    opcoes: opObj,
+                    gab: String(row[colMap.gab] || 'A').trim().toUpperCase(),
+                    justificativa: String(row[colMap.justificativa] || '').trim(),
+                    fonte: String(row[colMap.fonte] || '').trim()
+                });
+            }
+
+            userAnswers = {};
+            currentIndex = 0;
+
+            document.getElementById('loadingScreen').classList.add('hidden');
+            initTimer();
+            renderQuestion(currentIndex);
+            renderGridButtons();
+            setupPrintMode();
+            setupEventListeners();
+        }
+
+        // Mapeia onde está cada coluna buscando por palavras-chave
+        function mapearCabecalhosDinamicos(headerRow) {
+            const map = {};
+            headerRow.forEach((colName, colIdx) => {
+                if (!colName) return;
+                const name = String(colName).toLowerCase();
+
+                if (name.includes('nº') || name.includes('questão') || name.includes('num')) map.num = colIdx;
+                else if (name.includes('categoria')) map.cat = colIdx;
+                else if (name.includes('disciplina') || name.includes('área')) map.disc = colIdx;
+                else if (name.includes('dificuldade')) map.dif = colIdx;
+                else if (name.includes('tipo')) map.tipo = colIdx;
+                else if (name.includes('competência')) map.comp = colIdx;
+                else if (name.includes('habilidade')) map.hab = colIdx;
+                else if (name.includes('objeto') || name.includes('conteúdo')) map.conteudo = colIdx;
+                else if (name.includes('texto')) map.texto = colIdx;
+                else if (name.includes('comando')) map.comando = colIdx;
+                else if (name.includes('afirmativa') || name.includes('asserções')) map.afirmativas = colIdx;
+                else if (name.includes('opções') || name.includes('resposta')) map.opcoes = colIdx;
+                else if (name.includes('gabarito')) map.gab = colIdx;
+                else if (name.includes('justificativa') || name.includes('distrator')) map.justificativa = colIdx;
+                else if (name.includes('fundamentação') || name.includes('abnt') || name.includes('referência')) map.fonte = colIdx;
+            });
+            return map;
+        }
+
+        function parseOpcoesString(str) {
+            let ops = {};
+            let lines = str.split('\n');
+            let curr = null;
+
+            lines.forEach(line => {
+                line = line.trim();
+                let m = line.match(/^([A-E])[\)\.-]\s*(.*)/);
+                if (m) {
+                    curr = m[1];
+                    let optText = m[2].replace(/^Opção inédita [A-E]\s*/gi, '');
+                    ops[curr] = optText;
+                } else if (curr) {
+                    ops[curr] += " " + line;
+                }
+            });
+            return ops;
+        }
+
+        function initTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerSeconds = 0;
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const hrs = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(timerSeconds % 60).padStart(2, '0');
+                document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderQuestion(index) {
+            const q = questaoData[index];
+            if (!q) return;
+
+            document.getElementById('badgeNum').textContent = `Questão ${index + 1} de ${questaoData.length}`;
+            document.getElementById('badgeCat').textContent = q.cat;
+            document.getElementById('badgeDisc').textContent = q.disc || 'Geral';
+            document.getElementById('badgeDif').textContent = `Dificuldade: ${q.dif}`;
+            document.getElementById('badgeTipo').textContent = q.tipo;
+
+            document.getElementById('textComp').textContent = q.comp || 'Não especificado';
+            document.getElementById('textHab').textContent = q.hab || 'Não especificado';
+            document.getElementById('textConteudo').textContent = q.conteudo || 'Não especificado';
+
+            // --- TRATAMENTO CONTRA DUPLICAÇÃO DE ENUNCIADO ---
+            const textoElem = document.getElementById('textoBase');
+            const comandoElem = document.getElementById('comandoQuestao');
+
+            const isDuplicado = q.texto && q.comando && q.texto.trim() === q.comando.trim();
+            if (!q.texto || q.texto.trim() === '' || isDuplicado) {
+                textoElem.innerHTML = '';
+                textoElem.classList.add('hidden');
+            } else {
+                textoElem.innerHTML = q.texto;
+                textoElem.classList.remove('hidden');
+            }
+            comandoElem.textContent = q.comando;
+
+            const afmContainer = document.getElementById('containerAfirmativas');
+            if (q.afirmativas && q.afirmativas !== "N/A" && q.afirmativas.trim() !== "") {
+                document.getElementById('textoAfirmativas').textContent = q.afirmativas;
+                afmContainer.classList.remove('hidden');
+            } else {
+                afmContainer.classList.add('hidden');
+            }
+
+            const opcoesContainer = document.getElementById('containerOpcoes');
+            opcoesContainer.innerHTML = '';
+            const selectedOpt = userAnswers[index];
+
+            if (q.opcoes) {
+                Object.keys(q.opcoes).forEach(letra => {
+                    const isSelected = selectedOpt === letra;
+                    const optBtn = document.createElement('button');
+                    let borderStyle = isSelected ? 'border-ufcteal-600 bg-ufcteal-50/50 text-slate-900' : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800';
+                    let circleStyle = isSelected ? 'bg-ufcteal-600 text-white font-bold' : 'bg-slate-100 text-slate-600 font-semibold';
+
+                    optBtn.className = `w-full text-left p-3.5 rounded-xl border ${borderStyle} transition-all flex items-start space-x-3`;
+                    optBtn.onclick = () => selectOption(index, letra);
+
+                    optBtn.innerHTML = `
+                        <div class="w-7 h-7 rounded-lg ${circleStyle} flex items-center justify-center text-xs shrink-0 mt-0.5">${letra}</div>
+                        <div class="text-xs sm:text-sm leading-relaxed font-medium pt-0.5">${q.opcoes[letra]}</div>
+                    `;
+                    opcoesContainer.appendChild(optBtn);
+                });
+            }
+
+            const cardFeedback = document.getElementById('cardFeedback');
+            if (q.answered) {
+                showFeedback(q, selectedOpt);
+            } else {
+                cardFeedback.classList.add('hidden');
+            }
+
+            document.getElementById('btnPrev').disabled = index === 0;
+            document.getElementById('btnNext').disabled = index === questaoData.length - 1;
+            document.getElementById('progressBar').style.width = `${((index + 1) / questaoData.length) * 100}%`;
+        }
+
+        function selectOption(qIndex, letra) {
+            userAnswers[qIndex] = letra;
+            renderQuestion(qIndex);
+            updateGridButtons();
+        }
+
+        function confirmAnswer() {
+            const q = questaoData[currentIndex];
+            const userAns = userAnswers[currentIndex];
+            if (!userAns) { alert("Selecione uma alternativa antes de confirmar."); return; }
+            q.answered = true;
+            showFeedback(q, userAns);
+            updateGridButtons();
+        }
+
+        function showFeedback(q, selectedOpt) {
+            const cardFeedback = document.getElementById('cardFeedback');
+            const isCorrect = selectedOpt === q.gab;
+
+            document.getElementById('statusFeedbackHeader').className = `flex items-center space-x-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}`;
+            document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
+            document.getElementById('statusFeedbackTitle').textContent = isCorrect ? `Resposta Correta! (Gabarito: ${q.gab})` : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            document.getElementById('feedbackTexto').innerHTML = q.justificativa || 'Sem justificativa cadastrada.';
+            document.getElementById('fonteAbnt').textContent = q.fonte || 'Não informada.';
+
+            cardFeedback.classList.remove('hidden');
+        }
+
+        function setupEventListeners() {
+            document.getElementById('btnPrev').onclick = () => { if (currentIndex > 0) { currentIndex--; renderQuestion(currentIndex); } };
+            document.getElementById('btnNext').onclick = () => { if (currentIndex < questaoData.length - 1) { currentIndex++; renderQuestion(currentIndex); } };
+            document.getElementById('btnConfirmar').onclick = confirmAnswer;
+            document.getElementById('btnToggleMec').onclick = () => {
+                document.getElementById('panelMec').classList.toggle('hidden');
+                document.getElementById('iconToggleMec').classList.toggle('rotate-180');
+            };
+            document.getElementById('btnOpenGrid').onclick = () => document.getElementById('gridModal').classList.remove('hidden');
+            document.getElementById('btnCloseGrid').onclick = () => document.getElementById('gridModal').classList.add('hidden');
+            document.getElementById('btnFinalizarSimulado').onclick = finishSimulado;
+            document.getElementById('btnRevisarProvas').onclick = () => {
+                document.getElementById('resultsContainer').classList.add('hidden');
+                document.getElementById('quizContainer').classList.remove('hidden');
+                currentIndex = 0;
+                renderQuestion(currentIndex);
+            };
+        }
+
+        function renderGridButtons() {
+            const container = document.getElementById('gridQuestaoBtns');
+            container.innerHTML = '';
+            questaoData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `gridBtn_${idx}`;
+                btn.onclick = () => {
+                    currentIndex = idx;
+                    renderQuestion(currentIndex);
+                    document.getElementById('gridModal').classList.add('hidden');
+                };
+                container.appendChild(btn);
+            });
+            updateGridButtons();
+        }
+
+        function updateGridButtons() {
+            questaoData.forEach((q, idx) => {
+                const btn = document.getElementById(`gridBtn_${idx}`);
+                if (!btn) return;
+                const isCurrent = idx === currentIndex;
+                const userAns = userAnswers[idx];
+                let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
+                if (userAns) {
+                    bgClass = q.answered 
+                        ? (userAns === q.gab ? "bg-emerald-500 text-white font-bold" : "bg-rose-500 text-white font-bold")
+                        : "bg-ufcnavy-700 text-white font-bold";
+                }
+                if (isCurrent) bgClass += " ring-2 ring-offset-2 ring-ufcteal-500";
+                btn.className = `w-10 h-10 rounded-lg text-xs font-bold flex items-center justify-center ${bgClass}`;
+                btn.textContent = String(idx + 1).padStart(2, '0');
+            });
+        }
+
+        function finishSimulado() {
+            clearInterval(timerInterval);
+            document.getElementById('gridModal').classList.add('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+
+            let totalAcertos = 0, fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
+            questaoData.forEach((q, idx) => {
+                const isCorrect = userAnswers[idx] === q.gab;
+                if (q.cat.toLowerCase().includes('formação geral')) { fgTotal++; if (isCorrect) fgAcertos++; } 
+                else { ceTotal++; if (isCorrect) ceAcertos++; }
+                if (isCorrect) totalAcertos++;
+            });
+
+            document.getElementById('resNota').textContent = `${((totalAcertos / questaoData.length) * 10).toFixed(1)} / 10`;
+            document.getElementById('resAcertos').textContent = `${totalAcertos} / ${questaoData.length}`;
+            document.getElementById('resFg').textContent = `${fgTotal > 0 ? ((fgAcertos / fgTotal) * 100).toFixed(0) : 0}%`;
+            document.getElementById('resCe').textContent = `${ceTotal > 0 ? ((ceAcertos / ceTotal) * 100).toFixed(0) : 0}%`;
+            document.getElementById('resultsContainer').classList.remove('hidden');
+        }
+
+        function setupPrintMode() {
+            const printContainer = document.getElementById('printExamContainer');
+            if (!printContainer) return;
+            let printHTML = `
+                <div class="print-header mb-6 pb-4 border-b-2 border-slate-900 text-slate-900">
+                    <div class="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
+                        <div>
+                            <h1 class="text-base font-bold uppercase">UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS RUSSAS</h1>
+                            <h2 class="text-xs font-semibold text-slate-700">ENGENHARIA DE PRODUÇÃO — CADERNO DE SIMULADO</h2>
+                        </div>
+                        <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">SIMULADO ENADE</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-xs font-medium">
+                        <div><b>NOME:</b> ____________________________________________________</div>
+                        <div><b>MATRÍCULA:</b> ____________________</div>
+                    </div>
+                </div><div class="space-y-6">`;
+
+            questaoData.forEach((q, idx) => {
+                let optionsHTML = '';
+                if (q.opcoes) {
+                    Object.keys(q.opcoes).forEach(letra => {
+                        optionsHTML += `<div class="flex items-start space-x-2 my-1 text-xs"><span class="font-bold border border-slate-400 rounded w-5 h-5 flex items-center justify-center shrink-0">(${letra})</span><span>${q.opcoes[letra]}</span></div>`;
+                    });
+                }
+
+                const isSame = q.texto && q.comando && q.texto.trim() === q.comando.trim();
+                const showTexto = q.texto && q.texto.trim() !== '' && !isSame;
+
+                printHTML += `
+                    <div class="page-break-avoid border-b border-slate-200 pb-4 mb-4">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">QUESTÃO ${String(idx + 1).padStart(2, '0')} • ${q.cat} (${q.disc})</div>
+                        ${showTexto ? `<div class="text-xs text-slate-900 leading-relaxed my-2">${q.texto}</div>` : ''}
+                        ${q.afirmativas && q.afirmativas !== "N/A" ? `<div class="my-2 p-2 bg-slate-50 border-l-2 border-slate-400 text-xs">${q.afirmativas}</div>` : ''}
+                        <div class="text-xs font-semibold text-slate-900 mb-2">${q.comando}</div>
+                        <div class="space-y-1">${optionsHTML}</div>
+                    </div>`;
+            });
+            printHTML += `</div>`;
+            printContainer.innerHTML = printHTML;
+        }
+    </script>
+</body>
+</html>
