@@ -1,192 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="h-full bg-slate-50">
 <head>
-    <!-- ================================================================= -->
-    <!-- METADADOS E CONFIGURAÇÕES DE CABEÇALHO (SEO, Acessibilidade e PWA) -->
-    <!-- ================================================================= -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#003366">
-    <meta name="description" content="Portal Institucional de Simulados ENADE — Engenharia de Produção (UFC Campus Russas)">
-    <title>Portal de Simulados ENADE — Engenharia de Produção</title>
-
-    <!-- Tailwind CSS CDN para Estilização Responsiva -->
+    <title>Portal de Simulados ENADE | UFC Russas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        ufcnavy: {
-                            50: '#f0f5fa',
-                            100: '#e1ebd5',
-                            500: '#004b93',
-                            700: '#003366',
-                            900: '#001e3d'
-                        },
-                        ufcteal: {
-                            50: '#f0fdfa',
-                            500: '#00a896',
-                            600: '#008080',
-                            700: '#006666'
-                        }
+                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebd5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
-
-    <!-- Fontes Google & FontAwesome (Ícones) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
 </head>
-<body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased selection:bg-ufcteal-600 selection:text-white">
+<body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
 
-    <!-- CABEÇALHO INSTITUCIONAL -->
+    <!-- Topo -->
     <header class="bg-ufcnavy-700 text-white shadow-md">
-        <div class="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white p-2 rounded-xl shadow-sm text-ufcnavy-700 flex items-center justify-center">
-                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
-                </div>
-                <div>
-                    <span class="bg-ufcteal-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">UFC Campus Russas</span>
-                    <h1 class="text-base sm:text-lg font-bold tracking-tight">Engenharia de Produção</h1>
-                </div>
-            </div>
-            <span class="text-xs text-slate-300 font-medium hidden sm:inline-block">Série GEPRO 2026</span>
+        <div class="max-w-5xl mx-auto px-4 py-6 text-center space-y-2">
+            <span class="bg-ufcteal-600 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">ENADE 2026</span>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Portal de Simulados — Engenharia de Produção</h1>
+            <p class="text-xs sm:text-sm text-slate-200">Universidade Federal do Ceará — Campus Russas</p>
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL (PORTAL HUB) -->
-    <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
-        
-        <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center space-y-6">
+    <!-- Conteúdo Central -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-2">
+            <h2 class="text-base font-bold text-ufcnavy-900 flex items-center space-x-2">
+                <i class="fa-solid fa-graduation-cap text-ufcteal-600"></i>
+                <span>Selecione a Avaliação desejada</span>
+            </h2>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Cada simulado conta com cronômetro, relatório final de aproveitamento por categoria (Formação Geral e Componente Específico) e justificativas pedagógicas com referências ABNT.
+            </p>
+        </div>
+
+        <!-- Cards dos Simulados -->
+        <div class="grid sm:grid-cols-3 gap-4">
             
-            <!-- APRESENTAÇÃO DO PORTAL -->
-            <div class="space-y-2">
-                <div class="inline-flex items-center justify-center w-12 h-12 bg-ufcnavy-50 text-ufcnavy-700 rounded-full mb-1">
-                    <i class="fa-solid fa-list-check text-xl"></i>
+            <!-- Simulado 01 -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-4 hover:border-ufcteal-500 transition-all">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Módulo FG</span>
+                        <i class="fa-solid fa-leaf text-blue-600"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm">Simulado 01</h3>
+                    <p class="text-xs text-slate-500">Caderno focado nos temas transversais de Formação Geral (ESG, Direitos Humanos, Sustentabilidade e LGPD).</p>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Portal de Simulados ENADE</h2>
-                <p class="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    Selecione abaixo a avaliação ou módulo que deseja realizar para iniciar a sua preparação.
-                </p>
+                <a href="simulado.html?prova=simulado01.xlsx" class="w-full bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white text-xs font-bold py-2.5 rounded-xl text-center transition-colors block">
+                    Iniciar Simulado 01
+                </a>
             </div>
 
-            <!-- CONTAINER DA LISTA DE SIMULADOS (RENDERIZADO VIA SCRIPT) -->
-            <nav id="simuladosList" class="space-y-3.5 text-left" aria-label="Lista de Simulados">
-                <!-- Os botões serão inseridos automaticamente pelo JavaScript -->
-            </nav>
+            <!-- Simulado 02 -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-4 hover:border-ufcteal-500 transition-all">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">Prova Completa</span>
+                        <i class="fa-solid fa-gears text-emerald-600"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm">Simulado 02</h3>
+                    <p class="text-xs text-slate-500">Caderno global oficial do ENADE com 45 questões (Formação Geral + Componente Específico).</p>
+                </div>
+                <a href="simulado.html?prova=simulado02.xlsx" class="w-full bg-ufcteal-600 hover:bg-ufcteal-700 text-white text-xs font-bold py-2.5 rounded-xl text-center transition-colors block">
+                    Iniciar Simulado 02
+                </a>
+            </div>
 
-            <!-- AVISO DE INSTRUÇÃO E SALVAMENTO -->
-            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 text-left flex items-start space-x-3">
-                <i class="fa-solid fa-shield-halved text-ufcteal-600 text-sm mt-0.5"></i>
-                <p class="text-[11px] text-slate-600 leading-normal">
-                    <b>Progresso salvo automaticamente:</b> Você pode interromper e retornar ao simulado no mesmo dispositivo a qualquer momento.
-                </p>
+            <!-- Simulado 03 -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-4 hover:border-ufcteal-500 transition-all">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded">Caderno 03</span>
+                        <i class="fa-solid fa-chart-line text-purple-600"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm">Simulado 03</h3>
+                    <p class="text-xs text-slate-500">Banco complementar de questões aplicadas para aprofundamento das competências do MEC.</p>
+                </div>
+                <a href="simulado.html?prova=simulado03.xlsx" class="w-full bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white text-xs font-bold py-2.5 rounded-xl text-center transition-colors block">
+                    Iniciar Simulado 03
+                </a>
             </div>
 
         </div>
 
     </main>
 
-    <!-- RODAPÉ INSTITUCIONAL -->
+    <!-- Rodapé -->
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        <div class="max-w-4xl mx-auto px-4">
-            <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus Russas</p>
-            <p class="mt-0.5 text-[11px] text-slate-400">Curso de Engenharia de Produção | Organização Didática 2026</p>
-        </div>
+        <p class="font-semibold text-slate-700">UFC Campus Russas — Curso de Engenharia de Produção</p>
     </footer>
 
-    <!-- ================================================================= -->
-    <!-- SCRIPT DE REGISTRO E ADIÇÃO DE NOVOS SIMULADOS                     -->
-    <!-- ================================================================= -->
-    <script>
-        // PARA ADICIONAR UM NOVO SIMULADO: Insira um novo objeto {...} na lista abaixo!
-        const listaSimulados = [
-            {
-                id: "01",
-                arquivo: "01.html",
-                titulo: "Simulado 01 - Formação Geral",
-                descricao: "15 Questões",
-                badge: "Ativo",
-                badgeCor: "bg-emerald-500",
-                destaque: true
-            },
-
-            {
-        id: "02",
-        arquivo: "02.html",
-        titulo: "Simulado 02 — Formação específica)",
-        descricao: "45 Questões",
-        badge: "Ativo",
-        badgeCor: "bg-emerald-500",
-        destaque: true
-    }
-             ];
-        
-            /* EXEMPLO PARA ADICIONAR O SIMULADO 02 FUTURAMENTE (remova o /* para ativar):
-            ,{
-                id: "02",
-                arquivo: "02.html",
-                titulo: "Simulado Módulo II — Qualidade & PCP",
-                descricao: "15 Questões Objetivas",
-                badge: "Novo",
-                badgeCor: "bg-blue-500",
-                destaque: false
-            }
-            */
-       
-
-        // FUNÇÃO DE RENDERIZAÇÃO AUTOMÁTICA DOS BOTÕES
-        function renderizarSimulados() {
-            const container = document.getElementById('simuladosList');
-            container.innerHTML = '';
-
-            listaSimulados.forEach(item => {
-                const link = document.createElement('a');
-                link.href = item.arquivo;
-                
-                const bgEstilo = item.destaque 
-                    ? 'border-ufcnavy-500/20 bg-ufcnavy-50 hover:bg-ufcnavy-700 text-ufcnavy-900 hover:text-white' 
-                    : 'border-slate-200 bg-white hover:bg-ufcnavy-700 text-slate-800 hover:text-white';
-                
-                const numEstilo = item.destaque
-                    ? 'bg-ufcnavy-700 group-hover:bg-white text-white group-hover:text-ufcnavy-700'
-                    : 'bg-slate-100 group-hover:bg-white text-slate-700 group-hover:text-ufcnavy-700';
-
-                link.className = `group flex items-center justify-between p-4 rounded-xl border ${bgEstilo} transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ufcnavy-500`;
-
-                link.innerHTML = `
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-10 h-10 rounded-lg ${numEstilo} flex items-center justify-center font-bold text-sm transition-colors">
-                            ${item.id}
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h3 class="font-bold text-sm">${item.titulo}</h3>
-                                ${item.badge ? `<span class="${item.badgeCor} text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">${item.badge}</span>` : ''}
-                            </div>
-                            <p class="text-xs text-slate-500 group-hover:text-slate-200 transition-colors">${item.descricao}</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
-                `;
-                container.appendChild(link);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', renderizarSimulados);
-    </script>
 </body>
 </html>
