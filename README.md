@@ -8,7 +8,7 @@ Ecossistema digital desenvolvido pelo **GEPRO (Laboratório de Gestão da Produ�
 
 * 🌐 **Portal de Simulados Interativos (Site Público):** [gepro1.github.io/simulado-enade-2026](https://gepro1.github.io/simulado-enade-2026/)
 * 🧭 **Aplicativo Guia & Trilha de Estudos (ENADE Compass):** [enade-compass-2026.lovable.app](https://enade-compass-2026.lovable.app/)
-* 📄 **Cartilha Oficial ENADE 2026 (PDF):** [Acessar Cartilha em PDF](./cartilha-enade-2026.pdf) *(certifique-se de enviar o PDF com este nome para a raiz do repositório)*
+* * 📄 **Cartilha Oficial ENADE 2026 (PDF):** [Acessar Cartilha em PDF](./ebook_1enade2026.pdf)
 * 💻 **Repositório de Código-Fonte (GitHub):** [github.com/GEPRO1/simulado-enade-2026](https://github.com/GEPRO1/simulado-enade-2026)
 
 ---
