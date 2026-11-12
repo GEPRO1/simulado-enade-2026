@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#003366">
-    <title>Plataforma de Simulados ENADE | Engenharia de Produção</title>
+    <title>Plataforma de Simulados ENADE | Engenharia de Produção — UFC Russas</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebd5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebf5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
                         ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] }
@@ -28,7 +28,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         @media print {
-            header, footer, nav, button, #quizContainer, #gridModal, #resultsContainer, #loadingScreen, #fileUploadBar {
+            header, footer, nav, button, #quizContainer, #gridModal, #studyModal, #resultsContainer, #loadingScreen {
                 display: none !important;
             }
             #printExamContainer { display: block !important; }
@@ -41,46 +41,78 @@
 </head>
 <body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
 
-    <!-- Loading Screen -->
+    <!-- Tela de Carregamento -->
     <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-4">
         <div class="w-12 h-12 border-4 border-ufcnavy-700 border-t-ufcteal-500 rounded-full animate-spin"></div>
         <p id="loadingText" class="text-sm font-semibold text-slate-700">Carregando Caderno de Questões...</p>
     </div>
 
-   <!-- Header com Logótipos Oficiais (UFC Russas + GEPRO) -->
-<header class="bg-ufcnavy-700 text-white shadow-md">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-        
-        <!-- Esquerda: Logo UFC + Título -->
-        <div class="flex items-center space-x-3">
-            <img src="logo-ufc.png" alt="UFC Campus Russas" class="h-11 w-auto bg-white p-1 rounded-lg object-contain shadow-sm">
-            <div>
-                <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
-                <h1 class="text-xs sm:text-sm font-bold tracking-tight">Engenharia de Produção</h1>
-                <p class="text-[11px] text-slate-200">UFC — Campus Russas</p>
+    <!-- Header Institucional Unificado -->
+    <header class="bg-ufcnavy-700 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Esquerda: Voltar + Logo UFC + Título -->
+            <div class="flex items-center space-x-2.5">
+                <a href="index.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors" title="Voltar ao Portal">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </a>
+                <img src="logo-ufc.png" 
+                     onerror="this.onerror=null; this.src='logotipo%20vertical%20ufc%20russas.png';" 
+                     alt="UFC Campus Russas" 
+                     class="h-10 w-auto bg-white px-1.5 py-1 rounded-lg object-contain shadow-sm shrink-0">
+                <div>
+                    <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
+                    <h1 class="text-xs sm:text-sm font-bold tracking-tight leading-tight">Engenharia de Produção</h1>
+                    <p class="text-[10px] text-slate-200 hidden sm:block">UFC — Campus Russas</p>
+                </div>
+            </div>
+
+            <!-- Direita: Controles do Simulado + Logo GEPRO -->
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <!-- Seletor Rápido de Simulado (Troca a qualquer momento) -->
+                <select id="selectSimuladoUrl" aria-label="Selecionar Simulado" class="bg-ufcnavy-900 border border-white/25 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500 cursor-pointer">
+                    <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
+                    <option value="simulado02.xlsx">Simulado 02 (Completo 45Q)</option>
+                    <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
+                </select>
+
+                <!-- Cronômetro -->
+                <div class="bg-ufcnavy-900/70 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 border border-white/10 shrink-0">
+                    <i class="fa-regular fa-clock text-ufcteal-500 text-xs"></i>
+                    <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
+                </div>
+
+                <!-- Botão Mapas Mentais -->
+                <button id="btnOpenStudyAll" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-bold shadow-sm">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <span class="hidden md:inline">Mapas Mentais</span>
+                </button>
+
+                <!-- Botão Imprimir -->
+                <button type="button" onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
+                    <i class="fa-solid fa-print"></i>
+                    <span class="hidden lg:inline">Imprimir</span>
+                </button>
+
+                <!-- Botão Grade de Questões -->
+                <button id="btnOpenGrid" type="button" class="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors">
+                    <i class="fa-solid fa-th"></i>
+                    <span class="hidden sm:inline font-medium">Questões</span>
+                </button>
+
+                <!-- Logo GEPRO -->
+                <img src="logo-gepro.png" 
+                     onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';" 
+                     alt="GEPRO" 
+                     class="h-8 w-auto bg-white px-1.5 py-1 rounded-lg object-contain shadow-sm hidden sm:block shrink-0">
             </div>
         </div>
 
-        <!-- Direita: Logo GEPRO -->
-        <div class="flex items-center space-x-2">
-            <img src="logo-gepro.png" alt="GEPRO" class="h-9 w-auto bg-white p-1 rounded-lg object-contain shadow-sm">
+        <!-- Barra de Progresso -->
+        <div class="w-full bg-ufcnavy-900 h-1.5">
+            <div id="progressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300" style="width: 0%;"></div>
         </div>
-
-    </div>
-</header>
-
-    <!-- Barra Auxiliar (Upload Local) -->
-    <div id="fileUploadBar" class="bg-slate-200 border-b border-slate-300 px-4 py-1.5 text-xs text-slate-700 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-file-excel text-emerald-700"></i>
-            <span class="font-medium">Arquivo ativo: <strong id="nomeArquivoAtivo" class="text-slate-900">simulado01.xlsx</strong></span>
-        </div>
-        <label class="cursor-pointer bg-white hover:bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-md text-[11px] font-semibold text-slate-700 shadow-sm flex items-center space-x-1 transition-colors">
-            <i class="fa-solid fa-upload text-slate-500"></i>
-            <span>Carregar outro .xlsx</span>
-            <input type="file" id="inputLocalExcel" accept=".xlsx, .xls" class="hidden">
-        </label>
-    </div>
+    </header>
 
     <div id="printExamContainer"></div>
 
@@ -98,22 +130,29 @@
                         <span id="badgeTipo" class="bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">Tipo</span>
                     </div>
 
-                    <button id="btnToggleMec" class="text-xs text-ufcteal-700 hover:text-ufcteal-600 font-semibold flex items-center space-x-1">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span>Matriz MEC</span>
-                        <i id="iconToggleMec" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
-                    </button>
+                    <div class="flex items-center space-x-3">
+                        <button id="btnTopicMindmap" type="button" class="text-xs text-amber-700 hover:text-amber-800 font-semibold flex items-center space-x-1 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-200 transition-colors">
+                            <i class="fa-solid fa-sitemap"></i>
+                            <span>Revisar Tópico</span>
+                        </button>
+
+                        <button id="btnToggleMec" type="button" class="text-xs text-ufcteal-700 hover:text-ufcteal-600 font-semibold flex items-center space-x-1 bg-ufcteal-50 hover:bg-ufcteal-100 px-2.5 py-1 rounded-lg border border-ufcteal-200 transition-colors">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Matriz MEC</span>
+                            <i id="iconToggleMec" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Painel Matriz MEC -->
                 <div id="panelMec" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
                     <div>
-                        <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Competência Avaliada:</span>
+                        <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Competência Avaliada (MEC/DCNs):</span>
                         <p id="textComp" class="text-slate-700 mt-0.5">...</p>
                     </div>
-                    <div class="grid sm:grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
+                    <div class="grid sm:grid-cols-2 gap-2 pt-2 border-t border-slate-200/70">
                         <div>
-                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Habilidade:</span>
+                            <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Habilidade Avaliada:</span>
                             <p id="textHab" class="text-slate-700 mt-0.5">...</p>
                         </div>
                         <div>
@@ -144,20 +183,27 @@
 
             <!-- Card de Feedback e Gabarito Comentado -->
             <div id="cardFeedback" class="hidden bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
-                <div id="statusFeedbackHeader" class="flex items-center space-x-2 p-3 rounded-xl">
-                    <i id="statusFeedbackIcon" class="text-lg"></i>
-                    <span id="statusFeedbackTitle" class="font-bold text-sm"></span>
+                <div id="statusFeedbackHeader" class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl">
+                    <div class="flex items-center space-x-2">
+                        <i id="statusFeedbackIcon" class="text-lg"></i>
+                        <span id="statusFeedbackTitle" class="font-bold text-sm"></span>
+                    </div>
+                    <button id="btnFeedbackMindmap" type="button" class="bg-white/90 hover:bg-white text-ufcnavy-900 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 flex items-center space-x-1.5 transition-colors">
+                        <i class="fa-solid fa-diagram-project text-ufcteal-600"></i>
+                        <span>Abrir Mapa Mental deste Assunto</span>
+                    </button>
                 </div>
+
                 <div class="space-y-3 text-xs sm:text-sm">
                     <div>
                         <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Análise de Distratores:</span>
                         <div id="feedbackTexto" class="text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200"></div>
                     </div>
-                    <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200/60 flex items-start space-x-2 text-xs">
+                    <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200/70 flex items-start space-x-2 text-xs">
                         <i class="fa-solid fa-book-bookmark text-ufcnavy-700 mt-0.5"></i>
                         <div>
-                            <span class="font-bold text-ufcnavy-900 block">Referência Teórica (ABNT):</span>
-                            <span id="fonteAbnt" class="text-slate-600 italic">...</span>
+                            <span class="font-bold text-ufcnavy-900 block">Fundamentação Teórica (Referência ABNT):</span>
+                            <div id="fonteAbnt" class="text-slate-700 mt-0.5">...</div>
                         </div>
                     </div>
                 </div>
@@ -165,14 +211,14 @@
 
             <!-- Navegação Inferior -->
             <div class="flex items-center justify-between pt-2">
-                <button id="btnPrev" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
+                <button id="btnPrev" type="button" class="bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-40 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition-colors">
                     <i class="fa-solid fa-chevron-left text-xs"></i>
                     <span>Anterior</span>
                 </button>
-                <button id="btnConfirmar" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm">
+                <button id="btnConfirmar" type="button" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-colors">
                     Confirmar Resposta
                 </button>
-                <button id="btnNext" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
+                <button id="btnNext" type="button" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 disabled:opacity-40 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition-colors">
                     <span>Próxima</span>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
@@ -186,7 +232,7 @@
             </div>
             <div class="space-y-1">
                 <h2 class="text-2xl font-extrabold text-slate-900">Simulado Concluído!</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Confira abaixo a apuração do seu desempenho.</p>
+                <p class="text-xs sm:text-sm text-slate-500">Confira abaixo a apuração do seu desempenho por componente.</p>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
@@ -206,9 +252,12 @@
                     <span id="resCe" class="text-xl font-extrabold text-purple-600">0%</span>
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-                <button id="btnRevisarProvas" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm">
-                    Revisar Gabarito e Justificativas
+            <p class="text-xs text-slate-600 italic max-w-lg mx-auto">
+                "Cada questão revisada hoje consolida a sua formação como engenheiro(a) de produção e fortalece o conceito do nosso curso no ENADE 2026."
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <button id="btnRevisarProvas" type="button" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm">
+                    Revisar Gabarito e Mapas Mentais
                 </button>
                 <a href="index.html" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm">
                     Voltar ao Portal
@@ -223,30 +272,163 @@
             <div class="space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                     <h3 class="font-bold text-slate-900 text-sm">Navegador de Questões</h3>
-                    <button id="btnCloseGrid" class="text-slate-400 hover:text-slate-600 p-1">
+                    <button id="btnCloseGrid" type="button" class="text-slate-400 hover:text-slate-600 p-1">
                         <i class="fa-solid fa-xmark text-base"></i>
                     </button>
                 </div>
-                <div id="gridQuestaoBtns" class="grid grid-cols-5 gap-2 max-h-[60vh] overflow-y-auto p-1"></div>
+                <div class="flex flex-wrap gap-2 text-[10px] text-slate-600">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-200 inline-block"></span> Aberta</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-ufcnavy-700 inline-block"></span> Marcada</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> Correta</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> Incorreta</span>
+                </div>
+                <div id="gridQuestaoBtns" class="grid grid-cols-5 gap-2 max-h-[55vh] overflow-y-auto p-1"></div>
             </div>
-            <button id="btnFinalizarSimulado" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm">
+            <button id="btnFinalizarSimulado" type="button" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm">
                 Finalizar e Entregar Simulado
             </button>
         </div>
     </div>
 
-    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
-        <p class="font-semibold text-slate-700">UFC Campus Russas — Engenharia de Produção</p>
+    <!-- Modal de Revisão Teórica & Mapas Mentais (ENADE 2026 - GEPRO) -->
+    <div id="studyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200">
+            <!-- Header do Modal -->
+            <div class="bg-ufcnavy-700 text-white px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-diagram-project text-ufcteal-500 text-lg"></i>
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-base">Guia de Revisão & Mapas Mentais — ENADE 2026</h3>
+                        <p class="text-[11px] text-slate-200">Curadoria Pedagógica: GEPRO — Engenharia de Produção (UFC Russas)</p>
+                    </div>
+                </div>
+                <button id="btnCloseStudy" type="button" class="text-white/80 hover:text-white p-1.5 rounded-lg bg-white/10">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Barra de Seleção de Tópico -->
+            <div class="bg-slate-50 border-b border-slate-200 px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+                <label for="selectStudyTopic" class="text-xs font-bold text-slate-700">Selecione a Área / Disciplina:</label>
+                <select id="selectStudyTopic" class="flex-1 max-w-md bg-white border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ufcteal-500"></select>
+            </div>
+
+            <!-- Conteúdo do Resumo e Mapa Mental -->
+            <div id="studyModalBody" class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs sm:text-sm text-slate-800"></div>
+
+            <!-- Rodapé do Modal -->
+            <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Baseado nas Portarias MEC 154, 163 e 276/2026 • Acervo Minha Biblioteca UFC</span>
+                <button id="btnCloseStudyBottom" type="button" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold px-4 py-1.5 rounded-lg text-xs">
+                    Voltar à Questão
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé Institucional -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-600">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus de Russas</p>
+            <p class="text-slate-500 text-[11px]">Desenvolvido pelo <strong>GEPRO</strong> (Laboratório de Gestão da Produção)</p>
+        </div>
     </footer>
 
-    <!-- LÓGICA JAVASCRIPT CORRIGIDA E COMPLETA -->
+    <!-- BASE DE MAPAS MENTAIS E LÓGICA DA APLICAÇÃO -->
     <script>
+        // Acervo Curado de Mapas Mentais e Resumos por Área (ENADE 2026 - GEPRO)
+        const BASE_MAPAS_MENTAIS = {
+            "pcp": {
+                titulo: "Planejamento e Controle da Produção (PCP) & Operações",
+                keywords: ["pcp", "planejamento", "produção", "mrp", "kanban", "jit", "just-in-time", "estoque", "capacidade", "sequenciamento", "teoria das restrições", "gargalo", "lean"],
+                resumo: "O PCP coordena a alocação de recursos produtivos para atender à demanda nos horizontes de longo (S&OP), médio (MPS) e curto prazo (MRP e sequenciamento). O modelo tradicional empurrado (MRP II) programa ordens a partir da previsão de demanda, enquanto a produção puxada (Just-in-Time / Kanban) autoriza a fabricação somente mediante consumo real do posto subsequente, limitando o estoque em processo (WIP).",
+                mapaMental: [
+                    { ramo: "Sistemas de Produção", itens: ["Empurrada (MRP II): baseada em previsão e explosão de materiais (BOM)", "Puxada (JIT/Kanban): disparada pelo consumo real, controla WIP", "Híbrida (CONWIP): limita estoque global mantendo fluxo contínuo"] },
+                    { ramo: "Nivelamento e Fluxo", itens: ["Heijunka: nivelamento de mix e volume para reduzir flutuações", "Takt Time: ritmo da demanda (Tempo disponível / Demanda)", "SMED (Troca Rápida): redução de setup para viabilizar lotes pequenos"] },
+                    { ramo: "Teoria das Restrições (TOC)", itens: ["1. Identificar o gargalo", "2. Explorar o gargalo (não deixá-lo ocioso)", "3. Subordinar os demais recursos ao ritmo do gargalo"] }
+                ],
+                pegadinha: "A banca costuma afirmar que o sistema Kanban elimina a necessidade de previsão de demanda. Falso: o Kanban controla a execução no chão de fábrica, mas o dimensionamento de capacidade e compras de longo prazo continua exigindo previsão agregada.",
+                referencia: "SLACK, N.; BRANDON-JONES, A.; JOHNSTON, R. Administração da Produção. 8. ed. São Paulo: Atlas, 2018. Disponível em: Minha Biblioteca UFC."
+            },
+            "qualidade": {
+                titulo: "Gestão da Qualidade & Controle Estatístico de Processos (CEP)",
+                keywords: ["qualidade", "cep", "estatístico", "capabilidade", "cp", "cpk", "carta", "controle", "pdca", "dmaic", "iso", "fmea", "seis sigma"],
+                resumo: "O Controle Estatístico de Processos (CEP) distingue causas comuns (inerentes ao sistema, aleatórias) de causas especiais (atribuíveis, que tiram o processo de controle estatístico). Um processo sob controle estatístico não é necessariamente capaz: a capabilidade compara a dispersão natural do processo (6σ) com os limites de especificação do cliente (LSE e LIE).",
+                mapaMental: [
+                    { ramo: "Cartas de Controle (Shewhart)", itens: ["Variáveis contínuas: X-barra e R (amostras pequenas) ou X-barra e S", "Atributos: p (fração defeituosa), np (nº defeituosos), c e u (defeitos)"] },
+                    { ramo: "Índices de Capabilidade", itens: ["Cp = (LSE - LIE) / 6σ → mede capacidade potencial (ignora centralização)", "Cpk = mín[(LSE - μ)/3σ ; (μ - LIE)/3σ] → mede capacidade real centralizada", "Processo capaz exige Cpk ≥ 1,33 (padrão industrial)"] },
+                    { ramo: "Melhoria Contínua", itens: ["Ciclo PDCA (Plan, Do, Check, Act)", "Seis Sigma / DMAIC (Definir, Medir, Analisar, Melhorar, Controlar)"] }
+                ],
+                pegadinha: "Confundir Limites de Controle (LIC/LSC, calculados a partir dos dados do processo: μ ± 3σ) com Limites de Especificação (LIE/LSE, definidos pelo projeto/cliente). Alterar especificações não coloca um processo sob controle estatístico.",
+                referencia: "MONTGOMERY, D. C. Introdução ao Controle Estatístico da Qualidade. 7. ed. Rio de Janeiro: LTC, 2016. Disponível em: Minha Biblioteca UFC."
+            },
+            "po": {
+                titulo: "Pesquisa Operacional & Modelos de Decisão",
+                keywords: ["pesquisa operacional", "programação linear", "simplex", "otimização", "filas", "simulação", "sensibilidade", "dual", "rede", "transporte"],
+                resumo: "A Pesquisa Operacional estrutura problemas complexos de alocação de recursos escassos por meio de modelos matemáticos compostos por variáveis de decisão, função objetivo (maximização ou minimização) e conjunto de restrições técnicas e de não negatividade.",
+                mapaMental: [
+                    { ramo: "Programação Linear (PL)", itens: ["Hipóteses: proporcionalidade, aditividade, divisibilidade e certeza", "Solução ótima sempre ocorre em um ponto extremo (vértice) da região viável", "Folga zero indica restrição ativa (recurso escasso)"] },
+                    { ramo: "Dualidade e Sensibilidade", itens: ["Preço-Sombra (Shadow Price): variação na Função Objetivo por unidade adicional do recurso", "Válido apenas dentro do intervalo de viabilidade da análise de sensibilidade"] },
+                    { ramo: "Teoria das Filas (Kendall)", itens: ["Taxa de chegada (λ) deve ser estritamente menor que taxa de atendimento (μ)", "Lei de Little: L = λ · W (nº médio no sistema = taxa de chegada × tempo médio)"] }
+                ],
+                pegadinha: "Aplicar o Preço-Sombra fora dos limites de variação permitidos para o lado direito da restrição (RHS) ou atribuir preço-sombra positivo a uma restrição que possui folga (não ativa).",
+                referencia: "HILLIER, F. S.; LIEBERMAN, G. J. Introdução à Pesquisa Operacional. 9. ed. Porto Alegre: AMGH, 2013. Disponível em: Minha Biblioteca UFC."
+            },
+            "logistica": {
+                titulo: "Logística & Gestão da Cadeia de Suprimentos (SCM)",
+                keywords: ["logística", "cadeia", "suprimentos", "estoque", "lec", "abc", "chicote", "transporte", "armazenagem", "nível de serviço"],
+                resumo: "A Gestão da Cadeia de Suprimentos integra fluxos de materiais, informações e recursos financeiros desde os fornecedores primários até o consumidor final, buscando o equilíbrio entre custo logístico total e nível de serviço.",
+                mapaMental: [
+                    { ramo: "Gestão de Estoques", itens: ["Curva ABC (Pareto): Classe A (alto valor acumulado, controle rigoroso)", "LEC (Lote Econômico): equilibra custo de pedido e custo de armazenagem", "Estoque de Segurança: protege contra variabilidade da demanda e do lead time"] },
+                    { ramo: "Dinâmica da Cadeia", itens: ["Efeito Chicote (Bullwhip): amplificação da variabilidade dos pedidos a montante", "Causas: atualização de previsão, pedidos em lote, flutuação de preços e racionamento"] },
+                    { ramo: "Distribuição e Modais", itens: ["Trade-off custo vs. transit time (Rodoviário, Ferroviário, Aquaviário, Aéreo, Dutoviário)", "Cross-docking: consolidação rápida sem estocagem de longa permanência"] }
+                ],
+                pegadinha: "Acreditar que o Efeito Chicote é causado apenas por falhas físicas de transporte, quando sua principal raiz é a falta de compartilhamento de informações da demanda real (POS) entre os elos.",
+                referencia: "BALLOU, R. H. Gerenciamento da Cadeia de Suprimentos/Logística Empresarial. 5. ed. Porto Alegre: Bookman, 2006. Disponível em: Minha Biblioteca UFC."
+            },
+            "ergonomia": {
+                titulo: "Ergonomia, Saúde e Segurança do Trabalho",
+                keywords: ["ergonomia", "segurança", "trabalho", "nr", "aet", "cognitiva", "física", "organizacional", "acidente", "risco"],
+                resumo: "A Ergonomia adapta o trabalho ao ser humano (e não o contrário), visando segurança, conforto e desempenho eficiente. Divide-se nos domínios físico, cognitivo e organizacional, sendo operacionalizada pela Análise Ergonômica do Trabalho (AET) conforme a NR-17.",
+                mapaMental: [
+                    { ramo: "Domínios da Ergonomia", itens: ["Física: antropometria, postura, manuseio de cargas, LER/DORT", "Cognitiva: carga mental, tomada de decisão, interface homem-máquina, erro humano", "Organizacional: turnos, ritmo de trabalho, trabalho em equipe, comunicação"] },
+                    { ramo: "Análise Ergonômica (AET)", itens: ["1. Análise da Demanda → 2. Análise da Tarefa (prescrito) → 3. Análise da Atividade (real)", "Diferença fundamental entre trabalho prescrito (norma) e trabalho real (execução)"] },
+                    { ramo: "Prevenção e Normas (NRs)", itens: ["Hierarquia de controle: Eliminação > Substituição > Engenharia > Administrativo > EPI", "EPI é sempre a última barreira de proteção, não a primeira"] }
+                ],
+                pegadinha: "Indicar o fornecimento de EPI ou treinamento postural como solução primária quando o enunciado permite eliminar o risco na fonte por meio de projeto ergonômico do posto (controle de engenharia).",
+                referencia: "IIDA, I.; BUARQUE, L. Ergonomia: projeto e produção. 3. ed. São Paulo: Blucher, 2016. Disponível em: Minha Biblioteca UFC."
+            },
+            "economica": {
+                titulo: "Engenharia Econômica & Gestão de Custos",
+                keywords: ["econômica", "custos", "vpl", "tir", "payback", "tma", "investimento", "ponto de equilíbrio", "depreciação"],
+                resumo: "A Engenharia Econômica avalia a viabilidade financeira de projetos considerando o valor do dinheiro no tempo. A decisão baseia-se na comparação dos fluxos de caixa descontados pela Taxa Mínima de Atratividade (TMA).",
+                mapaMental: [
+                    { ramo: "Indicadores de Viabilidade", itens: ["VPL (Valor Presente Líquido): viável se VPL > 0 (cria valor acima da TMA)", "TIR (Taxa Interna de Retorno): viável se TIR > TMA", "Payback Descontado: tempo de recuperação considerando o custo de capital"] },
+                    { ramo: "Análise de Custos", itens: ["Ponto de Equilíbrio Contábil (PEC) = Custos Fixos / Margem de Contribuição Unitária", "Margem de Contribuição = Preço de Venda - Custos e Despesas Variáveis"] }
+                ],
+                pegadinha: "Escolher projetos mutuamente excludentes apenas pela maior TIR quando há diferença de escala de investimento. O critério soberano para maximização de riqueza é o maior VPL.",
+                referencia: "BLANK, L.; TARQUIN, A. Engenharia Econômica. 6. ed. Porto Alegre: AMGH, 2011. Disponível em: Minha Biblioteca UFC."
+            },
+            "formacao_geral": {
+                titulo: "Formação Geral: Sustentabilidade, ESG, Ética & Transformação Digital",
+                keywords: ["formação geral", "sustentabilidade", "esg", "ética", "direitos humanos", "lgpd", "energia", "circular", "ambiental", "social"],
+                resumo: "O componente de Formação Geral avalia a capacidade do futuro profissional de compreender temas transversais contemporâneos: crise climática, transição energética, economia circular, governança ética, proteção de dados (LGPD) e responsabilidade social.",
+                mapaMental: [
+                    { ramo: "Sustentabilidade e Economia Circular", itens: ["Tripé da Sustentabilidade (Triple Bottom Line): Ambiental, Social e Econômico", "Economia Circular: reduzir, reutilizar, remanufaturar e reciclar (ciclo fechado)", "Avaliação do Ciclo de Vida (ACV): impactos do berço ao túmulo / berço ao berço"] },
+                    { ramo: "Ética, Governança e Dados", itens: ["ESG: Ambiental, Social e Governança corporativa transparente", "LGPD (Lei 13.709/2018): consentimento, finalidade, minimização e segurança de dados"] }
+                ],
+                pegadinha: "Reduzir sustentabilidade apenas à dimensão ecológica ou confundir reciclagem de fim de tubo com Economia Circular sistêmica (que começa no ecodesign do produto).",
+                referencia: "BARBIERI, J. C. Gestão Ambiental Empresarial: conceitos, modelos e instrumentos. 4. ed. São Paulo: Saraiva, 2016. Disponível em: Minha Biblioteca UFC."
+            }
+        };
+
         let questaoData = [];
         let currentIndex = 0;
         let userAnswers = {};
         let timerSeconds = 0;
         let timerInterval = null;
         let arquivoAtual = '';
+        let listenersInitialized = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -258,30 +440,27 @@
 
             arquivoAtual = provaParam;
             const selectEl = document.getElementById('selectSimuladoUrl');
-            if (selectEl) selectEl.value = provaParam;
-            document.getElementById('nomeArquivoAtivo').textContent = provaParam;
-
-            carregarExcelRemote(arquivoAtual);
-
             if (selectEl) {
-                selectEl.addEventListener('change', (e) => {
-                    const novoArquivo = e.target.value;
-                    window.location.search = `?prova=${novoArquivo}`;
-                });
+                // Garante que a opção exista no select
+                if (![...selectEl.options].some(o => o.value === provaParam)) {
+                    const opt = document.createElement('option');
+                    opt.value = provaParam;
+                    opt.textContent = provaParam.replace('.xlsx', '').toUpperCase();
+                    selectEl.appendChild(opt);
+                }
+                selectEl.value = provaParam;
             }
 
-            document.getElementById('inputLocalExcel').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    document.getElementById('nomeArquivoAtivo').textContent = file.name;
-                    carregarExcelBuffer(file);
-                }
-            });
+            populateStudyTopicsDropdown();
+            setupEventListenersOnce();
+            carregarExcelRemote(arquivoAtual);
         });
 
         async function carregarExcelRemote(filename) {
-            document.getElementById('loadingText').textContent = `Carregando ${filename}...`;
-            document.getElementById('loadingScreen').classList.remove('hidden');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingText = document.getElementById('loadingText');
+            if (loadingText) loadingText.textContent = `Carregando ${filename}...`;
+            if (loadingScreen) loadingScreen.classList.remove('hidden');
 
             try {
                 const response = await fetch(filename);
@@ -290,23 +469,17 @@
                 processarWorkbookBuffer(buffer);
             } catch (err) {
                 console.error(err);
-                document.getElementById('loadingScreen').innerHTML = `
-                    <div class="text-center text-rose-600 space-y-2 p-6 max-w-md">
-                        <i class="fa-solid fa-triangle-exclamation text-4xl"></i>
-                        <p class="font-bold text-base">Arquivo "${filename}" não localizado.</p>
-                        <p class="text-xs text-slate-500">Certifique-se de enviar o arquivo <strong>${filename}</strong> para a raiz do repositório no GitHub.</p>
-                    </div>
-                `;
+                if (loadingScreen) {
+                    loadingScreen.innerHTML = `
+                        <div class="text-center text-rose-600 space-y-3 p-6 max-w-md">
+                            <i class="fa-solid fa-triangle-exclamation text-4xl"></i>
+                            <p class="font-bold text-base">Arquivo "${filename}" não localizado.</p>
+                            <p class="text-xs text-slate-600">Verifique se o arquivo <strong>${filename}</strong> está publicado na raiz do repositório no GitHub.</p>
+                            <a href="index.html" class="inline-block mt-2 bg-ufcnavy-700 text-white text-xs font-bold px-4 py-2 rounded-lg">Voltar ao Portal</a>
+                        </div>
+                    `;
+                }
             }
-        }
-
-        function carregarExcelBuffer(file) {
-            document.getElementById('loadingText').textContent = `Processando ${file.name}...`;
-            document.getElementById('loadingScreen').classList.remove('hidden');
-
-            const reader = new FileReader();
-            reader.onload = (e) => processarWorkbookBuffer(e.target.result);
-            reader.readAsArrayBuffer(file);
         }
 
         function processarWorkbookBuffer(arrayBuffer) {
@@ -318,11 +491,11 @@
             let headerRowIndex = -1;
             let colMap = {};
 
-            for (let r = 0; r < Math.min(10, rawRows.length); r++) {
+            for (let r = 0; r < Math.min(12, rawRows.length); r++) {
                 const row = rawRows[r];
                 if (!row) continue;
                 const rowStr = row.map(c => String(c || '').toLowerCase()).join(' ');
-                if (rowStr.includes('gabarito') || rowStr.includes('comando') || rowStr.includes('questão')) {
+                if (rowStr.includes('gabarito') || rowStr.includes('comando')) {
                     headerRowIndex = r;
                     colMap = mapearCabecalhosDinamicos(row);
                     break;
@@ -330,23 +503,30 @@
             }
 
             if (headerRowIndex === -1) {
-                alert("Erro: Não foi possível identificar o cabeçalho das colunas na planilha Excel.");
+                alert("Erro: Cabeçalho das colunas não identificado na planilha.");
                 return;
             }
 
             questaoData = [];
             for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
                 const row = rawRows[r];
-                if (!row || row[colMap.num] === undefined || row[colMap.num] === null) continue;
+                const numCol = colMap.num !== undefined ? colMap.num : 0;
+                if (!row || row[numCol] === undefined || row[numCol] === null) continue;
 
-                let numVal = String(row[colMap.num] || '').trim();
+                let numVal = String(row[numCol] || '').trim();
                 if (!numVal) continue;
 
                 let opObj = parseOpcoesString(String(row[colMap.opcoes] || ''));
                 let textoRaw = String(row[colMap.texto] || '').trim();
                 let comandoRaw = String(row[colMap.comando] || '').trim();
+                let textoLimpo = textoRaw
+                    .replace(/Cenário inédito de avaliação/gi, 'Estudo de caso')
+                    .replace(/\n/g, '<br>');
 
-                let textoLimpo = textoRaw.replace(/Cenário inédito de avaliação/gi, 'Estudo de caso').replace(/\n/g, '<br>');
+                // Extrai exclusivamente a letra A-E do gabarito
+                const gabRaw = String(row[colMap.gab] || 'A').trim().toUpperCase();
+                const gabMatch = gabRaw.match(/[A-E]/);
+                const gabClean = gabMatch ? gabMatch[0] : 'A';
 
                 questaoData.push({
                     num: numVal,
@@ -361,24 +541,26 @@
                     comando: comandoRaw,
                     afirmativas: String(row[colMap.afirmativas] || '').trim(),
                     opcoes: opObj,
-                    gab: String(row[colMap.gab] || 'A').trim().toUpperCase(),
+                    gab: gabClean,
                     justificativa: String(row[colMap.justificativa] || '').trim(),
-                    fonte: String(row[colMap.fonte] || '').trim()
+                    fonte: String(row[colMap.fonte] || '').trim(),
+                    answered: false
                 });
             }
 
             userAnswers = {};
             currentIndex = 0;
 
-            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('resultsContainer')?.classList.add('hidden');
+            document.getElementById('quizContainer')?.classList.remove('hidden');
+            document.getElementById('loadingScreen')?.classList.add('hidden');
+
             initTimer();
             renderQuestion(currentIndex);
             renderGridButtons();
             setupPrintMode();
-            setupEventListeners();
         }
 
-        // MAPEAMENTO COM ORDEM DE PRIORIDADE CORRIGIDA
         function mapearCabecalhosDinamicos(headerRow) {
             const colMap = {};
             headerRow.forEach((colName, colIdx) => {
@@ -394,7 +576,7 @@
                 else if (name.includes('texto')) colMap.texto = colIdx;
                 else if (name.includes('objeto') || name.includes('conteúdo')) colMap.conteudo = colIdx;
                 else if (name.includes('habilidade')) colMap.hab = colIdx;
-                else if (name.includes('competência')) mapComp(colMap, colIdx);
+                else if (name.includes('competência')) colMap.comp = colIdx;
                 else if (name.includes('tipo')) colMap.tipo = colIdx;
                 else if (name.includes('dificuldade')) colMap.dif = colIdx;
                 else if (name.includes('disciplina') || name.includes('área')) colMap.disc = colIdx;
@@ -404,8 +586,6 @@
             return colMap;
         }
 
-        function mapComp(colMap, colIdx) { colMap.comp = colIdx; }
-
         function parseOpcoesString(str) {
             let ops = {};
             let lines = str.split('\n');
@@ -413,27 +593,39 @@
 
             lines.forEach(line => {
                 line = line.trim();
-                let m = line.match(/^([A-E])[\)\.-]\s*(.*)/);
+                let m = line.match(/^\(?([A-E])[\)\.-]\s*(.*)/i);
                 if (m) {
-                    curr = m[1];
+                    curr = m[1].toUpperCase();
                     let optText = m[2].replace(/^Opção inédita [A-E]\s*/gi, '');
                     ops[curr] = optText;
-                } else if (curr) {
+                } else if (curr && line) {
                     ops[curr] += " " + line;
                 }
             });
             return ops;
         }
 
+        function formatReferenceWithLinks(text) {
+            if (!text) return 'Não informada.';
+            const escaped = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            return escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline font-semibold text-ufcnavy-700 hover:text-ufcteal-600">$1</a>');
+        }
+
         function initTimer() {
             if (timerInterval) clearInterval(timerInterval);
             timerSeconds = 0;
+            const timerEl = document.getElementById('timerDisplay');
+            if (timerEl) timerEl.textContent = '00:00:00';
+
             timerInterval = setInterval(() => {
                 timerSeconds++;
                 const hrs = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
                 const mins = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
                 const secs = String(timerSeconds % 60).padStart(2, '0');
-                document.getElementById('timerDisplay').textContent = `${hrs}:${mins}:${secs}`;
+                if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
             }, 1000);
         }
 
@@ -447,9 +639,9 @@
             document.getElementById('badgeDif').textContent = `Dificuldade: ${q.dif}`;
             document.getElementById('badgeTipo').textContent = q.tipo;
 
-            document.getElementById('textComp').textContent = q.comp || 'Não especificado';
-            document.getElementById('textHab').textContent = q.hab || 'Não especificado';
-            document.getElementById('textConteudo').textContent = q.conteudo || 'Não especificado';
+            document.getElementById('textComp').textContent = q.comp || 'Não especificado na planilha.';
+            document.getElementById('textHab').textContent = q.hab || 'Não especificado na planilha.';
+            document.getElementById('textConteudo').textContent = q.conteudo || 'Não especificado na planilha.';
 
             const textoElem = document.getElementById('textoBase');
             const comandoElem = document.getElementById('comandoQuestao');
@@ -480,10 +672,26 @@
                 Object.keys(q.opcoes).forEach(letra => {
                     const isSelected = selectedOpt === letra;
                     const optBtn = document.createElement('button');
-                    let borderStyle = isSelected ? 'border-ufcteal-600 bg-ufcteal-50/50 text-slate-900' : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800';
-                    let circleStyle = isSelected ? 'bg-ufcteal-600 text-white font-bold' : 'bg-slate-100 text-slate-600 font-semibold';
+                    optBtn.type = 'button';
 
-                    optBtn.className = `w-full text-left p-3.5 rounded-xl border ${borderStyle} transition-all flex items-start space-x-3`;
+                    let borderStyle = isSelected
+                        ? 'border-ufcteal-600 bg-ufcteal-50/60 text-slate-900 ring-1 ring-ufcteal-500'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 text-slate-800';
+                    let circleStyle = isSelected
+                        ? 'bg-ufcteal-600 text-white font-bold'
+                        : 'bg-slate-100 text-slate-600 font-semibold';
+
+                    if (q.answered) {
+                        if (letra === q.gab) {
+                            borderStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950';
+                            circleStyle = 'bg-emerald-600 text-white font-bold';
+                        } else if (isSelected && letra !== q.gab) {
+                            borderStyle = 'border-rose-500 bg-rose-50 text-rose-950';
+                            circleStyle = 'bg-rose-600 text-white font-bold';
+                        }
+                    }
+
+                    optBtn.className = `w-full text-left p-3.5 rounded-xl border ${borderStyle} transition-all flex items-start space-x-3 cursor-pointer`;
                     optBtn.onclick = () => selectOption(index, letra);
 
                     optBtn.innerHTML = `
@@ -503,7 +711,10 @@
 
             document.getElementById('btnPrev').disabled = index === 0;
             document.getElementById('btnNext').disabled = index === questaoData.length - 1;
-            document.getElementById('progressBar').style.width = `${((index + 1) / questaoData.length) * 100}%`;
+            const progressEl = document.getElementById('progressBar');
+            if (progressEl) {
+                progressEl.style.width = `${((index + 1) / questaoData.length) * 100}%`;
+            }
         }
 
         function selectOption(qIndex, letra) {
@@ -515,9 +726,12 @@
         function confirmAnswer() {
             const q = questaoData[currentIndex];
             const userAns = userAnswers[currentIndex];
-            if (!userAns) { alert("Selecione uma alternativa antes de confirmar."); return; }
+            if (!userAns) {
+                alert("Selecione uma alternativa (A a E) antes de confirmar.");
+                return;
+            }
             q.answered = true;
-            showFeedback(q, userAns);
+            renderQuestion(currentIndex);
             updateGridButtons();
         }
 
@@ -525,44 +739,191 @@
             const cardFeedback = document.getElementById('cardFeedback');
             const isCorrect = selectedOpt === q.gab;
 
-            document.getElementById('statusFeedbackHeader').className = `flex items-center space-x-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}`;
+            document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
             document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
-            document.getElementById('statusFeedbackTitle').textContent = isCorrect ? `Resposta Correta! (Gabarito: ${q.gab})` : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            document.getElementById('statusFeedbackTitle').textContent = isCorrect
+                ? `Resposta Correta! (Gabarito: ${q.gab})`
+                : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+
             document.getElementById('feedbackTexto').innerHTML = q.justificativa || 'Sem justificativa cadastrada.';
-            document.getElementById('fonteAbnt').textContent = q.fonte || 'Não informada.';
+            document.getElementById('fonteAbnt').innerHTML = formatReferenceWithLinks(q.fonte);
 
             cardFeedback.classList.remove('hidden');
         }
 
-        function setupEventListeners() {
-            document.getElementById('btnPrev').onclick = () => { if (currentIndex > 0) { currentIndex--; renderQuestion(currentIndex); } };
-            document.getElementById('btnNext').onclick = () => { if (currentIndex < questaoData.length - 1) { currentIndex++; renderQuestion(currentIndex); } };
-            document.getElementById('btnConfirmar').onclick = confirmAnswer;
-            document.getElementById('btnToggleMec').onclick = () => {
-                document.getElementById('panelMec').classList.toggle('hidden');
-                document.getElementById('iconToggleMec').classList.toggle('rotate-180');
-            };
-            document.getElementById('btnOpenGrid').onclick = () => document.getElementById('gridModal').classList.remove('hidden');
-            document.getElementById('btnCloseGrid').onclick = () => document.getElementById('gridModal').classList.add('hidden');
-            document.getElementById('btnFinalizarSimulado').onclick = finishSimulado;
-            document.getElementById('btnRevisarProvas').onclick = () => {
-                document.getElementById('resultsContainer').classList.add('hidden');
-                document.getElementById('quizContainer').classList.remove('hidden');
+        // --- SISTEMA DE MAPAS MENTAIS E REVISÃO POR TÓPICO ---
+        function findTopicKeyForQuestion(q) {
+            if (!q) return 'pcp';
+            const searchStr = `${q.disc} ${q.conteudo} ${q.cat}`.toLowerCase();
+            if (searchStr.includes('formação geral')) return 'formacao_geral';
+
+            for (const [key, data] of Object.entries(BASE_MAPAS_MENTAIS)) {
+                if (key === 'formacao_geral') continue;
+                if (data.keywords.some(kw => searchStr.includes(kw))) {
+                    return key;
+                }
+            }
+            return 'pcp';
+        }
+
+        function populateStudyTopicsDropdown() {
+            const select = document.getElementById('selectStudyTopic');
+            if (!select) return;
+            select.innerHTML = '';
+            Object.entries(BASE_MAPAS_MENTAIS).forEach(([key, val]) => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = val.titulo;
+                select.appendChild(opt);
+            });
+        }
+
+        function openStudyModal(topicKey) {
+            const key = topicKey && BASE_MAPAS_MENTAIS[topicKey] ? topicKey : 'pcp';
+            const select = document.getElementById('selectStudyTopic');
+            if (select) select.value = key;
+            renderStudyTopicContent(key);
+            document.getElementById('studyModal')?.classList.remove('hidden');
+        }
+
+        function renderStudyTopicContent(topicKey) {
+            const data = BASE_MAPAS_MENTAIS[topicKey] || BASE_MAPAS_MENTAIS['pcp'];
+            const body = document.getElementById('studyModalBody');
+            if (!body) return;
+
+            const ramosHTML = data.mapaMental.map(r => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                    <div class="flex items-center space-x-2 text-ufcnavy-800 font-bold text-xs uppercase tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-ufcteal-600"></span>
+                        <span>${r.ramo}</span>
+                    </div>
+                    <ul class="space-y-1.5 pl-4 border-l-2 border-ufcteal-500/40 text-xs text-slate-700">
+                        ${r.itens.map(item => `<li>• ${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+
+            body.innerHTML = `
+                <div class="space-y-1">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-ufcteal-700 bg-ufcteal-50 px-2 py-0.5 rounded">Síntese Conceitual</span>
+                    <h4 class="text-base font-extrabold text-ufcnavy-900 pt-1">${data.titulo}</h4>
+                    <p class="text-slate-700 leading-relaxed">${data.resumo}</p>
+                </div>
+
+                <div class="space-y-2.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-ufcnavy-700 block">Mapa Mental Estruturado</span>
+                    <div class="grid sm:grid-cols-3 gap-3">
+                        ${ramosHTML}
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-xl space-y-1">
+                    <span class="font-bold text-amber-900 text-xs flex items-center space-x-1.5">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                        <span>Atenção à Pegadinha da Banca (INEP):</span>
+                    </span>
+                    <p class="text-xs text-amber-950 leading-relaxed">${data.pegadinha}</p>
+                </div>
+
+                <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200/70 text-[11px] text-slate-700">
+                    <strong class="text-ufcnavy-900">Referência Base (ABNT):</strong> ${data.referencia}
+                </div>
+            `;
+        }
+
+        function setupEventListenersOnce() {
+            if (listenersInitialized) return;
+            listenersInitialized = true;
+
+            // Troca de simulado a qualquer momento sem perder estado da página
+            document.getElementById('selectSimuladoUrl')?.addEventListener('change', (e) => {
+                const novoArquivo = e.target.value;
+                arquivoAtual = novoArquivo;
+                const newUrl = `${window.location.pathname}?prova=${novoArquivo}`;
+                window.history.replaceState(null, '', newUrl);
+                carregarExcelRemote(novoArquivo);
+            });
+
+            document.getElementById('btnPrev')?.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    renderQuestion(currentIndex);
+                }
+            });
+
+            document.getElementById('btnNext')?.addEventListener('click', () => {
+                if (currentIndex < questaoData.length - 1) {
+                    currentIndex++;
+                    renderQuestion(currentIndex);
+                }
+            });
+
+            document.getElementById('btnConfirmar')?.addEventListener('click', confirmAnswer);
+
+            document.getElementById('btnToggleMec')?.addEventListener('click', () => {
+                document.getElementById('panelMec')?.classList.toggle('hidden');
+                document.getElementById('iconToggleMec')?.classList.toggle('rotate-180');
+            });
+
+            // Botões dos Mapas Mentais
+            document.getElementById('btnOpenStudyAll')?.addEventListener('click', () => {
+                const currentQ = questaoData[currentIndex];
+                openStudyModal(findTopicKeyForQuestion(currentQ));
+            });
+
+            document.getElementById('btnTopicMindmap')?.addEventListener('click', () => {
+                const currentQ = questaoData[currentIndex];
+                openStudyModal(findTopicKeyForQuestion(currentQ));
+            });
+
+            document.getElementById('btnFeedbackMindmap')?.addEventListener('click', () => {
+                const currentQ = questaoData[currentIndex];
+                openStudyModal(findTopicKeyForQuestion(currentQ));
+            });
+
+            document.getElementById('selectStudyTopic')?.addEventListener('change', (e) => {
+                renderStudyTopicContent(e.target.value);
+            });
+
+            document.getElementById('btnCloseStudy')?.addEventListener('click', () => {
+                document.getElementById('studyModal')?.classList.add('hidden');
+            });
+
+            document.getElementById('btnCloseStudyBottom')?.addEventListener('click', () => {
+                document.getElementById('studyModal')?.classList.add('hidden');
+            });
+
+            // Grade de Questões
+            document.getElementById('btnOpenGrid')?.addEventListener('click', () => {
+                document.getElementById('gridModal')?.classList.remove('hidden');
+            });
+
+            document.getElementById('btnCloseGrid')?.addEventListener('click', () => {
+                document.getElementById('gridModal')?.classList.add('hidden');
+            });
+
+            document.getElementById('btnFinalizarSimulado')?.addEventListener('click', finishSimulado);
+
+            document.getElementById('btnRevisarProvas')?.addEventListener('click', () => {
+                document.getElementById('resultsContainer')?.classList.add('hidden');
+                document.getElementById('quizContainer')?.classList.remove('hidden');
                 currentIndex = 0;
                 renderQuestion(currentIndex);
-            };
+            });
         }
 
         function renderGridButtons() {
             const container = document.getElementById('gridQuestaoBtns');
+            if (!container) return;
             container.innerHTML = '';
             questaoData.forEach((q, idx) => {
                 const btn = document.createElement('button');
+                btn.type = 'button';
                 btn.id = `gridBtn_${idx}`;
                 btn.onclick = () => {
                     currentIndex = idx;
                     renderQuestion(currentIndex);
-                    document.getElementById('gridModal').classList.add('hidden');
+                    document.getElementById('gridModal')?.classList.add('hidden');
                 };
                 container.appendChild(btn);
             });
@@ -577,7 +938,7 @@
                 const userAns = userAnswers[idx];
                 let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
                 if (userAns) {
-                    bgClass = q.answered 
+                    bgClass = q.answered
                         ? (userAns === q.gab ? "bg-emerald-500 text-white font-bold" : "bg-rose-500 text-white font-bold")
                         : "bg-ufcnavy-700 text-white font-bold";
                 }
@@ -589,14 +950,19 @@
 
         function finishSimulado() {
             clearInterval(timerInterval);
-            document.getElementById('gridModal').classList.add('hidden');
-            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('gridModal')?.classList.add('hidden');
+            document.getElementById('quizContainer')?.classList.add('hidden');
 
             let totalAcertos = 0, fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
             questaoData.forEach((q, idx) => {
                 const isCorrect = userAnswers[idx] === q.gab;
-                if (q.cat.toLowerCase().includes('formação geral')) { fgTotal++; if (isCorrect) fgAcertos++; } 
-                else { ceTotal++; if (isCorrect) ceAcertos++; }
+                if (q.cat.toLowerCase().includes('formação geral')) {
+                    fgTotal++;
+                    if (isCorrect) fgAcertos++;
+                } else {
+                    ceTotal++;
+                    if (isCorrect) ceAcertos++;
+                }
                 if (isCorrect) totalAcertos++;
             });
 
@@ -604,7 +970,7 @@
             document.getElementById('resAcertos').textContent = `${totalAcertos} / ${questaoData.length}`;
             document.getElementById('resFg').textContent = `${fgTotal > 0 ? ((fgAcertos / fgTotal) * 100).toFixed(0) : 0}%`;
             document.getElementById('resCe').textContent = `${ceTotal > 0 ? ((ceAcertos / ceTotal) * 100).toFixed(0) : 0}%`;
-            document.getElementById('resultsContainer').classList.remove('hidden');
+            document.getElementById('resultsContainer')?.classList.remove('hidden');
         }
 
         function setupPrintMode() {
@@ -615,9 +981,9 @@
                     <div class="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
                         <div>
                             <h1 class="text-base font-bold uppercase">UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS RUSSAS</h1>
-                            <h2 class="text-xs font-semibold text-slate-700">ENGENHARIA DE PRODUÇÃO — CADERNO DE SIMULADO</h2>
+                            <h2 class="text-xs font-semibold text-slate-700">ENGENHARIA DE PRODUÇÃO — CADERNO DE SIMULADO (GEPRO)</h2>
                         </div>
-                        <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">SIMULADO ENADE</span>
+                        <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">ENADE 2026</span>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-xs font-medium">
                         <div><b>NOME:</b> ____________________________________________________</div>
