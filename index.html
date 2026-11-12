@@ -1,34 +1,161 @@
-<!-- Seção de Materiais Complementares (Cartilha PDF + Guia Interativo) -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 class="text-sm sm:text-base font-bold text-ufcnavy-900 flex items-center space-x-2">
-                    <i class="fa-solid fa-book-open-reader text-ufcteal-600"></i>
-                    <span>Materiais de Apoio & Orientação ao Discente</span>
-                </h2>
-                <span class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">GEPRO • UFC</span>
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003366">
+    <title>Portal de Simulados ENADE 2026 | Engenharia de Produção — UFC Russas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ufcnavy: { 50: '#f0f5fa', 100: '#dce7f3', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
+
+    <!-- Cabeçalho Institucional Único -->
+    <header class="bg-ufcnavy-700 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Esquerda: Logo UFC + Título -->
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-white rounded-xl px-2.5 py-1.5 shadow-sm shrink-0">
+                    <img src="logo-ufc.png"
+                         onerror="this.onerror=null; this.src='logotipo%20vertical%20ufc%20russas.png';"
+                         alt="UFC Campus Russas"
+                         class="h-11 w-auto object-contain">
+                </div>
+                <div>
+                    <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight mt-0.5">Portal de Simulados — Engenharia de Produção</h1>
+                    <p class="text-[11px] text-slate-200">Universidade Federal do Ceará — Campus de Russas</p>
+                </div>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-4">
-                <!-- Card Cartilha PDF -->
-                <a href="cartilha-enade-2026.pdf" target="_blank" rel="noopener noreferrer" class="group flex items-start space-x-3.5 p-4 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50/30 transition-all">
-                    <div class="w-10 h-10 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-file-pdf text-lg"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-rose-700">Cartilha Oficial ENADE 2026 (PDF)</h3>
-                        <p class="text-[11px] text-slate-500 leading-relaxed">Documento completo com cronograma, diretrizes do MEC, estrutura da prova e orientações para o dia do exame.</p>
-                    </div>
+            <!-- Direita: Botão Único da Cartilha (Lovable) + Logo GEPRO -->
+            <div class="flex items-center space-x-3">
+                <a href="https://enade-compass-2026.lovable.app/"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="bg-ufcteal-600 hover:bg-ufcteal-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-colors flex items-center space-x-2">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Cartilha ENADE 2026</span>
                 </a>
 
-                <!-- Card Aplicativo Guia (Compass) -->
-                <a href="https://enade-compass-2026.lovable.app/" target="_blank" rel="noopener noreferrer" class="group flex items-start space-x-3.5 p-4 rounded-xl border border-slate-200 hover:border-ufcteal-500 hover:bg-ufcteal-50/40 transition-all">
-                    <div class="w-10 h-10 rounded-lg bg-ufcteal-50 text-ufcteal-700 border border-ufcteal-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-compass text-lg"></i>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-ufcteal-700">Guia Interativo — ENADE Compass</h3>
-                        <p class="text-[11px] text-slate-500 leading-relaxed">Trilha interativa de preparação, checklist de conteúdos e navegação rápida pelos eixos da Engenharia de Produção.</p>
-                    </div>
-                </a>
+                <div class="bg-white rounded-xl px-3 py-1.5 shadow-sm hidden sm:block shrink-0">
+                    <img src="logo-gepro.png"
+                         onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';"
+                         alt="GEPRO — Laboratório de Gestão da Produção"
+                         class="h-9 w-auto object-contain">
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 space-y-6">
+
+        <!-- Orientação Compacta -->
+        <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start sm:items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-ufcnavy-50 text-ufcnavy-700 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-graduation-cap text-base"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-ufcnavy-900">Selecione um caderno de simulado para iniciar</h2>
+                    <p class="text-xs text-slate-500">Inclui cronômetro, Matriz MEC, Mapas Mentais por tópico, gabarito comentado e impressão em A4.</p>
+                </div>
             </div>
         </div>
+
+        <!-- Grade dos 3 Simulados -->
+        <div class="grid md:grid-cols-3 gap-5">
+            
+            <!-- Simulado 01 -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-5 hover:border-ufcteal-500 transition-all">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">Formação Geral</span>
+                        <i class="fa-solid fa-leaf text-blue-600 text-sm"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">Simulado 01</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Temas transversais contemporâneos: Sustentabilidade, ESG, Economia Circular, Direitos Humanos e LGPD.
+                    </p>
+                </div>
+                <a href="simulado.html?prova=simulado01.xlsx"
+                   class="w-full bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white text-xs font-bold py-2.5 rounded-xl text-center transition-colors flex items-center justify-center space-x-2">
+                    <span>Iniciar Simulado 01</span>
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
+            </div>
+
+            <!-- Simulado 02 -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-5 hover:border-ufcteal-500 transition-all">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">Prova Completa • 45Q</span>
+                        <i class="fa-solid fa-gears text-emerald-600 text-sm"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">Simulado 02</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Caderno completo no padrão INEP integrando Formação Geral e Componente Específico da Engenharia de Produção.
+                    </p>
+                </div>
+                <a href="simulado.html?prova=simulado02.xlsx"
+                   class="w-full bg-ufcteal-600 hover:bg-ufcteal-700 text-white text-xs font-bold py-2.5 rounded-xl text-center transition-colors flex items-center justify-center space-x-2">
+                    <span>Iniciar Simulado 02</span>
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
+            </div>
+
+            <!-- Simulado 03 -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-5 hover:border-ufcteal-500 transition-all">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">Aprofundamento</span>
+                        <i class="fa-solid fa-chart-line text-purple-600 text-sm"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">Simulado 03</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Banco complementar de questões aplicadas para revisão das competências e habilidades exigidas pelo MEC.
+                    </p>
+                </div>
+                <a href="simulado.html?prova=simulado03.xlsx"
+                   class="w-full bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white text-xs font-bold py-2.5 rounded-xl text-center transition-colors flex items-center justify-center space-x-2">
+                    <span>Iniciar Simulado 03</span>
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Rodapé Institucional -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-xs text-slate-600">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+            <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus de Russas</p>
+            <p class="text-slate-500 text-[11px]">
+                Desenvolvido pelo <strong>GEPRO</strong> (Laboratório de Gestão da Produção)
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
