@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#003366">
-    <title>Portal de Simulados ENADE | UFC Russas</title>
+    <title>Portal de Simulados ENADE | Engenharia de Produção — UFC Russas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebd5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcnavy: { 50: '#f0f5fa', 100: '#e1ebf5', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
                         ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
                     },
                     fontFamily: { sans: ['Inter', 'sans-serif'] }
@@ -24,27 +24,29 @@
 </head>
 <body class="h-full flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
 
- <!-- Header com Logótipos Oficiais (UFC Russas + GEPRO) -->
-<header class="bg-ufcnavy-700 text-white shadow-md">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-        
-        <!-- Esquerda: Logo UFC + Título -->
-        <div class="flex items-center space-x-3">
-            <img src="logo-ufc.png" alt="UFC Campus Russas" class="h-11 w-auto bg-white p-1 rounded-lg object-contain shadow-sm">
-            <div>
-                <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
-                <h1 class="text-xs sm:text-sm font-bold tracking-tight">Engenharia de Produção</h1>
-                <p class="text-[11px] text-slate-200">UFC — Campus Russas</p>
+    <!-- Header Institucional -->
+    <header class="bg-ufcnavy-700 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <img src="logo-ufc.png" 
+                     onerror="this.onerror=null; this.src='logotipo%20vertical%20ufc%20russas.png';" 
+                     alt="UFC Campus Russas" 
+                     class="h-12 w-auto bg-white px-2 py-1 rounded-lg object-contain shadow-sm shrink-0">
+                <div>
+                    <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight">Portal de Simulados — Engenharia de Produção</h1>
+                    <p class="text-[11px] text-slate-200">Universidade Federal do Ceará — Campus de Russas</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <img src="logo-gepro.png" 
+                     onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';" 
+                     alt="GEPRO" 
+                     class="h-10 w-auto bg-white px-2 py-1 rounded-lg object-contain shadow-sm shrink-0">
             </div>
         </div>
-
-        <!-- Direita: Logo GEPRO -->
-        <div class="flex items-center space-x-2">
-            <img src="logo-gepro.png" alt="GEPRO" class="h-9 w-auto bg-white p-1 rounded-lg object-contain shadow-sm">
-        </div>
-
-    </div>
-</header>
+    </header>
 
     <!-- Conteúdo Central -->
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
@@ -55,7 +57,7 @@
                 <span>Selecione a Avaliação desejada</span>
             </h2>
             <p class="text-xs text-slate-600 leading-relaxed">
-                Cada simulado conta com cronômetro, relatório final de aproveitamento por categoria (Formação Geral e Componente Específico) e justificativas pedagógicas com referências ABNT.
+                Cada simulado dispõe de cronômetro, consulta à <strong>Matriz MEC</strong>, <strong>Mapas Mentais por disciplina</strong> para revisão conceitual, justificativas pedagógicas comentadas e referências bibliográficas em norma ABNT.
             </p>
         </div>
 
@@ -111,17 +113,13 @@
 
     </main>
 
-    <!-- Rodapé -->
-   <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-600">
-    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <p class="font-semibold text-slate-700">
-            Universidade Federal do Ceará — Campus de Russas
-        </p>
-        <p class="text-slate-500 text-[11px]">
-            Desenvolvido pelo <strong>GEPRO</strong> (Laboratório de Gestão da Produção)
-        </p>
-    </div>
-</footer>
+    <!-- Rodapé Institucional -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-600">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus de Russas</p>
+            <p class="text-slate-500 text-[11px]">Desenvolvido pelo <strong>GEPRO</strong> (Laboratório de Gestão da Produção)</p>
+        </div>
+    </footer>
 
 </body>
 </html>
