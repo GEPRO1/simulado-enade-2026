@@ -37,7 +37,7 @@
                     <img src="logo-ufc.png"
                          onerror="this.onerror=null; this.src='logotipo%20vertical%20ufc%20russas.png';"
                          alt="UFC Campus Russas"
-                         class="h-11 w-auto object-contain">
+                         class="h-12 w-auto object-contain">
                 </div>
                 <div>
                     <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026</span>
@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <!-- Direita: Botão Único da Cartilha (Lovable) + Logo GEPRO -->
+            <!-- Direita: Botão da Cartilha + Logo GEPRO -->
             <div class="flex items-center space-x-3">
                 <a href="https://enade-compass-2026.lovable.app/"
                    target="_blank"
@@ -60,7 +60,7 @@
                     <img src="logo-gepro.png"
                          onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';"
                          alt="GEPRO — Laboratório de Gestão da Produção"
-                         class="h-9 w-auto object-contain">
+                         class="h-10 w-auto object-contain">
                 </div>
             </div>
 
@@ -77,16 +77,16 @@
                     <i class="fa-solid fa-graduation-cap text-base"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-ufcnavy-900">Selecione um caderno de simulado para iniciar</h2>
-                    <p class="text-xs text-slate-500">Inclui cronômetro, Matriz MEC, Mapas Mentais por tópico, gabarito comentado e impressão em A4.</p>
+                    <h2 class="text-sm font-bold text-ufcnavy-900">Selecione um caderno de simulado ou a Oficina Plus de Questões Discursivas</h2>
+                    <p class="text-xs text-slate-500">Inclui cronômetro, Matriz MEC, Mapas Mentais, Discursivas do Componente Específico e impressão em A4.</p>
                 </div>
             </div>
             <span class="text-[11px] font-bold text-ufcteal-700 bg-ufcteal-50 border border-ufcteal-200 px-3 py-1 rounded-full self-start sm:self-center shrink-0">
-                5 Cadernos Disponíveis
+                5 Cadernos + Módulo Plus
             </span>
         </div>
 
-        <!-- Grade dos 5 Simulados -->
+        <!-- Grade dos 5 Simulados + Card Plus de Questões Discursivas -->
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             
             <!-- Simulado 01 -->
@@ -184,17 +184,52 @@
                 </a>
             </div>
 
+            <!-- CARD DESTAQUE PLUS: Questões Discursivas (Componente Específico) -->
+            <div class="relative bg-gradient-to-br from-ufcnavy-900 via-ufcnavy-700 to-ufcteal-700 text-white rounded-2xl p-5 shadow-md border-2 border-amber-400/80 flex flex-col justify-between space-y-5 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="bg-amber-400 text-slate-950 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
+                            <i class="fa-solid fa-star mr-1"></i>Plus • Componente Específico
+                        </span>
+                        <span class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center text-amber-300 shrink-0">
+                            <i class="fa-solid fa-pen-ruler text-sm"></i>
+                        </span>
+                    </div>
+                    <h3 class="font-extrabold text-white text-base tracking-tight">Oficina de Questões Discursivas</h3>
+                    <p class="text-xs text-slate-100 leading-relaxed">
+                        5 estudos de caso discursivos inéditos da área específica (PCP, Econômica, Qualidade/CEP, Logística e Pesquisa Operacional) com folha oficial de 30 linhas, espelho INEP e impressão A4.
+                    </p>
+                </div>
+                <a href="discursivas.html"
+                   class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold py-2.5 rounded-xl text-center shadow-sm transition-colors flex items-center justify-center space-x-2">
+                    <span>Abrir Oficina Discursiva</span>
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
+            </div>
+
         </div>
 
     </main>
 
-    <!-- Rodapé Institucional -->
+    <!-- Rodapé Institucional com Logos UFC + GEPRO -->
     <footer class="bg-white border-t border-slate-200 py-4 text-xs text-slate-600">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-            <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus de Russas</p>
-            <p class="text-slate-500 text-[11px]">
-                Desenvolvido pelo <strong>GEPRO</strong> (Laboratório de Gestão da Produção)
-            </p>
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div class="flex items-center space-x-2.5">
+                <img src="logo-ufc.png"
+                     onerror="this.style.display='none';"
+                     alt="UFC Campus Russas"
+                     class="h-7 w-auto object-contain">
+                <p class="font-semibold text-slate-700">Universidade Federal do Ceará — Campus de Russas</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <p class="text-slate-500 text-[11px]">
+                    Desenvolvido pelo <strong>GEPRO</strong> (Laboratório de Gestão da Produção)
+                </p>
+                <img src="logo-gepro.png"
+                     onerror="this.style.display='none';"
+                     alt="GEPRO"
+                     class="h-6 w-auto object-contain">
+            </div>
         </div>
     </footer>
 
