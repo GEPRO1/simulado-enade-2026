@@ -452,4 +452,645 @@
                     { label: "Eficiência = 75%", patterns: ["75%", "75,0%", "0,75", "eficiencia"] }
                 ],
                 padraoA: "Tempo disponível mensal = 25 dias × 8 h/dia × 60 min/h = 12.000 minutos.\nTempo de ciclo (TC) = Tempo disponível / Demanda = 12.000 min / 1.200 unidades = 10 minutos/unidade.",
-                padraoB: "1. Soma dos tempos das tarefas (∑t) = 6 + 4 + 3 + 5 + 4 + 5 + 2 + 1 = 30 minutos.\n2. Número mínimo teórico de estações (N_mín) = ∑t / TC = 30 / 10 = 3 centros de trabalho.\n3. Agrupamento respeitando precedência e TC ≤ 10 min:\n   • Centro de Trabalho 1 (CT1): {A, B} → 6 + 4 = 10 min (ociosidade = 0 min)\n   • Centro de Trabalho 2 (CT2): {C, D} → 3 + 5 = 8 min (ociosidade = 2 min; E não cabe pois 8 + 4 > 10)\n   • Centro de Trabalho 3 (CT3): {E, F} → 4 + 5 = 9 min (ociosidade = 1 min; G não cabe pois 9 + 2 > 10)\n   • Centro de Trabalho 4 (CT4
+                padraoB: "1. Soma dos tempos das tarefas (∑t) = 6 + 4 + 3 + 5 + 4 + 5 + 2 + 1 = 30 minutos.\n2. Número mínimo teórico de estações (N_mín) = ∑t / TC = 30 / 10 = 3 centros de trabalho.\n3. Agrupamento respeitando precedência e TC ≤ 10 min:\n   • Centro de Trabalho 1 (CT1): {A, B} → 6 + 4 = 10 min (ociosidade = 0 min)\n   • Centro de Trabalho 2 (CT2): {C, D} → 3 + 5 = 8 min (ociosidade = 2 min; E não cabe pois 8 + 4 > 10)\n   • Centro de Trabalho 3 (CT3): {E, F} → 4 + 5 = 9 min (ociosidade = 1 min; G não cabe pois 9 + 2 > 10)\n   • Centro de Trabalho 4 (CT4): {G, H} → 2 + 1 = 3 min (ociosidade = 7 min)\n4. Eficiência da linha (E) = ∑t / (N_real × TC) = 30 / (4 × 10) = 30 / 40 = 75,0% (desbalanceamento = 25,0%).",
+                pegadinha: "Tentar fechar com apenas 3 estações ignorando as restrições de precedência (ex.: juntar D com F antes de concluir B e C) ou esquecer de calcular a eficiência final da linha.",
+                referencia: "SLACK, N.; BRANDON-JONES, A.; JOHNSTON, R. Administração da produção. 8. ed. São Paulo: Atlas, 2018."
+            },
+            d2: {
+                codigo: "DISCURSIVA D2",
+                origem: "Simulados 03 e 05 • Padrão INEP",
+                area: "Engenharia Econômica e Gestão de Investimentos Industriais",
+                competencia: "Avaliar a viabilidade econômico-financeira de projetos de investimento e apoiar decisões de modernização produtiva sob restrição de capital.",
+                contexto: "Uma indústria metalmecânica estuda duas alternativas <strong>mutuamente excludentes</strong> para automatizar sua célula de soldagem, ambas com vida útil de <strong>4 anos</strong>, valor residual nulo e <strong>Taxa Mínima de Atratividade (TMA) de 10% ao ano</strong>:<br>" +
+                          "• <strong>Projeto X (Célula Semiautomatizada):</strong> investimento inicial de R$ 100.000,00 e fluxo de caixa líquido anual constante de R$ 35.000,00 nos anos 1 a 4.<br>" +
+                          "• <strong>Projeto Y (Célula Robotizada Integral):</strong> investimento inicial de R$ 140.000,00 e fluxo de caixa líquido anual constante de R$ 46.000,00 nos anos 1 a 4.<br>" +
+                          "<em>Dado auxiliar:</em> Fator de Valor Presente de uma Série Uniforme (P/A; 10%; 4 anos) = <strong>3,1699</strong>.",
+                itemA: "A) Calcule o Valor Presente Líquido (VPL) dos Projetos X e Y à TMA de 10% a.a.",
+                itemB: "B) Indique qual alternativa deve ser escolhida pela empresa e justifique tecnicamente sua recomendação considerando o critério do VPL e a análise do investimento incremental.",
+                pontosA: 50,
+                pontosB: 50,
+                keywordsA: [
+                    { label: "VPL(X) = +R$ 10.946,50", patterns: ["10.946", "10946", "vpl(x)", "projeto x"] },
+                    { label: "VPL(Y) = +R$ 5.815,40", patterns: ["5.815", "5815", "vpl(y)", "projeto y"] }
+                ],
+                keywordsB: [
+                    { label: "Escolha do Projeto X", patterns: ["projeto x", "alternativa x", "escolher x"] },
+                    { label: "Mutuamente excludentes / Maior VPL", patterns: ["mutuamente excludente", "maior vpl", "riqueza"] },
+                    { label: "Análise Incremental (-R$ 5.131,10)", patterns: ["incremental", "5.131", "5131", "40.000", "tma"] }
+                ],
+                padraoA: "Aplicando VPL = -I₀ + FC × (P/A; 10%; 4):\n• VPL(X) = -100.000,00 + 35.000,00 × 3,1699 = -100.000,00 + 110.946,50 = +R$ 10.946,50.\n• VPL(Y) = -140.000,00 + 46.000,00 × 3,1699 = -140.000,00 + 145.815,40 = +R$ 5.815,40.",
+                padraoB: "A empresa deve escolher o Projeto X.\nJustificativa técnica:\n1. Embora ambos os projetos sejam economicamente viáveis (VPL > 0), trata-se de alternativas mutuamente excludentes, devendo-se selecionar aquela que maximiza a geração de riqueza líquida (VPL_X = R$ 10.946,50 > VPL_Y = R$ 5.815,40).\n2. Pela análise incremental (Δ = Y - X): o aporte adicional de R$ 40.000,00 exige retorno incremental de R$ 11.000,00/ano, gerando VPL incremental = -40.000,00 + 11.000,00 × 3,1699 = -R$ 5.131,10 (< 0). Logo, o capital incremental não remunera a TMA de 10% a.a.",
+                pegadinha: "Escolher o Projeto Y apenas por possuir maior fluxo de caixa anual absoluto (R$ 46.000 vs. R$ 35.000), desconsiderando o custo de oportunidade do investimento inicial adicional de R$ 40.000.",
+                referencia: "CASAROTTO FILHO, N.; KOPITTKE, B. H. Análise de investimentos. 11. ed. São Paulo: Atlas, 2010."
+            },
+            d3: {
+                codigo: "DISCURSIVA D3",
+                origem: "Inédita ENADE 2026 • Qualidade & CEP",
+                area: "Engenharia da Qualidade — Controle Estatístico de Processos (CEP) e Capabilidade",
+                competencia: "Analisar a estabilidade estatística e a capabilidade de processos produtivos, propondo intervenções sistemáticas de melhoria da qualidade.",
+                contexto: "Na usinagem de eixos automotivos de precisão, o cliente especifica diâmetro nominal de <strong>50,00 mm</strong> com tolerância bilateral de <strong>± 0,30 mm</strong> (LIE = 49,70 mm e LSE = 50,30 mm). Após estabilizar o processo em carta de controle, coletaram-se amostras que indicaram média do processo <strong>μ = 50,06 mm</strong> e desvio-padrão inerente <strong>σ = 0,08 mm</strong>. Sabe-se que o padrão corporativo exige <strong>Cpk ≥ 1,33</strong>.",
+                itemA: "A) Calcule os índices de capabilidade potencial (Cp) e efetiva/centralizada (Cpk) do processo.",
+                itemB: "B) Diagnostique a situação do processo frente ao requisito do cliente (Cpk ≥ 1,33) e apresente duas ações técnicas distintas para adequar o processo sem alterar as especificações do cliente.",
+                pontosA: 50,
+                pontosB: 50,
+                keywordsA: [
+                    { label: "Índice Cp = 1,25", patterns: ["1,25", "1.25", "cp"] },
+                    { label: "Índice Cpk = 1,00", patterns: ["1,00", "1.00", "= 1", "cpk"] }
+                ],
+                keywordsB: [
+                    { label: "Incapaz (Cpk = 1,00 < 1,33)", patterns: ["incapaz", "nao atende", "1,33", "1.33"] },
+                    { label: "Centralização da média (50,00 mm)", patterns: ["centraliz", "ajuste", "setup", "offset", "media"] },
+                    { label: "Redução de variabilidade (σ)", patterns: ["variabilidade", "dispersao", "manutencao", "dmaic", "desvio"] }
+                ],
+                padraoA: "1. Cp = (LSE - LIE) / (6 × σ) = (50,30 - 49,70) / (6 × 0,08) = 0,60 / 0,48 = 1,25.\n2. Cpk = mín[ (LSE - μ)/(3 × σ) ; (μ - LIE)/(3 × σ) ]\n   • Cps = (50,30 - 50,06) / (3 × 0,08) = 0,24 / 0,24 = 1,00.\n   • Cpi = (50,06 - 49,70) / (3 × 0,08) = 0,36 / 0,24 = 1,50.\n   • Logo, Cpk = mín(1,00 ; 1,50) = 1,00.",
+                padraoB: "Diagnóstico: O processo não atende ao requisito mínimo de capabilidade (Cpk = 1,00 < 1,33) e encontra-se descentrado em direção ao Limite Superior de Especificação (μ = 50,06 mm > nominal 50,00 mm), além de apresentar dispersão natural excessiva (Cp = 1,25 < 1,33).\nAções técnicas:\n1. Centralização da média (ajuste de setup/offset da ferramenta de usinagem) para alinhar μ ao valor nominal de 50,00 mm, elevando Cpk até o patamar de Cp (1,25).\n2. Redução da variabilidade comum (σ) por meio de manutenção preventiva de precisão nos fusos, controle térmico do fluido de corte ou padronização operacional (DMAIC), elevando Cp e Cpk acima de 1,33.",
+                pegadinha: "Propor 'ampliar os limites de tolerância do cliente' como solução (o comando proíbe expressamente) ou confundir Cp com Cpk.",
+                referencia: "MONTGOMERY, D. C. Introdução ao Controle Estatístico da Qualidade. 7. ed. Rio de Janeiro: LTC, 2016."
+            },
+            d4: {
+                codigo: "DISCURSIVA D4",
+                origem: "Inédita ENADE 2026 • Logística & SCM",
+                area: "Logística e Gestão da Cadeia de Suprimentos — Estoques e Efeito Chicote",
+                competencia: "Dimensionar políticas de ressuprimento de materiais e propor mecanismos de coordenação na cadeia de suprimentos.",
+                contexto: "Um centro de distribuição opera <strong>250 dias úteis por ano</strong> e comercializa um componente industrial com demanda anual determinística de <strong>D = 10.000 unidades/ano</strong>. O custo fixo de emissão de cada pedido de compra é <strong>S = R$ 180,00</strong>, o custo unitário de armazenagem anual é <strong>H = R$ 9,00/unidade·ano</strong>, e o lead time de entrega do fornecedor é constante e igual a <strong>L = 4 dias úteis</strong>.",
+                itemA: "A) Calcule o Lote Econômico de Compras (LEC), o número anual de pedidos e o Ponto de Pedido (PP) sem estoque de segurança.",
+                itemB: "B) Explique o fenômeno do Efeito Chicote (Bullwhip Effect) caso a empresa passe a agrupar pedidos em lotes maiores ou promoções esporádicas, e indique duas práticas colaborativas para mitigá-lo na cadeia de suprimentos.",
+                pontosA: 50,
+                pontosB: 50,
+                keywordsA: [
+                    { label: "LEC ≈ 632 ou 633 unidades", patterns: ["632", "633", "lec"] },
+                    { label: "Nº de pedidos ≈ 15,81/ano", patterns: ["15,8", "15.8", "16 pedidos"] },
+                    { label: "Ponto de Pedido = 160 unid.", patterns: ["160", "ponto de pedido", "40"] }
+                ],
+                keywordsB: [
+                    { label: "Amplificação da variabilidade (montante)", patterns: ["amplific", "variabilidade", "montante", "distorcao", "bullwhip"] },
+                    { label: "Compartilhamento de demanda (POS)", patterns: ["pos", "point of sale", "compartilhamento", "informacao", "tempo real"] },
+                    { label: "VMI / CPFR / Preços Estáveis", patterns: ["vmi", "cpfr", "edlp", "colaborativ", "reposicao continua"] }
+                ],
+                padraoA: "1. LEC = √[(2 × D × S) / H] = √[(2 × 10.000 × 180) / 9] = √[3.600.000 / 9] = √400.000 ≈ 632,46 → 632 ou 633 unidades.\n2. Número anual de pedidos (N) = D / LEC = 10.000 / 632,46 ≈ 15,81 pedidos/ano.\n3. Demanda diária (d) = 10.000 / 250 = 40 unidades/dia.\n4. Ponto de Pedido (PP) = d × L = 40 × 4 = 160 unidades.",
+                padraoB: "Explicação do Efeito Chicote: Consiste na amplificação progressiva da variabilidade dos pedidos à medida que se avança a montante na cadeia de suprimentos (varejista → distribuidor → fabricante → fornecedor), gerando excesso de estoques, rupturas e ociosidade de capacidade.\nPráticas mitigadoras:\n1. Compartilhamento eletrônico em tempo real dos dados da demanda final (POS — Point of Sale) entre todos os elos, evitando previsões baseadas apenas nos pedidos intermediários.\n2. Adoção de programas de reposição contínua como VMI (Vendor Managed Inventory — Estoque Gerenciado pelo Fornecedor) ou CPFR (Planejamento, Previsão e Reabastecimento Colaborativo), aliados à política de preços estáveis (EDLP).",
+                pegadinha: "Usar 365 dias em vez de 250 dias úteis para calcular a demanda diária no Ponto de Pedido.",
+                referencia: "BALLOU, R. H. Gerenciamento da Cadeia de Suprimentos/Logística Empresarial. 5. ed. Porto Alegre: Bookman, 2006."
+            },
+            d5: {
+                codigo: "DISCURSIVA D5",
+                origem: "Inédita ENADE 2026 • Pesquisa Operacional",
+                area: "Pesquisa Operacional — Programação Linear e Análise de Sensibilidade",
+                competencia: "Formular modelos matemáticos de otimização para alocação de recursos escassos e interpretar relatórios de sensibilidade para tomada de decisão gerencial.",
+                contexto: "Uma fábrica de móveis planejados produz dois modelos de bancadas industriais: <strong>Modelo P1</strong> (lucro unitário de <strong>R$ 120,00</strong>) e <strong>Modelo P2</strong> (lucro unitário de <strong>R$ 150,00</strong>). Cada unidade de P1 consome <strong>2 horas</strong> no setor de Corte e <strong>4 horas</strong> no setor de Acabamento. Cada unidade de P2 consome <strong>3 horas</strong> no setor de Corte e <strong>3 horas</strong> no setor de Acabamento. A disponibilidade semanal máxima é de <strong>120 horas no Corte</strong> e <strong>180 horas no Acabamento</strong>.",
+                itemA: "A) Formule o modelo matemático de Programação Linear (variáveis de decisão, função objetivo e restrições) e determine o plano ótimo de produção semanal (x₁, x₂) e o lucro máximo (Z).",
+                itemB: "B) Calcule o Preço-Sombra (Shadow Price) de cada hora adicional nos setores de Corte e Acabamento e avalie se vale a pena contratar horas extras no setor de Corte ao custo de R$ 28,00/hora adicional.",
+                pontosA: 50,
+                pontosB: 50,
+                keywordsA: [
+                    { label: "Função Objetivo (120x₁ + 150x₂)", patterns: ["120", "150", "maximizar", "funcao objetivo"] },
+                    { label: "Plano Ótimo (x₁ = 30, x₂ = 20)", patterns: ["30", "20", "x1 = 30", "x2 = 20"] },
+                    { label: "Lucro Máximo = R$ 6.600,00", patterns: ["6.600", "6600"] }
+                ],
+                keywordsB: [
+                    { label: "Preço-Sombra Corte = R$ 40,00/h", patterns: ["40,00", "40", "preco-sombra", "preco sombra"] },
+                    { label: "Preço-Sombra Acabamento = R$ 10,00/h", patterns: ["10,00", "10"] },
+                    { label: "Viabilidade da Hora Extra (+R$ 12/h)", patterns: ["vale a pena", "sim", "viavel", "supera", "28"] }
+                ],
+                padraoA: "1. Variáveis de decisão: x₁ = quantidade semanal de P1; x₂ = quantidade semanal de P2 (x₁, x₂ ≥ 0).\n2. Função Objetivo: Maximizar Z = 120·x₁ + 150·x₂.\n3. Restrições:\n   • Corte: 2·x₁ + 3·x₂ ≤ 120\n   • Acabamento: 4·x₁ + 3·x₂ ≤ 180\n4. Solução ótima (interseção das duas restrições ativas):\n   Subtraindo (Corte) de (Acabamento): (4x₁ + 3x₂) - (2x₁ + 3x₂) = 180 - 120 → 2x₁ = 60 → x₁ = 30 unidades.\n   Substituindo no Corte: 2(30) + 3x₂ = 120 → 3x₂ = 60 → x₂ = 20 unidades.\n   Lucro máximo: Z* = 120(30) + 150(20) = 3.600 + 3.000 = R$ 6.600,00/semana.",
+                padraoB: "1. Preço-Sombra do Corte: aumentando Corte de 120 para 121 h (2x₁ + 3x₂ = 121 e 4x₁ + 3x₂ = 180), obtém-se x₁ = 29,5 e x₂ = 62/3, com Z = 120(29,5) + 150(62/3) = 3.540 + 3.100 = R$ 6.640,00 → Preço-Sombra (Corte) = +R$ 40,00/hora.\n2. Preço-Sombra do Acabamento: aumentando Acabamento de 180 para 181 h (2x₁ + 3x₂ = 120 e 4x₁ + 3x₂ = 181), obtém-se x₁ = 30,5 e x₂ = 59/3, com Z = 120(30,5) + 150(59/3) = 3.660 + 2.950 = R$ 6.610,00 → Preço-Sombra (Acabamento) = +R$ 10,00/hora.\n3. Decisão gerencial: Sim, vale a pena contratar horas extras no Corte, pois o benefício marginal (Preço-Sombra = R$ 40,00/h) supera o custo marginal da hora extra (R$ 28,00/h), gerando ganho líquido de R$ 12,00 por hora adicional (dentro do intervalo de validade da base).",
+                pegadinha: "Somar o preço-sombra diretamente ao custo normal da hora já contabilizado no lucro unitário ou esquecer de verificar se o preço-sombra é maior que o custo incremental da hora extra.",
+                referencia: "HILLIER, F. S.; LIEBERMAN, G. J. Introdução à Pesquisa Operacional. 9. ed. Porto Alegre: AMGH, 2013."
+            }
+        };
+
+        // =========================================================================
+        // QUESTIONÁRIO DE PERCEPÇÃO DE PROVA (P01 - P09 - PADRÃO INEP / ENADE)
+        // =========================================================================
+        const QUESTOES_PERCEPCAO = [
+            { id: "P01", bloco: "Avaliação Global da Prova", pergunta: "Qual foi o tempo gasto por você para concluir a prova?", opcoes: ["A) Menos de uma hora.", "B) Entre uma e duas horas.", "C) Entre duas e três horas.", "D) Entre três e quatro horas.", "E) Quatro horas, e não consegui terminar."] },
+            { id: "P02", bloco: "Avaliação Global da Prova", pergunta: "Em relação ao tempo total de aplicação, você considera que a prova foi:", opcoes: ["A) Muito longa.", "B) Longa.", "C) Adequada.", "D) Curta.", "E) Muito curta."] },
+            { id: "P03", bloco: "Avaliação Global da Prova", pergunta: "As informações/instruções fornecidas para a resolução das questões foram suficientes para resolvê-las?", opcoes: ["A) Sim, até excessivas.", "B) Sim, em todas elas.", "C) Sim, na maioria delas.", "D) Sim, somente em algumas.", "E) Não, em nenhuma delas."] },
+            { id: "P04", bloco: "Avaliação Global da Prova", pergunta: "Você se deparou com alguma dificuldade ao responder à prova? Qual?", opcoes: ["A) Desconhecimento do conteúdo.", "B) Forma diferente de abordagem do conteúdo.", "C) Espaço insuficiente para responder às questões.", "D) Falta de motivação para fazer a prova.", "E) Não tive qualquer tipo de dificuldade para responder à prova."] },
+            { id: "P05", bloco: "Avaliação Global da Prova", pergunta: "Considerando apenas as questões objetivas da prova, você percebeu que:", opcoes: ["A) Não estudou ainda a maioria desses conteúdos.", "B) Estudou alguns desses conteúdos, mas não os aprendeu.", "C) Estudou a maioria desses conteúdos, mas não os aprendeu.", "D) Estudou e aprendeu muitos desses conteúdos.", "E) Estudou e aprendeu todos esses conteúdos."] },
+            { id: "P06", bloco: "Formação Geral", pergunta: "Qual o grau de dificuldade das questões de Formação Geral?", opcoes: ["A) Muito fácil.", "B) Fácil.", "C) Médio.", "D) Difícil.", "E) Muito difícil."] },
+            { id: "P07", bloco: "Formação Geral", pergunta: "Os enunciados das questões de Formação Geral estavam compreensíveis e objetivos?", opcoes: ["A) Sim, todos.", "B) Sim, a maioria.", "C) Apenas cerca da metade.", "D) Poucos.", "E) Não, nenhum."] },
+            { id: "P08", bloco: "Componente Específico", pergunta: "Qual o grau de dificuldade das questões do Componente Específico?", opcoes: ["A) Muito fácil.", "B) Fácil.", "C) Médio.", "D) Difícil.", "E) Muito difícil."] },
+            { id: "P09", bloco: "Componente Específico", pergunta: "Os enunciados das questões do Componente Específico estavam compreensíveis e objetivos?", opcoes: ["A) Sim, todos.", "B) Sim, a maioria.", "C) Apenas cerca da metade.", "D) Poucos.", "E) Não, nenhum."] }
+        ];
+
+        // =========================================================================
+        // ESTADO E LÓGICA INTERATIVA
+        // =========================================================================
+        let abaAtiva = 'discursiva';
+        let discursivaAtualId = 'd1';
+        let ultimoCampoFocado = 'textareaDiscA';
+        let percepcaoRespostas = {};
+
+        let timerSec = 0;
+        let timerRunning = true;
+        let timerHandle = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            iniciarCronometroPlus();
+            renderDiscursivaCe(discursivaAtualId);
+            renderPercepcaoLista();
+            verificarChaveApiSalva();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const modo = urlParams.get('modo');
+            const qParam = urlParams.get('q');
+            if (qParam && QUESTOES_DISCURSIVAS[qParam]) {
+                renderDiscursivaCe(qParam);
+            }
+            if (modo === 'percepcao') switchPlusTab('percepcao');
+        });
+
+        function iniciarCronometroPlus() {
+            timerHandle = setInterval(() => {
+                if (!timerRunning) return;
+                timerSec++;
+                const h = String(Math.floor(timerSec / 3600)).padStart(2, '0');
+                const m = String(Math.floor((timerSec % 3600) / 60)).padStart(2, '0');
+                const s = String(timerSec % 60).padStart(2, '0');
+                const el = document.getElementById('plusTimerDisplay');
+                if (el) el.textContent = `${h}:${m}:${s}`;
+            }, 1000);
+
+            document.getElementById('btnToggleTimer')?.addEventListener('click', () => {
+                timerRunning = !timerRunning;
+                const icon = document.getElementById('iconTimerState');
+                if (icon) icon.className = timerRunning ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+            });
+
+            document.getElementById('btnResetTimer')?.addEventListener('click', () => {
+                timerSec = 0;
+                const el = document.getElementById('plusTimerDisplay');
+                if (el) el.textContent = '00:00:00';
+            });
+        }
+
+        function switchPlusTab(tab) {
+            abaAtiva = tab;
+            const sections = { discursiva: 'secDiscursiva', percepcao: 'secPercepcao' };
+            const btns = { discursiva: 'tabBtnDiscursiva', percepcao: 'tabBtnPercepcao' };
+
+            Object.keys(sections).forEach(k => {
+                const sec = document.getElementById(sections[k]);
+                const btn = document.getElementById(btns[k]);
+                if (k === tab) {
+                    sec?.classList.remove('hidden');
+                    btn.className = 'flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all bg-ufcnavy-700 text-white shadow-sm';
+                } else {
+                    sec?.classList.add('hidden');
+                    btn.className = 'flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100';
+                }
+            });
+        }
+
+        function navegarDiscursiva(delta) {
+            const idx = DISC_IDS.indexOf(discursivaAtualId);
+            const nextIdx = idx + delta;
+            if (nextIdx >= 0 && nextIdx < DISC_IDS.length) {
+                renderDiscursivaCe(DISC_IDS[nextIdx]);
+            }
+        }
+
+        function estimarLinhas(texto) {
+            let total = 0;
+            if (!texto || texto.trim() === '') return total;
+            const paragrafos = texto.split(/\n/);
+            paragrafos.forEach(par => {
+                if (par.trim() === '') {
+                    total += 1;
+                } else {
+                    total += Math.max(1, Math.ceil(par.length / 82));
+                }
+            });
+            return total;
+        }
+
+        function renderDiscursivaCe(id) {
+            discursivaAtualId = id;
+            const d = QUESTOES_DISCURSIVAS[id];
+            if (!d) return;
+
+            const selectEl = document.getElementById('selectDiscursivaCe');
+            if (selectEl) selectEl.value = id;
+
+            const idx = DISC_IDS.indexOf(id);
+            const btnPrev = document.getElementById('btnDiscPrev');
+            const btnNext = document.getElementById('btnDiscNext');
+            if (btnPrev) btnPrev.disabled = idx <= 0;
+            if (btnNext) btnNext.disabled = idx >= DISC_IDS.length - 1;
+
+            document.getElementById('boxEnunciadoDiscursiva').innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-ufcnavy-700 text-white text-xs font-bold px-2.5 py-1 rounded-lg">${d.codigo} (${idx + 1}/${DISC_IDS.length})</span>
+                        <span class="bg-ufcteal-50 text-ufcteal-700 border border-ufcteal-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">${d.origem}</span>
+                        <span class="bg-slate-100 text-slate-700 text-[11px] font-medium px-2.5 py-0.5 rounded-full">${d.area}</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-slate-500">Valor: 100 pontos (A: ${d.pontosA} pts | B: ${d.pontosB} pts)</span>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                    <span class="font-bold text-ufcnavy-700 uppercase text-[10px] tracking-wider block">Competência Avaliada (MEC/DCNs):</span>
+                    <p class="text-slate-700 mt-0.5">${d.competencia}</p>
+                </div>
+
+                <div class="text-xs sm:text-sm text-slate-800 leading-relaxed">${d.contexto}</div>
+
+                <div class="bg-blue-50/70 border-l-4 border-ufcnavy-700 p-4 rounded-r-xl space-y-2 text-xs sm:text-sm font-semibold text-slate-900">
+                    <p>${d.itemA}</p>
+                    <p>${d.itemB}</p>
+                </div>
+            `;
+
+            const saved = JSON.parse(localStorage.getItem(`enade2026_disc_${id}`) || '{}');
+            document.getElementById('textareaDiscA').value = saved.itemA || '';
+            document.getElementById('textareaDiscB').value = saved.itemB || '';
+
+            document.getElementById('painelPadraoDiscursiva').classList.add('hidden');
+            document.getElementById('painelDiagnosticoLocal').classList.add('hidden');
+            document.getElementById('painelCorrecaoIA').classList.add('hidden');
+            document.getElementById('painelApiMonitor').classList.add('hidden');
+            atualizarMetricasDiscursiva();
+
+            document.getElementById('painelPadraoDiscursiva').innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div>
+                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">
+                            Espelho Oficial de Correção (INEP / GEPRO)
+                        </span>
+                        <h3 class="text-base font-extrabold text-ufcnavy-900 mt-1">Padrão de Resposta & Autoavaliação</h3>
+                    </div>
+                    <div class="bg-ufcnavy-900 text-white px-4 py-2 rounded-xl text-center">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-300 block">Nota Autoavaliada</span>
+                        <span id="notaEstimadaDisc" class="text-xl font-extrabold text-ufcteal-400">0 / 100</span>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-extrabold text-ufcnavy-900">Item A (${d.pontosA} pontos)</span>
+                            <label class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 cursor-pointer">
+                                <input type="checkbox" id="chkDiscA" onchange="calcularNotaDiscursiva(${d.pontosA}, ${d.pontosB})" class="rounded text-ufcteal-600">
+                                <span>Atingi o Item A</span>
+                            </label>
+                        </div>
+                        <pre class="whitespace-pre-wrap font-sans text-xs text-slate-800 leading-relaxed bg-white p-3 rounded-lg border border-slate-200">${d.padraoA}</pre>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-extrabold text-ufcnavy-900">Item B (${d.pontosB} pontos)</span>
+                            <label class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 cursor-pointer">
+                                <input type="checkbox" id="chkDiscB" onchange="calcularNotaDiscursiva(${d.pontosA}, ${d.pontosB})" class="rounded text-ufcteal-600">
+                                <span>Atingi o Item B</span>
+                            </label>
+                        </div>
+                        <pre class="whitespace-pre-wrap font-sans text-xs text-slate-800 leading-relaxed bg-white p-3 rounded-lg border border-slate-200">${d.padraoB}</pre>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-xl text-xs text-amber-950">
+                    <strong><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>Atenção à Pegadinha da Banca:</strong> ${d.pegadinha}
+                </div>
+
+                <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200/70 text-xs text-slate-700">
+                    <strong class="text-ufcnavy-900">Fundamentação Teórica (ABNT):</strong> ${d.referencia}
+                </div>
+            `;
+        }
+
+        function inserirSimbolo(simbolo) {
+            const el = document.getElementById(ultimoCampoFocado) || document.getElementById('textareaDiscA');
+            if (!el) return;
+            const start = el.selectionStart || 0;
+            const end = el.selectionEnd || 0;
+            el.value = el.value.substring(0, start) + simbolo + el.value.substring(end);
+            el.focus();
+            el.selectionStart = el.selectionEnd = start + simbolo.length;
+            onDiscursivaInput();
+        }
+
+        function onDiscursivaInput() {
+            const itemA = document.getElementById('textareaDiscA').value;
+            const itemB = document.getElementById('textareaDiscB').value;
+            localStorage.setItem(`enade2026_disc_${discursivaAtualId}`, JSON.stringify({ itemA, itemB }));
+            atualizarMetricasDiscursiva();
+        }
+
+        function atualizarMetricasDiscursiva() {
+            const itemA = document.getElementById('textareaDiscA').value;
+            const itemB = document.getElementById('textareaDiscB').value;
+            const linhas = estimarLinhas(itemA) + estimarLinhas(itemB);
+            const badge = document.getElementById('badgeLinhasDiscursiva');
+            badge.textContent = `${linhas} / 30 linhas`;
+            badge.className = linhas > 30
+                ? 'bg-rose-100 text-rose-800 border border-rose-300 text-xs font-extrabold px-3 py-1 rounded-lg'
+                : 'bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold px-3 py-1 rounded-lg';
+        }
+
+        function limparRascunhoDiscursiva() {
+            if (!confirm('Deseja limpar suas respostas desta questão discursiva?')) return;
+            document.getElementById('textareaDiscA').value = '';
+            document.getElementById('textareaDiscB').value = '';
+            localStorage.removeItem(`enade2026_disc_${discursivaAtualId}`);
+            document.getElementById('painelDiagnosticoLocal').classList.add('hidden');
+            document.getElementById('painelCorrecaoIA').classList.add('hidden');
+            document.getElementById('painelApiMonitor').classList.add('hidden');
+            atualizarMetricasDiscursiva();
+        }
+
+        function baixarTxtDiscursiva() {
+            const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
+            const itemA = document.getElementById('textareaDiscA').value;
+            const itemB = document.getElementById('textareaDiscB').value;
+            const conteudo = `UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS DE RUSSAS\nGEPRO — OFICINA DE QUESTÕES DISCURSIVAS (ENADE 2026)\n\nQUESTÃO: ${d.codigo} — ${d.area}\n\n[ITEM A]\n${itemA}\n\n[ITEM B]\n${itemB}`;
+            const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `discursiva_${discursivaAtualId}_enade2026.txt`;
+            a.click();
+        }
+
+        function togglePadraoDiscursiva() {
+            const panel = document.getElementById('painelPadraoDiscursiva');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function calcularNotaDiscursiva(ptsA, ptsB) {
+            const a = document.getElementById('chkDiscA')?.checked ? ptsA : 0;
+            const b = document.getElementById('chkDiscB')?.checked ? ptsB : 0;
+            const el = document.getElementById('notaEstimadaDisc');
+            if (el) el.textContent = `${a + b} / 100`;
+        }
+
+        // =========================================================================
+        // MODO DE CORREÇÃO 1: DIAGNÓSTICO INSTANTÂNEO LOCAL (OFFLINE)
+        // =========================================================================
+        function normalizarTexto(str) {
+            return (str || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function executarDiagnosticoLocal() {
+            const respA = document.getElementById('textareaDiscA').value.trim();
+            const respB = document.getElementById('textareaDiscB').value.trim();
+
+            if (!respA && !respB) {
+                alert('Escreva sua resposta nos campos do Item A e/ou Item B antes de solicitar o diagnóstico.');
+                return;
+            }
+
+            const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
+            const linhasA = estimarLinhas(respA);
+            const linhasB = estimarLinhas(respB);
+            const linhasTotais = linhasA + linhasB;
+
+            const normA = normalizarTexto(respA);
+            const normB = normalizarTexto(respB);
+
+            let acertosA = 0;
+            const tagsA = d.keywordsA.map(kw => {
+                const ok = kw.patterns.some(p => normA.includes(normalizarTexto(p)));
+                if (ok) acertosA++;
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${ok ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'}">
+                    <i class="fa-solid ${ok ? 'fa-check text-emerald-600' : 'fa-circle-exclamation text-amber-600'}"></i> ${kw.label}
+                </span>`;
+            }).join('');
+
+            let acertosB = 0;
+            const tagsB = d.keywordsB.map(kw => {
+                const ok = kw.patterns.some(p => normB.includes(normalizarTexto(p)));
+                if (ok) acertosB++;
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${ok ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'}">
+                    <i class="fa-solid ${ok ? 'fa-check text-emerald-600' : 'fa-circle-exclamation text-amber-600'}"></i> ${kw.label}
+                </span>`;
+            }).join('');
+
+            // Coesão e memória de cálculo
+            const temCalculoA = /[0-9]/.test(respA) && /[=×÷+\-*\/]/.test(respA);
+            const conectivos = ['portanto', 'dessa forma', 'assim', 'logo', 'alem disso', 'ademais', 'contudo', 'entretanto', 'visto que', 'uma vez que', 'conclui-se', 'recomenda-se'];
+            const qtdConectivos = conectivos.filter(c => (normA + ' ' + normB).includes(c)).length;
+
+            // Sugestão inicial automática dos checkboxes
+            const propA = d.keywordsA.length ? acertosA / d.keywordsA.length : 0;
+            const propB = d.keywordsB.length ? acertosB / d.keywordsB.length : 0;
+            const autoCheckA = propA >= 0.7;
+            const autoCheckB = propB >= 0.65;
+
+            const painel = document.getElementById('painelDiagnosticoLocal');
+            painel.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div>
+                        <span class="bg-ufcnavy-50 text-ufcnavy-700 border border-ufcnavy-200 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">
+                            Diagnóstico Instantâneo • ${d.codigo}
+                        </span>
+                        <h3 class="text-base font-extrabold text-ufcnavy-900 mt-1">Análise de Estrutura, Cálculos e Conceitos</h3>
+                    </div>
+                    <div class="bg-ufcnavy-900 text-white px-4 py-2 rounded-xl text-center">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-300 block">Nota Estimada</span>
+                        <span id="notaDiagLocal" class="text-xl font-extrabold text-amber-400">0 / 100</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                        <span class="text-[10px] font-bold uppercase text-slate-500 block">Extensão da Resposta</span>
+                        <span class="text-base font-extrabold ${linhasTotais > 30 ? 'text-rose-700' : 'text-ufcnavy-900'}">${linhasTotais} / 30 linhas</span>
+                        <p class="text-[11px] text-slate-600 mt-0.5">Item A: ${linhasA} linhas • Item B: ${linhasB} linhas</p>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                        <span class="text-[10px] font-bold uppercase text-slate-500 block">Memória de Cálculo (Item A)</span>
+                        <span class="text-base font-extrabold ${temCalculoA ? 'text-emerald-700' : 'text-amber-700'}">
+                            ${temCalculoA ? 'Demonstrada' : 'Pouco explícita'}
+                        </span>
+                        <p class="text-[11px] text-slate-600 mt-0.5">${temCalculoA ? 'Equações e passos numéricos identificados.' : 'Inclua passo a passo e unidades.'}</p>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                        <span class="text-[10px] font-bold uppercase text-slate-500 block">Coesão Técnica (Item B)</span>
+                        <span class="text-base font-extrabold text-ufcnavy-900">${qtdConectivos} conectivo(s)</span>
+                        <p class="text-[11px] text-slate-600 mt-0.5">${qtdConectivos >= 2 ? 'Boa articulação argumentativa.' : 'Use conectivos conclusivos (Portanto, Dessa forma).'}</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-extrabold text-ufcnavy-900">Núcleos Esperados — Item A (${acertosA}/${d.keywordsA.length})</span>
+                            <label class="inline-flex items-center gap-1.5 font-bold text-emerald-700 cursor-pointer">
+                                <input type="checkbox" id="diagChkA" ${autoCheckA ? 'checked' : ''} onchange="atualizarNotaDiagLocal(${d.pontosA}, ${d.pontosB})">
+                                <span>+${d.pontosA} pts</span>
+                            </label>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">${tagsA}</div>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-extrabold text-ufcnavy-900">Núcleos Esperados — Item B (${acertosB}/${d.keywordsB.length})</span>
+                            <label class="inline-flex items-center gap-1.5 font-bold text-emerald-700 cursor-pointer">
+                                <input type="checkbox" id="diagChkB" ${autoCheckB ? 'checked' : ''} onchange="atualizarNotaDiagLocal(${d.pontosA}, ${d.pontosB})">
+                                <span>+${d.pontosB} pts</span>
+                            </label>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">${tagsB}</div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-xl text-xs text-amber-950">
+                    <strong><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>Verifique antes de finalizar:</strong> ${d.pegadinha}
+                </div>
+            `;
+
+            painel.classList.remove('hidden');
+            atualizarNotaDiagLocal(d.pontosA, d.pontosB);
+            painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function atualizarNotaDiagLocal(ptsA, ptsB) {
+            const a = document.getElementById('diagChkA')?.checked ? ptsA : 0;
+            const b = document.getElementById('diagChkB')?.checked ? ptsB : 0;
+            const el = document.getElementById('notaDiagLocal');
+            if (el) el.textContent = `${a + b} / 100`;
+        }
+
+        // =========================================================================
+        // MODO DE CORREÇÃO 2: IA PADRÃO BANCA INEP EM 1 CLIQUE
+        // =========================================================================
+        function montarPromptBancaINEP() {
+            const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
+            const respA = document.getElementById('textareaDiscA').value.trim() || '(Em branco)';
+            const respB = document.getElementById('textareaDiscB').value.trim() || '(Em branco)';
+            const contextoLimpo = d.contexto.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+            return `Atue como membro rigoroso e acolhedor da Banca Corretora do INEP para o ENADE 2026 de Engenharia de Produção (alinhado às Portarias MEC nº 154, 163 e 276 de 2026).
+
+Avalie a resposta discursiva de um concluinte de Engenharia de Produção da UFC — Campus de Russas (GEPRO) com base no enunciado e no espelho oficial abaixo.
+
+=== QUESTÃO (${d.codigo} — ${d.area}) ===
+Contexto: ${contextoLimpo}
+${d.itemA} (Valor: ${d.pontosA} pontos)
+${d.itemB} (Valor: ${d.pontosB} pontos)
+
+=== ESPELHO OFICIAL DE CORREÇÃO (INEP / GEPRO) ===
+[Padrão Item A]:
+${d.padraoA}
+
+[Padrão Item B]:
+${d.padraoB}
+
+[Pegadinha da Banca]: ${d.pegadinha}
+
+=== RESPOSTA DO ESTUDANTE ===
+[ITEM A]:
+${respA}
+
+[ITEM B]:
+${respB}
+
+=== CRITÉRIOS DA SUA CORREÇÃO ===
+1. Atribua uma nota de 0 a 100 pontos, detalhando separadamente a pontuação do Item A (0 a ${d.pontosA}) e do Item B (0 a ${d.pontosB}).
+2. Confira a memória de cálculo, as fórmulas, as unidades de medida e se o estudante evitou a pegadinha da banca.
+3. Avalie clareza, objetividade, coesão e norma culta (padrão discursivo ENADE de até 30 linhas).
+4. Apresente: (a) Acertos e pontos fortes; (b) Erros conceituais, de cálculo ou omissões; (c) Uma versão aprimorada da resposta dentro do limite de 30 linhas.`;
+        }
+
+        function executarCorrecaoIA1Clique() {
+            const respA = document.getElementById('textareaDiscA').value.trim();
+            const respB = document.getElementById('textareaDiscB').value.trim();
+
+            if (!respA && !respB) {
+                alert('Escreva sua resposta nos campos do Item A e/ou Item B antes de enviar para correção.');
+                return;
+            }
+
+            const prompt = montarPromptBancaINEP();
+            const campo = document.getElementById('campoPromptGerado');
+            campo.value = prompt;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(prompt).catch(() => {});
+            } else {
+                campo.select();
+                try { document.execCommand('copy'); } catch (e) {}
+            }
+
+            const painel = document.getElementById('painelCorrecaoIA');
+            painel.classList.remove('hidden');
+            painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function copiarPromptManualmente() {
+            const campo = document.getElementById('campoPromptGerado');
+            if (!campo) return;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(campo.value);
+            } else {
+                campo.select();
+                document.execCommand('copy');
+            }
+            const btnTxt = document.getElementById('txtBtnCopiarManual');
+            if (btnTxt) {
+                btnTxt.textContent = 'Copiado!';
+                setTimeout(() => { btnTxt.textContent = 'Copiar Novamente'; }, 2000);
+            }
+        }
+
+        // =========================================================================
+        // MODO DE CORREÇÃO 3 (OPCIONAL): MODO MONITOR VIA CHAVE API GEMINI
+        // =========================================================================
+        function abrirModalApi() {
+            document.getElementById('inputChaveApi').value = localStorage.getItem('gepro_gemini_api_key') || '';
+            document.getElementById('modalApiMonitor').classList.remove('hidden');
+        }
+
+        function fecharModalApi() {
+            document.getElementById('modalApiMonitor').classList.add('hidden');
+        }
+
+        function salvarChaveApi() {
+            const chave = document.getElementById('inputChaveApi').value.trim();
+            if (!chave) {
+                alert('Cole uma chave válida ou clique em Remover.');
+                return;
+            }
+            localStorage.setItem('gepro_gemini_api_key', chave);
+            verificarChaveApiSalva();
+            fecharModalApi();
+        }
+
+        function removerChaveApi() {
+            localStorage.removeItem('gepro_gemini_api_key');
+            document.getElementById('inputChaveApi').value = '';
+            verificarChaveApiSalva();
+            fecharModalApi();
+        }
+
+        function verificarChaveApiSalva() {
+            const chave = localStorage.getItem('gepro_gemini_api_key');
+            const btn = document.getElementById('btnCorrecaoApiDireta');
+            if (!btn) return;
+            if (chave) {
+                btn.classList.remove('hidden');
+                btn.classList.add('flex');
+            } else {
+                btn.classList.add('hidden');
+                btn.classList.remove('flex');
+            }
+        }
+
+        async function executarCorrecaoApiMonitor() {
+            const chave = localStorage.getItem('gepro_gemini_api_key');
+            if (!chave) { abrirModalApi(); return; }
+
+            const respA = document.getElementById('textareaDiscA').value.trim();
+            const respB = document.getElementById('textareaDiscB').value.trim();
+            if (!respA && !respB) {
+                alert('Escreva sua resposta antes
