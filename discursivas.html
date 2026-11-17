@@ -603,10 +603,13 @@
         }
 
         function limparRascunhoDiscursiva() {
-            if (!confirm('Deseja limpar suas respostas desta questão discursiva?')) return;
+            if (!confirm('Deseja limpar suas respostas (texto e foto anexada) desta questão discursiva?')) return;
             document.getElementById('textareaDiscA').value = '';
             document.getElementById('textareaDiscB').value = '';
             localStorage.removeItem(`enade2026_disc_${discursivaAtualId}`);
+            if (typeof window.removerFotoManuscrita === 'function') {
+                window.removerFotoManuscrita(true);
+            }
             atualizarMetricasDiscursiva();
         }
 
@@ -816,15 +819,159 @@
         }
     };
 
+    let fotoManuscritaAtual = null;
+
     function norm(txt) {
         return (txt || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
+    function processarImagemManuscrita(file) {
+        return new Promise(function (resolve, reject) {
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const img = new Image();
+                img.onload = function () {
+                    const MAX_DIM = 1800;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > MAX_DIM || h > MAX_DIM) {
+                        if (w > h) {
+                            h = Math.round((h * MAX_DIM) / w);
+                            w = MAX_DIM;
+                        } else {
+                            w = Math.round((w * MAX_DIM) / h);
+                            h = MAX_DIM;
+                        }
+                    }
+                    const canvas = document.createElement("canvas");
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext("2d");
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.86);
+                    const base64 = dataUrl.split(",")[1];
+                    resolve({
+                        dataUrl: dataUrl,
+                        base64: base64,
+                        mimeType: "image/jpeg",
+                        width: w,
+                        height: h,
+                        nome: file.name || "folha_manuscrita.jpg"
+                    });
+                };
+                img.onerror = function () { reject(new Error("Não foi possível ler a imagem selecionada.")); };
+                img.src = ev.target.result;
+            };
+            reader.onerror = function () { reject(new Error("Falha ao carregar o arquivo de imagem.")); };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    window.aoSelecionarFotoManuscrita = async function (inputEl) {
+        const file = inputEl && inputEl.files && inputEl.files[0];
+        if (!file) return;
+        const statusEl = document.getElementById("geproFotoStatus");
+        if (statusEl) {
+            statusEl.textContent = "Processando e otimizando legibilidade da folha...";
+            statusEl.className = "text-[11px] font-semibold text-ufcnavy-700";
+        }
+        try {
+            fotoManuscritaAtual = await processarImagemManuscrita(file);
+            atualizarPreviewFotoManuscrita();
+        } catch (err) {
+            alert(err.message || "Erro ao processar a foto. Tente outra imagem (JPG ou PNG).");
+            window.removerFotoManuscrita(true);
+        }
+    };
+
+    window.removerFotoManuscrita = function (silencioso) {
+        fotoManuscritaAtual = null;
+        const inputEl = document.getElementById("inputFotoManuscrita");
+        if (inputEl) inputEl.value = "";
+        atualizarPreviewFotoManuscrita();
+        if (!silencioso) {
+            document.getElementById("geproDossieBanca")?.classList.add("hidden");
+        }
+    };
+
+    window.abrirAmpliacaoFotoManuscrita = function () {
+        if (!fotoManuscritaAtual) return;
+        const imgModal = document.getElementById("geproImgAmpliada");
+        const modal = document.getElementById("geproModalPreviewFoto");
+        if (imgModal && modal) {
+            imgModal.src = fotoManuscritaAtual.dataUrl;
+            modal.classList.remove("hidden");
+        }
+    };
+
+    window.fecharAmpliacaoFotoManuscrita = function () {
+        document.getElementById("geproModalPreviewFoto")?.classList.add("hidden");
+    };
+
+    function atualizarPreviewFotoManuscrita() {
+        const boxVazio = document.getElementById("geproFotoBoxVazio");
+        const boxPreview = document.getElementById("geproFotoBoxPreview");
+        const thumb = document.getElementById("geproFotoThumb");
+        const info = document.getElementById("geproFotoInfo");
+        const statusEl = document.getElementById("geproFotoStatus");
+        if (!boxVazio || !boxPreview) return;
+
+        if (fotoManuscritaAtual) {
+            boxVazio.classList.add("hidden");
+            boxPreview.classList.remove("hidden");
+            if (thumb) thumb.src = fotoManuscritaAtual.dataUrl;
+            if (info) {
+                info.textContent = fotoManuscritaAtual.nome + " (" + fotoManuscritaAtual.width + "×" + fotoManuscritaAtual.height + " px • Pronta para leitura)";
+            }
+        } else {
+            boxPreview.classList.add("hidden");
+            boxVazio.classList.remove("hidden");
+            if (statusEl) {
+                statusEl.textContent = "Caneta preta • Enquadre reto sem sombra • Identifique Item A e Item B";
+                statusEl.className = "text-[11px] text-slate-600";
+            }
+        }
+    }
+
     function gerarPromptLacrado() {
         const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
-        const respA = document.getElementById("textareaDiscA").value.trim() || "(Em branco)";
-        const respB = document.getElementById("textareaDiscB").value.trim() || "(Em branco)";
+        const respA = document.getElementById("textareaDiscA").value.trim();
+        const respB = document.getElementById("textareaDiscB").value.trim();
         const contextoLimpo = d.contexto.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        const temFoto = !!fotoManuscritaAtual;
+
+        let blocoResposta = "";
+        if (temFoto) {
+            blocoResposta =
+                "=== RESPOSTA MANUSCRITA DO ESTUDANTE (IMAGEM ANEXA) ===\n" +
+                "A resposta do estudante está na imagem anexa da folha definitiva pautada (30 linhas).\n" +
+                "IMPORTANTE: Antes de atribuir qualquer nota, faça a TRANSCRIÇÃO FIEL do texto e das equações manuscritas lidas na imagem (separando Item A e Item B) e verifique quantas linhas numeradas foram ocupadas.\n";
+            if (respA || respB) {
+                blocoResposta += "\n[Rascunho complementar digitado pelo estudante]:\n" +
+                                 "[ITEM A]: " + (respA || "(Não digitado)") + "\n" +
+                                 "[ITEM B]: " + (respB || "(Não digitado)") + "\n";
+            }
+        } else {
+            blocoResposta =
+                "=== RESPOSTA DO ESTUDANTE ===\n" +
+                "[ITEM A]:\n" + (respA || "(Em branco)") + "\n\n" +
+                "[ITEM B]:\n" + (respB || "(Em branco)") + "\n";
+        }
+
+        const criterios = temFoto
+            ? "=== CRITÉRIOS DA CORREÇÃO ===\n" +
+              "0. TRANSCRIÇÃO DE CONFERÊNCIA: Transcreva exatamente o que leu na imagem manuscrita (Item A e Item B) e informe o total de linhas utilizadas.\n" +
+              "1. Atribua nota de 0 a 100 pontos, detalhando Item A (0 a " + d.pontosA + ") e Item B (0 a " + d.pontosB + ").\n" +
+              "2. Verifique cálculos, fórmulas, unidades e se evitou a pegadinha da banca.\n" +
+              "3. Avalie legibilidade/organização, clareza, coesão e norma culta (limite ENADE de 30 linhas).\n" +
+              "4. Indique acertos, lacunas e um texto modelo aprimorado dentro de 30 linhas."
+            : "=== CRITÉRIOS DA CORREÇÃO ===\n" +
+              "1. Atribua nota de 0 a 100 pontos, detalhando Item A (0 a " + d.pontosA + ") e Item B (0 a " + d.pontosB + ").\n" +
+              "2. Verifique cálculos, fórmulas, unidades e se evitou a pegadinha da banca.\n" +
+              "3. Avalie clareza, coesão e norma culta (limite ENADE de 30 linhas).\n" +
+              "4. Indique acertos, lacunas e um texto modelo aprimorado dentro de 30 linhas.";
 
         return "Atue como membro rigoroso e acolhedor da Banca Corretora do INEP para o ENADE 2026 de Engenharia de Produção (Portarias MEC nº 154, 163 e 276 de 2026).\n\n" +
                "Avalie a resposta discursiva de um concluinte de Engenharia de Produção com base no enunciado e no espelho oficial:\n\n" +
@@ -836,14 +983,8 @@
                "[Padrão Item A]:\n" + d.padraoA + "\n\n" +
                "[Padrão Item B]:\n" + d.padraoB + "\n\n" +
                "[Pegadinha da Banca]: " + d.pegadinha + "\n\n" +
-               "=== RESPOSTA DO ESTUDANTE ===\n" +
-               "[ITEM A]:\n" + respA + "\n\n" +
-               "[ITEM B]:\n" + respB + "\n\n" +
-               "=== CRITÉRIOS DA CORREÇÃO ===\n" +
-               "1. Atribua nota de 0 a 100 pontos, detalhando Item A (0 a " + d.pontosA + ") e Item B (0 a " + d.pontosB + ").\n" +
-               "2. Verifique cálculos, fórmulas, unidades e se evitou a pegadinha da banca.\n" +
-               "3. Avalie clareza, coesão e norma culta (limite ENADE de 30 linhas).\n" +
-               "4. Indique acertos, lacunas e um texto modelo aprimorado dentro de 30 linhas.";
+               blocoResposta + "\n" +
+               criterios;
     }
 
     function avaliarLocalmente(id, respA, respB) {
@@ -924,35 +1065,54 @@
         };
     }
 
-    function renderizarDossieDeslacrado(av, textoIA) {
+    function renderizarDossieDeslacrado(av, textoIA, opts) {
+        opts = opts || {};
         const d = av.d;
         const protocolo = "INEP-2026-" + d.codigo.replace(/\s+/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
+        const temFoto = !!opts.temFoto;
+        const apenasFotoSemTexto = temFoto && !opts.temTexto;
 
         const listaAcertos = av.acertosA.concat(av.acertosB);
         const listaLacunas = av.lacunasA.concat(av.lacunasB);
 
-        const blocoIA = textoIA
-            ? '<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">' +
-                  '<div class="flex items-center gap-2 text-xs font-extrabold text-ufcnavy-900 uppercase tracking-wider">' +
-                      '<i class="fa-solid fa-feather-pointed text-ufcteal-600"></i>' +
-                      '<span>Parecer Detalhado da Banca Avaliadora</span>' +
-                  '</div>' +
-                  '<div class="text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">' + textoIA.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</div>' +
-              '</div>'
-            : '<div class="grid md:grid-cols-2 gap-4 text-xs">' +
-                  '<div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 space-y-2">' +
-                      '<h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i>Elementos Validados pela Banca (' + listaAcertos.length + ')</h4>' +
-                      (listaAcertos.length
-                          ? '<ul class="space-y-1.5 text-emerald-950 list-disc list-inside">' + listaAcertos.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>'
-                          : '<p class="text-emerald-800 italic">Nenhum núcleo conceitual completo foi identificado automaticamente. Compare sua linha de raciocínio com os pontos abaixo.</p>') +
-                  '</div>' +
-                  '<div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 space-y-2">' +
-                      '<h4 class="font-extrabold text-amber-950 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-amber-600"></i>Pontos a Aprimorar no Texto (' + listaLacunas.length + ')</h4>' +
-                      (listaLacunas.length
-                          ? '<ul class="space-y-1.5 text-amber-950 list-disc list-inside">' + listaLacunas.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>'
-                          : '<p class="text-emerald-800 font-semibold">Todos os núcleos conceituais e numéricos esperados pelo espelho foram contemplados!</p>') +
-                  '</div>' +
-              '</div>';
+        let blocoPrincipal = "";
+        if (textoIA) {
+            blocoPrincipal =
+                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">' +
+                    '<div class="flex items-center justify-between gap-2 text-xs font-extrabold text-ufcnavy-900 uppercase tracking-wider">' +
+                        '<span class="flex items-center gap-2"><i class="fa-solid fa-feather-pointed text-ufcteal-600"></i>Parecer Detalhado da Banca Avaliadora' + (temFoto ? ' (Leitura de Folha Manuscrita)' : '') + '</span>' +
+                    '</div>' +
+                    '<div class="text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">' + textoIA.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</div>' +
+                '</div>';
+        } else if (apenasFotoSemTexto) {
+            blocoPrincipal =
+                '<div class="bg-ufcnavy-50/70 border border-ufcnavy-200 rounded-xl p-4 space-y-3 text-xs">' +
+                    '<div class="flex flex-col sm:flex-row sm:items-center gap-3">' +
+                        '<img src="' + fotoManuscritaAtual.dataUrl + '" alt="Folha manuscrita" class="w-24 h-28 object-cover rounded-lg border border-slate-300 shadow-sm shrink-0 cursor-pointer" onclick="abrirAmpliacaoFotoManuscrita()" title="Clique para ampliar">' +
+                        '<div class="space-y-1.5">' +
+                            '<span class="bg-ufcnavy-700 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">Folha Manuscrita Anexada</span>' +
+                            '<h4 class="font-extrabold text-ufcnavy-900 text-sm">Pronta para correção visual por IA</h4>' +
+                            '<p class="text-slate-700 leading-relaxed">Para corrigir automaticamente aqui nesta tela, ative o <strong>Modo Docente</strong> (no rodapé). Ou clique em um dos botões abaixo para copiar o dossiê cego e anexar/colar esta foto diretamente no <strong>Gemini</strong> ou <strong>ChatGPT</strong>.</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        } else {
+            blocoPrincipal =
+                '<div class="grid md:grid-cols-2 gap-4 text-xs">' +
+                    '<div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 space-y-2">' +
+                        '<h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i>Elementos Validados pela Banca (' + listaAcertos.length + ')</h4>' +
+                        (listaAcertos.length
+                            ? '<ul class="space-y-1.5 text-emerald-950 list-disc list-inside">' + listaAcertos.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>'
+                            : '<p class="text-emerald-800 italic">Nenhum núcleo conceitual completo foi identificado automaticamente. Compare sua linha de raciocínio com os pontos abaixo.</p>') +
+                    '</div>' +
+                    '<div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 space-y-2">' +
+                        '<h4 class="font-extrabold text-amber-950 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-amber-600"></i>Pontos a Aprimorar no Texto (' + listaLacunas.length + ')</h4>' +
+                        (listaLacunas.length
+                            ? '<ul class="space-y-1.5 text-amber-950 list-disc list-inside">' + listaLacunas.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>'
+                            : '<p class="text-emerald-800 font-semibold">Todos os núcleos conceituais e numéricos esperados pelo espelho foram contemplados!</p>') +
+                    '</div>' +
+                '</div>';
+        }
 
         const alertaArmadilhaHtml = av.caiuArmadilha
             ? '<div class="bg-rose-50 border-l-4 border-rose-600 p-3.5 rounded-r-xl text-xs text-rose-950">' +
@@ -960,6 +1120,38 @@
               '</div>'
             : '<div class="bg-slate-50 border-l-4 border-ufcnavy-700 p-3.5 rounded-r-xl text-xs text-slate-800">' +
                   '<strong><i class="fa-solid fa-shield-halved text-ufcnavy-700 mr-1"></i>Radar de Pegadinha da Banca:</strong> ' + d.pegadinha +
+              '</div>';
+
+        const cardNotaTopo = temFoto
+            ? '<div class="bg-ufcnavy-900 text-white px-5 py-2.5 rounded-xl text-center shadow-sm">' +
+                  '<span class="text-[10px] uppercase tracking-wider text-slate-300 block">Correção Manuscrita</span>' +
+                  '<span class="text-base sm:text-lg font-extrabold text-amber-400">Folha A4 Anexada</span>' +
+                  '<span class="text-[10px] text-slate-300 block">A: ' + d.pontosA + ' pts • B: ' + d.pontosB + ' pts</span>' +
+              '</div>'
+            : '<div class="bg-ufcnavy-900 text-white px-5 py-2.5 rounded-xl text-center shadow-sm">' +
+                  '<span class="text-[10px] uppercase tracking-wider text-slate-300 block">Nota da Banca</span>' +
+                  '<span class="text-2xl font-extrabold ' + av.corNota + '">' + av.notaFinal + ' / 100</span>' +
+                  '<span class="text-[10px] text-slate-300 block">A: ' + av.ptsA + '/' + d.pontosA + ' • B: ' + av.ptsB + '/' + d.pontosB + '</span>' +
+              '</div>';
+
+        const indicadoresHtml = apenasFotoSemTexto
+            ? ''
+            : '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">' +
+                  '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
+                      '<span class="text-[10px] font-bold uppercase text-slate-500 block">Folha Definitiva (30 Linhas)</span>' +
+                      '<strong class="text-sm ' + (av.excessoLinhas ? 'text-rose-700' : 'text-ufcnavy-900') + '">' + av.linhas + ' / 30 linhas</strong>' +
+                      '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.excessoLinhas ? 'Excedeu o limite (-5 pts)' : 'Dentro do limite oficial') + '</span>' +
+                  '</div>' +
+                  '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
+                      '<span class="text-[10px] font-bold uppercase text-slate-500 block">Memória de Cálculo (Item A)</span>' +
+                      '<strong class="text-sm ' + (av.temMemoriaA ? 'text-emerald-700' : 'text-amber-700') + '">' + (av.temMemoriaA ? 'Explicitada' : 'Sumária') + '</strong>' +
+                      '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.temMemoriaA ? 'Desenvolvimento numérico presente' : 'Registre fórmulas e etapas') + '</span>' +
+                  '</div>' +
+                  '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
+                      '<span class="text-[10px] font-bold uppercase text-slate-500 block">Coesão Argumentativa (Item B)</span>' +
+                      '<strong class="text-sm text-ufcnavy-900">' + av.qtdConectivos + ' articulador(es)</strong>' +
+                      '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.qtdConectivos >= 2 ? 'Encadeamento técnico adequado' : 'Reforce conectivos conclusivos') + '</span>' +
+                  '</div>' +
               '</div>';
 
         return (
@@ -970,34 +1162,13 @@
                         '<span class="font-mono text-[11px] font-bold text-slate-500">Protocolo: ' + protocolo + '</span>' +
                     '</div>' +
                     '<h3 class="text-base sm:text-lg font-extrabold text-ufcnavy-900 mt-1">Boletim Individual de Correção — ' + d.codigo + '</h3>' +
-                    '<p class="text-[11px] text-slate-500">' + av.conceito + ' • Matriz ENADE 2026 (Portarias MEC nº 154, 163 e 276/2026)</p>' +
+                    '<p class="text-[11px] text-slate-500">' + (temFoto ? 'Modalidade Manuscrita (Folha A4)' : av.conceito) + ' • Matriz ENADE 2026 (Portarias MEC nº 154, 163 e 276/2026)</p>' +
                 '</div>' +
-                '<div class="bg-ufcnavy-900 text-white px-5 py-2.5 rounded-xl text-center shadow-sm">' +
-                    '<span class="text-[10px] uppercase tracking-wider text-slate-300 block">Nota da Banca</span>' +
-                    '<span class="text-2xl font-extrabold ' + av.corNota + '">' + av.notaFinal + ' / 100</span>' +
-                    '<span class="text-[10px] text-slate-300 block">A: ' + av.ptsA + '/' + d.pontosA + ' • B: ' + av.ptsB + '/' + d.pontosB + '</span>' +
-                '</div>' +
+                cardNotaTopo +
             '</div>' +
 
-            '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">' +
-                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
-                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Folha Definitiva (30 Linhas)</span>' +
-                    '<strong class="text-sm ' + (av.excessoLinhas ? 'text-rose-700' : 'text-ufcnavy-900') + '">' + av.linhas + ' / 30 linhas</strong>' +
-                    '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.excessoLinhas ? 'Excedeu o limite (-5 pts)' : 'Dentro do limite oficial') + '</span>' +
-                '</div>' +
-                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
-                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Memória de Cálculo (Item A)</span>' +
-                    '<strong class="text-sm ' + (av.temMemoriaA ? 'text-emerald-700' : 'text-amber-700') + '">' + (av.temMemoriaA ? 'Explicitada' : 'Sumária') + '</strong>' +
-                    '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.temMemoriaA ? 'Desenvolvimento numérico presente' : 'Registre fórmulas e etapas') + '</span>' +
-                '</div>' +
-                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
-                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Coesão Argumentativa (Item B)</span>' +
-                    '<strong class="text-sm text-ufcnavy-900">' + av.qtdConectivos + ' articulador(es)</strong>' +
-                    '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.qtdConectivos >= 2 ? 'Encadeamento técnico adequado' : 'Reforce conectivos conclusivos') + '</span>' +
-                '</div>' +
-            '</div>' +
-
-            blocoIA +
+            indicadoresHtml +
+            blocoPrincipal +
             alertaArmadilhaHtml +
 
             '<div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">' +
@@ -1017,8 +1188,10 @@
     window.submeterBancaAvaliadora = async function () {
         const respA = document.getElementById("textareaDiscA").value.trim();
         const respB = document.getElementById("textareaDiscB").value.trim();
-        if (!respA && !respB) {
-            alert("Redija sua resposta nos campos do Item A e/ou Item B antes de submeter à Banca Avaliadora.");
+        const temFoto = !!fotoManuscritaAtual;
+
+        if (!respA && !respB && !temFoto) {
+            alert("Redija sua resposta nos campos do Item A e/ou Item B, ou anexe uma foto nítida da folha manuscrita antes de submeter à Banca Avaliadora.");
             return;
         }
 
@@ -1033,9 +1206,9 @@
                     '<i class="fa-solid fa-stamp text-xl"></i>' +
                 '</div>' +
                 '<div>' +
-                    '<span class="text-[10px] font-extrabold uppercase tracking-widest text-ufcteal-700 bg-ufcteal-50 border border-ufcteal-200 px-3 py-0.5 rounded-full">Malote Lacrado • ' + d.codigo + '</span>' +
-                    '<h3 class="text-base font-extrabold text-ufcnavy-900 mt-2" id="geproStatusEtapa">Lacrado e protocolado — Recebendo folha discursiva...</h3>' +
-                    '<p class="text-xs text-slate-500 mt-1">A Banca Avaliadora (INEP / GEPRO) está auditando sua resposta. Aguarde o parecer oficial.</p>' +
+                    '<span class="text-[10px] font-extrabold uppercase tracking-widest text-ufcteal-700 bg-ufcteal-50 border border-ufcteal-200 px-3 py-0.5 rounded-full">Malote Lacrado • ' + d.codigo + (temFoto ? ' • Manuscrita' : '') + '</span>' +
+                    '<h3 class="text-base font-extrabold text-ufcnavy-900 mt-2" id="geproStatusEtapa">' + (temFoto ? 'Lacrado e protocolado — Lendo caligrafia da folha A4...' : 'Lacrado e protocolado — Recebendo folha discursiva...') + '</h3>' +
+                    '<p class="text-xs text-slate-500 mt-1">A Banca Avaliadora está auditando sua resposta segundo a matriz do ENADE 2026. Aguarde o parecer oficial.</p>' +
                 '</div>' +
                 '<div class="max-w-md mx-auto bg-slate-100 rounded-full h-2 overflow-hidden">' +
                     '<div id="geproBarraSuspense" class="bg-ufcnavy-700 h-full transition-all duration-700" style="width: 25%"></div>' +
@@ -1043,11 +1216,17 @@
             '</div>';
         painel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-        const etapas = [
-            { pct: "55%", txt: "Auditando memória de cálculo, fórmulas e unidades dimensionais..." },
-            { pct: "85%", txt: "Conferindo critérios das Portarias MEC nº 154, 163 e 276/2026..." },
-            { pct: "100%", txt: "Parecer consolidado — Deslacrando boletim individual..." }
-        ];
+        const etapas = temFoto
+            ? [
+                { pct: "55%", txt: "Transcrevendo equações, unidades e conferindo as 30 linhas..." },
+                { pct: "85%", txt: "Auditando critérios das Portarias MEC nº 154, 163 e 276/2026..." },
+                { pct: "100%", txt: "Parecer consolidado — Deslacrando boletim individual..." }
+              ]
+            : [
+                { pct: "55%", txt: "Auditando memória de cálculo, fórmulas e unidades dimensionais..." },
+                { pct: "85%", txt: "Conferindo critérios das Portarias MEC nº 154, 163 e 276/2026..." },
+                { pct: "100%", txt: "Parecer consolidado — Deslacrando boletim individual..." }
+              ];
 
         const t1 = setTimeout(function () {
             const st = document.getElementById("geproStatusEtapa");
@@ -1071,12 +1250,21 @@
 
         if (chaveApi) {
             try {
+                const parts = [{ text: gerarPromptLacrado() }];
+                if (temFoto && fotoManuscritaAtual) {
+                    parts.push({
+                        inline_data: {
+                            mime_type: fotoManuscritaAtual.mimeType,
+                            data: fotoManuscritaAtual.base64
+                        }
+                    });
+                }
                 const respApi = await fetch(
                     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(chaveApi),
                     {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: gerarPromptLacrado() }] }] })
+                        body: JSON.stringify({ contents: [{ parts: parts }] })
                     }
                 );
                 const dados = await respApi.json();
@@ -1092,7 +1280,10 @@
         clearTimeout(t1);
         clearTimeout(t2);
 
-        painel.innerHTML = renderizarDossieDeslacrado(avaliacaoLocal, textoIA);
+        painel.innerHTML = renderizarDossieDeslacrado(avaliacaoLocal, textoIA, {
+            temFoto: temFoto,
+            temTexto: !!(respA || respB)
+        });
     };
 
     function copiarTextoAreaTransferencia(texto) {
@@ -1128,15 +1319,18 @@
             aviso.id = "geproAvisoCopia";
             dossie.appendChild(aviso);
         }
+        const extraFoto = fotoManuscritaAtual
+            ? ' <strong>Lembre-se de anexar a foto da folha manuscrita (+) antes de enviar!</strong>'
+            : '';
         if (destino === "chatgpt") {
             aviso.className = "bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2";
             aviso.innerHTML =
-                '<span><i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i><strong>Dossiê enviado ao ChatGPT!</strong> Na aba que abriu, basta pressionar <strong>Enter</strong> (cópia também salva na área de transferência).</span>' +
+                '<span><i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i><strong>Dossiê enviado ao ChatGPT!</strong> Na aba que abriu, basta pressionar <strong>Enter</strong> (cópia também salva na área de transferência).' + extraFoto + '</span>' +
                 '<button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-950 font-bold px-1">✕</button>';
         } else {
             aviso.className = "bg-ufcnavy-50 border border-ufcnavy-300 text-ufcnavy-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2";
             aviso.innerHTML =
-                '<span><i class="fa-solid fa-clipboard-check text-ufcnavy-700 mr-1.5"></i><strong>Dossiê copiado para a área de transferência!</strong> O Google Gemini abre a tela inicial por padrão — clique na caixa de mensagem e pressione <strong>Ctrl + V</strong> e <strong>Enter</strong>.</span>' +
+                '<span><i class="fa-solid fa-clipboard-check text-ufcnavy-700 mr-1.5"></i><strong>Dossiê copiado para a área de transferência!</strong> O Google Gemini abre a tela inicial por padrão — clique na caixa de mensagem e pressione <strong>Ctrl + V</strong> e <strong>Enter</strong>.' + extraFoto + '</span>' +
                 '<button type="button" onclick="this.parentElement.remove()" class="text-ufcnavy-700 hover:text-ufcnavy-950 font-bold px-1">✕</button>';
         }
     }
@@ -1210,6 +1404,48 @@
         const espelho = document.getElementById("painelPadraoDiscursiva");
         if (!espelho || document.getElementById("geproCardSubmissao")) return;
 
+        // Injeta o uploader de foto manuscrita logo acima do Item A na Folha de Resposta
+        const labelItemA = document.querySelector('label[for="textareaDiscA"]');
+        if (labelItemA && labelItemA.parentElement && !document.getElementById("geproUploadManuscrita")) {
+            const boxUploadHtml =
+                '<div id="geproUploadManuscrita" class="bg-ufcnavy-50/70 border border-dashed border-ufcnavy-300 rounded-xl p-3.5 space-y-2">' +
+                    '<input type="file" id="inputFotoManuscrita" accept="image/*" class="hidden" onchange="aoSelecionarFotoManuscrita(this)">' +
+                    '<div id="geproFotoBoxVazio" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+                        '<div class="flex items-start gap-2.5">' +
+                            '<span class="w-8 h-8 rounded-lg bg-ufcnavy-700 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">' +
+                                '<i class="fa-solid fa-camera text-sm"></i>' +
+                            '</span>' +
+                            '<div>' +
+                                '<div class="flex flex-wrap items-center gap-1.5">' +
+                                    '<span class="text-xs font-extrabold text-ufcnavy-900">Treino Manuscrito (Folha A4 Impressa)</span>' +
+                                    '<span class="bg-amber-200/80 text-amber-950 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded">Opcional</span>' +
+                                '</div>' +
+                                '<p id="geproFotoStatus" class="text-[11px] text-slate-600 mt-0.5">Caneta preta • Enquadre reto sem sombra • Identifique Item A e Item B</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<button type="button" onclick="document.getElementById(\'inputFotoManuscrita\').click()" class="shrink-0 bg-white hover:bg-ufcnavy-50 text-ufcnavy-900 border border-ufcnavy-300 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer">' +
+                            '<i class="fa-solid fa-image text-ufcteal-600"></i>' +
+                            '<span>Anexar Foto da Folha</span>' +
+                        '</button>' +
+                    '</div>' +
+                    '<div id="geproFotoBoxPreview" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2.5 rounded-lg border border-emerald-300">' +
+                        '<div class="flex items-center gap-3">' +
+                            '<img id="geproFotoThumb" src="" alt="Prévia da folha manuscrita" onclick="abrirAmpliacaoFotoManuscrita()" class="w-12 h-14 object-cover rounded-md border border-slate-300 cursor-pointer shrink-0" title="Clique para ampliar">' +
+                            '<div>' +
+                                '<span class="text-[10px] font-extrabold uppercase text-emerald-700 block"><i class="fa-solid fa-circle-check mr-1"></i>Folha Manuscrita Anexada</span>' +
+                                '<p id="geproFotoInfo" class="text-xs font-bold text-slate-800 break-all"></p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-2 shrink-0">' +
+                            '<button type="button" onclick="abrirAmpliacaoFotoManuscrita()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg text-[11px] cursor-pointer"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Ampliar</button>' +
+                            '<button type="button" onclick="document.getElementById(\'inputFotoManuscrita\').click()" class="bg-ufcnavy-50 hover:bg-ufcnavy-100 text-ufcnavy-900 font-bold px-2.5 py-1.5 rounded-lg text-[11px] cursor-pointer">Trocar</button>' +
+                            '<button type="button" onclick="removerFotoManuscrita(false)" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-2.5 py-1.5 rounded-lg text-[11px] cursor-pointer" title="Remover foto">✕</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            labelItemA.parentElement.insertAdjacentHTML("beforebegin", boxUploadHtml);
+        }
+
         const cardSubmissao =
             '<div id="geproCardSubmissao" class="bg-gradient-to-r from-ufcnavy-900 via-ufcnavy-700 to-ufcnavy-900 text-white rounded-2xl p-5 shadow-md border border-ufcnavy-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
                 '<div class="space-y-1">' +
@@ -1255,8 +1491,23 @@
         const sel = document.getElementById("selectDiscursivaCe");
         const prev = document.getElementById("btnDiscPrev");
         const next = document.getElementById("btnDiscNext");
+        const modalFotoHtml =
+            '<div id="geproModalPreviewFoto" onclick="if(event.target===this) fecharAmpliacaoFotoManuscrita()" class="hidden fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4">' +
+                '<div class="bg-white rounded-2xl max-w-3xl w-full p-3 shadow-2xl space-y-2">' +
+                    '<div class="flex items-center justify-between px-2 pt-1">' +
+                        '<span class="text-xs font-extrabold text-ufcnavy-900">Conferência de Legibilidade — Folha Manuscrita</span>' +
+                        '<button type="button" onclick="fecharAmpliacaoFotoManuscrita()" class="text-slate-500 hover:text-slate-900 font-bold px-2 py-0.5">✕</button>' +
+                    '</div>' +
+                    '<div class="max-h-[80vh] overflow-auto flex justify-center bg-slate-100 rounded-xl p-2">' +
+                        '<img id="geproImgAmpliada" src="" alt="Folha ampliada" class="max-w-full h-auto rounded">' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        document.body.insertAdjacentHTML("beforeend", modalFotoHtml);
+
         const fecharDossie = function () {
             document.getElementById("geproDossieBanca")?.classList.add("hidden");
+            window.removerFotoManuscrita(true);
         };
         sel?.addEventListener("change", fecharDossie);
         prev?.addEventListener("click", fecharDossie);
