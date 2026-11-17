@@ -827,12 +827,12 @@
         const contextoLimpo = d.contexto.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 
         return "Atue como membro rigoroso e acolhedor da Banca Corretora do INEP para o ENADE 2026 de Engenharia de Produção (Portarias MEC nº 154, 163 e 276 de 2026).\n\n" +
-               "Avalie a resposta discursiva de um concluinte de Engenharia de Produção da UFC — Campus de Russas (GEPRO) com base no enunciado e no espelho oficial:\n\n" +
+               "Avalie a resposta discursiva de um concluinte de Engenharia de Produção com base no enunciado e no espelho oficial:\n\n" +
                "=== QUESTÃO (" + d.codigo + " — " + d.area + ") ===\n" +
                "Contexto: " + contextoLimpo + "\n" +
                d.itemA + " (Valor: " + d.pontosA + " pontos)\n" +
                d.itemB + " (Valor: " + d.pontosB + " pontos)\n\n" +
-               "=== ESPELHO OFICIAL (INEP / GEPRO) ===\n" +
+               "=== ESPELHO OFICIAL DE CORREÇÃO (PADRÃO INEP) ===\n" +
                "[Padrão Item A]:\n" + d.padraoA + "\n\n" +
                "[Padrão Item B]:\n" + d.padraoB + "\n\n" +
                "[Pegadinha da Banca]: " + d.pegadinha + "\n\n" +
@@ -1128,37 +1128,41 @@
             aviso.id = "geproAvisoCopia";
             dossie.appendChild(aviso);
         }
-        const nomePlataforma = destino === "chatgpt" ? "ChatGPT" : "Google Gemini";
-        aviso.className = "bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2 animate-fade-in";
-        aviso.innerHTML =
-            '<span><i class="fa-solid fa-clipboard-check text-emerald-600 mr-1.5"></i><strong>Dossiê lacrado copiado!</strong> Na aba do <strong>' + nomePlataforma + '</strong>, pressione <strong>Ctrl + V</strong> (ou <em>Colar</em>) caso o campo não abra preenchido.</span>' +
-            '<button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-950 font-bold px-1">✕</button>';
+        if (destino === "chatgpt") {
+            aviso.className = "bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2";
+            aviso.innerHTML =
+                '<span><i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i><strong>Dossiê enviado ao ChatGPT!</strong> Na aba que abriu, basta pressionar <strong>Enter</strong> (cópia também salva na área de transferência).</span>' +
+                '<button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-950 font-bold px-1">✕</button>';
+        } else {
+            aviso.className = "bg-ufcnavy-50 border border-ufcnavy-300 text-ufcnavy-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2";
+            aviso.innerHTML =
+                '<span><i class="fa-solid fa-clipboard-check text-ufcnavy-700 mr-1.5"></i><strong>Dossiê copiado para a área de transferência!</strong> O Google Gemini abre a tela inicial por padrão — clique na caixa de mensagem e pressione <strong>Ctrl + V</strong> e <strong>Enter</strong>.</span>' +
+                '<button type="button" onclick="this.parentElement.remove()" class="text-ufcnavy-700 hover:text-ufcnavy-950 font-bold px-1">✕</button>';
+        }
     }
 
-    window.consultarSegundaOpiniaoSilenciosa = async function (destino, btnEl) {
+    window.consultarSegundaOpiniaoSilenciosa = function (destino, btnEl) {
         const promptSecreto = gerarPromptLacrado();
 
-        // 1. Cópia síncrona imediata enquanto a aba atual ainda possui foco
+        // 1. Cópia síncrona imediata + Clipboard API iniciada dentro do mesmo gesto do usuário
         copiarTextoAreaTransferencia(promptSecreto);
-
-        // 2. Reforço via Clipboard API assíncrona ANTES de abrir a nova aba
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            try {
-                await navigator.clipboard.writeText(promptSecreto);
-            } catch (e) {}
+            navigator.clipboard.writeText(promptSecreto).catch(function () {});
         }
 
-        // 3. Feedback visual discreto (sem expor o prompt)
+        // 2. Feedback visual claro conforme o comportamento de cada plataforma
         if (btnEl) {
             const originalHtml = btnEl.innerHTML;
-            btnEl.innerHTML = '<i class="fa-solid fa-check mr-1 text-[10px]"></i>Copiado! Cole com Ctrl+V';
+            btnEl.innerHTML = destino === "chatgpt"
+                ? '<i class="fa-solid fa-check mr-1 text-[10px]"></i>Preenchido! Aperte Enter'
+                : '<i class="fa-solid fa-check mr-1 text-[10px]"></i>Copiado! Use Ctrl+V no Gemini';
             setTimeout(function () {
                 btnEl.innerHTML = originalHtml;
-            }, 3500);
+            }, 4500);
         }
         mostrarAvisoCopiaSilenciosa(destino);
 
-        // 4. Abre o destino (ChatGPT já recebe parâmetro ?q= quando dentro do limite de URL)
+        // 3. Abre o destino (ChatGPT aceita ?q= na URL; Gemini web abre limpo e recebe via Ctrl+V)
         let url = "https://gemini.google.com/app";
         if (destino === "chatgpt") {
             const encoded = encodeURIComponent(promptSecreto);
