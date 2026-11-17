@@ -38,7 +38,7 @@
             padding-top: 4px;
         }
         @media print {
-            header, footer, nav, button, .no-print, #mainWorkspace, #geproModalApi {
+            header, footer, nav, button, .no-print, #mainWorkspace {
                 display: none !important;
             }
             #printPlusContainer { display: block !important; }
@@ -851,11 +851,9 @@
                     ctx.fillRect(0, 0, w, h);
                     ctx.drawImage(img, 0, 0, w, h);
                     const dataUrl = canvas.toDataURL("image/jpeg", 0.86);
-                    const base64 = dataUrl.split(",")[1];
                     resolve({
                         dataUrl: dataUrl,
-                        base64: base64,
-                        mimeType: "image/jpeg",
+                        canvas: canvas,
                         width: w,
                         height: h,
                         nome: file.name || "folha_manuscrita.jpg"
@@ -908,6 +906,26 @@
 
     window.fecharAmpliacaoFotoManuscrita = function () {
         document.getElementById("geproModalPreviewFoto")?.classList.add("hidden");
+    };
+
+    window.copiarFotoParaAreaTransferencia = async function (btnEl) {
+        if (!fotoManuscritaAtual || !fotoManuscritaAtual.canvas) return;
+        try {
+            if (!navigator.clipboard || !window.ClipboardItem) {
+                throw new Error("Sem suporte direto");
+            }
+            const blob = await new Promise(function (resolve) {
+                fotoManuscritaAtual.canvas.toBlob(resolve, "image/png");
+            });
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            if (btnEl) {
+                const orig = btnEl.innerHTML;
+                btnEl.innerHTML = '<i class="fa-solid fa-check mr-1 text-[10px]"></i>Foto Copiada! Cole com Ctrl+V';
+                setTimeout(function () { btnEl.innerHTML = orig; }, 4000);
+            }
+        } catch (e) {
+            alert("Neste navegador, anexe a foto diretamente pelo botão (+) ou clipe no Gemini / ChatGPT.");
+        }
     };
 
     function atualizarPreviewFotoManuscrita() {
@@ -1065,7 +1083,7 @@
         };
     }
 
-    function renderizarDossieDeslacrado(av, textoIA, opts) {
+    function renderizarDossieDeslacrado(av, opts) {
         opts = opts || {};
         const d = av.d;
         const protocolo = "INEP-2026-" + d.codigo.replace(/\s+/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
@@ -1076,23 +1094,22 @@
         const listaLacunas = av.lacunasA.concat(av.lacunasB);
 
         let blocoPrincipal = "";
-        if (textoIA) {
-            blocoPrincipal =
-                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">' +
-                    '<div class="flex items-center justify-between gap-2 text-xs font-extrabold text-ufcnavy-900 uppercase tracking-wider">' +
-                        '<span class="flex items-center gap-2"><i class="fa-solid fa-feather-pointed text-ufcteal-600"></i>Parecer Detalhado da Banca Avaliadora' + (temFoto ? ' (Leitura de Folha Manuscrita)' : '') + '</span>' +
-                    '</div>' +
-                    '<div class="text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">' + textoIA.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</div>' +
-                '</div>';
-        } else if (apenasFotoSemTexto) {
+        if (apenasFotoSemTexto) {
             blocoPrincipal =
                 '<div class="bg-ufcnavy-50/70 border border-ufcnavy-200 rounded-xl p-4 space-y-3 text-xs">' +
-                    '<div class="flex flex-col sm:flex-row sm:items-center gap-3">' +
-                        '<img src="' + fotoManuscritaAtual.dataUrl + '" alt="Folha manuscrita" class="w-24 h-28 object-cover rounded-lg border border-slate-300 shadow-sm shrink-0 cursor-pointer" onclick="abrirAmpliacaoFotoManuscrita()" title="Clique para ampliar">' +
-                        '<div class="space-y-1.5">' +
-                            '<span class="bg-ufcnavy-700 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">Folha Manuscrita Anexada</span>' +
-                            '<h4 class="font-extrabold text-ufcnavy-900 text-sm">Pronta para correção visual por IA</h4>' +
-                            '<p class="text-slate-700 leading-relaxed">Para corrigir automaticamente aqui nesta tela, ative o <strong>Modo Docente</strong> (no rodapé). Ou clique em um dos botões abaixo para copiar o dossiê cego e anexar/colar esta foto diretamente no <strong>Gemini</strong> ou <strong>ChatGPT</strong>.</p>' +
+                    '<div class="flex flex-col sm:flex-row sm:items-start gap-3.5">' +
+                        '<img src="' + fotoManuscritaAtual.dataUrl + '" alt="Folha manuscrita" class="w-24 h-32 object-cover rounded-lg border border-slate-300 shadow-sm shrink-0 cursor-pointer" onclick="abrirAmpliacaoFotoManuscrita()" title="Clique para ampliar">' +
+                        '<div class="space-y-2 flex-1">' +
+                            '<div class="flex flex-wrap items-center gap-1.5">' +
+                                '<span class="bg-emerald-600 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded"><i class="fa-solid fa-check mr-1"></i>Roteiro Cego Copiado Automaticamente</span>' +
+                                '<span class="bg-ufcnavy-100 text-ufcnavy-900 text-[10px] font-bold px-2 py-0.5 rounded">Leitura de Caligrafia + 30 Linhas</span>' +
+                            '</div>' +
+                            '<h4 class="font-extrabold text-ufcnavy-900 text-sm">Como receber sua nota agora (3 passos simples):</h4>' +
+                            '<ol class="list-decimal list-inside space-y-1 text-slate-700 leading-relaxed">' +
+                                '<li>Clique em <strong>Corrigir no Gemini</strong> ou <strong>Corrigir no ChatGPT</strong> abaixo (o espelho oficial já está copiado).</li>' +
+                                '<li>Na conversa aberta, <strong>cole o texto</strong> (<kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-mono">Ctrl+V</kbd>) e <strong>anexe a foto</strong> da folha pelo botão <strong>(+)</strong>.</li>' +
+                                '<li>Envie para receber a <strong>transcrição fiel</strong>, conferência das 30 linhas e nota detalhada de 0 a 100.</li>' +
+                            '</ol>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -1122,7 +1139,7 @@
                   '<strong><i class="fa-solid fa-shield-halved text-ufcnavy-700 mr-1"></i>Radar de Pegadinha da Banca:</strong> ' + d.pegadinha +
               '</div>';
 
-        const cardNotaTopo = temFoto
+        const cardNotaTopo = apenasFotoSemTexto
             ? '<div class="bg-ufcnavy-900 text-white px-5 py-2.5 rounded-xl text-center shadow-sm">' +
                   '<span class="text-[10px] uppercase tracking-wider text-slate-300 block">Correção Manuscrita</span>' +
                   '<span class="text-base sm:text-lg font-extrabold text-amber-400">Folha A4 Anexada</span>' +
@@ -1154,6 +1171,15 @@
                   '</div>' +
               '</div>';
 
+        const btnCopiarFotoHtml = temFoto
+            ? '<button type="button" onclick="copiarFotoParaAreaTransferencia(this)" class="bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" title="Copia a imagem da folha para colar com Ctrl+V">' +
+                  '<i class="fa-solid fa-copy mr-1 text-[10px]"></i>Copiar Foto' +
+              '</button>'
+            : '';
+
+        const labelGemini = apenasFotoSemTexto ? 'Corrigir no Gemini' : 'Parecer IA (Gemini)';
+        const labelChatGPT = apenasFotoSemTexto ? 'Corrigir no ChatGPT' : 'Parecer IA (ChatGPT)';
+
         return (
             '<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">' +
                 '<div>' +
@@ -1162,7 +1188,7 @@
                         '<span class="font-mono text-[11px] font-bold text-slate-500">Protocolo: ' + protocolo + '</span>' +
                     '</div>' +
                     '<h3 class="text-base sm:text-lg font-extrabold text-ufcnavy-900 mt-1">Boletim Individual de Correção — ' + d.codigo + '</h3>' +
-                    '<p class="text-[11px] text-slate-500">' + (temFoto ? 'Modalidade Manuscrita (Folha A4)' : av.conceito) + ' • Matriz ENADE 2026 (Portarias MEC nº 154, 163 e 276/2026)</p>' +
+                    '<p class="text-[11px] text-slate-500">' + (apenasFotoSemTexto ? 'Modalidade Manuscrita (Folha A4)' : av.conceito) + ' • Matriz ENADE 2026 (Portarias MEC nº 154, 163 e 276/2026)</p>' +
                 '</div>' +
                 cardNotaTopo +
             '</div>' +
@@ -1174,11 +1200,12 @@
             '<div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">' +
                 '<span class="text-slate-500 italic">Continue refinando sua escrita técnica: cada linha objetiva aproxima você do Conceito Máximo no ENADE 2026.</span>' +
                 '<div class="flex flex-wrap items-center gap-2">' +
-                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'gemini\', this)" class="bg-ufcnavy-50 hover:bg-ufcnavy-100 border border-ufcnavy-200 text-ufcnavy-900 font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" title="Copia seu dossiê lacrado para a área de transferência e abre o Gemini">' +
-                        '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>2ª Opinião (Gemini)' +
+                    btnCopiarFotoHtml +
+                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'gemini\', this)" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm" title="Copia seu dossiê lacrado e abre o Google Gemini">' +
+                        '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>' + labelGemini +
                     '</button>' +
-                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'chatgpt\', this)" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" title="Copia seu dossiê lacrado e abre o ChatGPT">' +
-                        '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>2ª Opinião (ChatGPT)' +
+                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'chatgpt\', this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm" title="Copia seu dossiê lacrado e abre o ChatGPT">' +
+                        '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>' + labelChatGPT +
                     '</button>' +
                 '</div>' +
             '</div>'
@@ -1195,6 +1222,13 @@
             return;
         }
 
+        // Copia o dossiê lacrado dentro do clique do usuário para que já esteja pronto ao deslacrar
+        const promptSecreto = gerarPromptLacrado();
+        copiarTextoAreaTransferencia(promptSecreto);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(promptSecreto).catch(function () {});
+        }
+
         const painel = document.getElementById("geproDossieBanca");
         const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
 
@@ -1207,7 +1241,7 @@
                 '</div>' +
                 '<div>' +
                     '<span class="text-[10px] font-extrabold uppercase tracking-widest text-ufcteal-700 bg-ufcteal-50 border border-ufcteal-200 px-3 py-0.5 rounded-full">Malote Lacrado • ' + d.codigo + (temFoto ? ' • Manuscrita' : '') + '</span>' +
-                    '<h3 class="text-base font-extrabold text-ufcnavy-900 mt-2" id="geproStatusEtapa">' + (temFoto ? 'Lacrado e protocolado — Lendo caligrafia da folha A4...' : 'Lacrado e protocolado — Recebendo folha discursiva...') + '</h3>' +
+                    '<h3 class="text-base font-extrabold text-ufcnavy-900 mt-2" id="geproStatusEtapa">' + (temFoto ? 'Lacrado e protocolado — Preparando folha manuscrita A4...' : 'Lacrado e protocolado — Recebendo folha discursiva...') + '</h3>' +
                     '<p class="text-xs text-slate-500 mt-1">A Banca Avaliadora está auditando sua resposta segundo a matriz do ENADE 2026. Aguarde o parecer oficial.</p>' +
                 '</div>' +
                 '<div class="max-w-md mx-auto bg-slate-100 rounded-full h-2 overflow-hidden">' +
@@ -1218,9 +1252,9 @@
 
         const etapas = temFoto
             ? [
-                { pct: "55%", txt: "Transcrevendo equações, unidades e conferindo as 30 linhas..." },
-                { pct: "85%", txt: "Auditando critérios das Portarias MEC nº 154, 163 e 276/2026..." },
-                { pct: "100%", txt: "Parecer consolidado — Deslacrando boletim individual..." }
+                { pct: "55%", txt: "Organizando critérios de transcrição e limite de 30 linhas..." },
+                { pct: "85%", txt: "Vinculando espelho das Portarias MEC nº 154, 163 e 276/2026..." },
+                { pct: "100%", txt: "Dossiê pronto — Deslacrando boletim individual..." }
               ]
             : [
                 { pct: "55%", txt: "Auditando memória de cálculo, fórmulas e unidades dimensionais..." },
@@ -1233,54 +1267,21 @@
             const br = document.getElementById("geproBarraSuspense");
             if (st) st.textContent = etapas[0].txt;
             if (br) br.style.width = etapas[0].pct;
-        }, 700);
+        }, 650);
 
         const t2 = setTimeout(function () {
             const st = document.getElementById("geproStatusEtapa");
             const br = document.getElementById("geproBarraSuspense");
             if (st) st.textContent = etapas[1].txt;
             if (br) br.style.width = etapas[1].pct;
-        }, 1450);
+        }, 1350);
 
         const avaliacaoLocal = avaliarLocalmente(discursivaAtualId, respA, respB);
-        const chaveApi = localStorage.getItem("gepro_gemini_api_key");
-        let textoIA = null;
-
-        const esperaMinima = new Promise(function (resolve) { setTimeout(resolve, 2200); });
-
-        if (chaveApi) {
-            try {
-                const parts = [{ text: gerarPromptLacrado() }];
-                if (temFoto && fotoManuscritaAtual) {
-                    parts.push({
-                        inline_data: {
-                            mime_type: fotoManuscritaAtual.mimeType,
-                            data: fotoManuscritaAtual.base64
-                        }
-                    });
-                }
-                const respApi = await fetch(
-                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(chaveApi),
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ contents: [{ parts: parts }] })
-                    }
-                );
-                const dados = await respApi.json();
-                if (respApi.ok) {
-                    textoIA = dados.candidates?.[0]?.content?.parts?.[0]?.text || null;
-                }
-            } catch (e) {
-                textoIA = null;
-            }
-        }
-
-        await esperaMinima;
+        await new Promise(function (resolve) { setTimeout(resolve, 2000); });
         clearTimeout(t1);
         clearTimeout(t2);
 
-        painel.innerHTML = renderizarDossieDeslacrado(avaliacaoLocal, textoIA, {
+        painel.innerHTML = renderizarDossieDeslacrado(avaliacaoLocal, {
             temFoto: temFoto,
             temTexto: !!(respA || respB)
         });
@@ -1330,7 +1331,7 @@
         } else {
             aviso.className = "bg-ufcnavy-50 border border-ufcnavy-300 text-ufcnavy-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2";
             aviso.innerHTML =
-                '<span><i class="fa-solid fa-clipboard-check text-ufcnavy-700 mr-1.5"></i><strong>Dossiê copiado para a área de transferência!</strong> O Google Gemini abre a tela inicial por padrão — clique na caixa de mensagem e pressione <strong>Ctrl + V</strong> e <strong>Enter</strong>.' + extraFoto + '</span>' +
+                '<span><i class="fa-solid fa-clipboard-check text-ufcnavy-700 mr-1.5"></i><strong>Dossiê copiado para a área de transferência!</strong> No Google Gemini que abriu, clique na caixa de mensagem, pressione <strong>Ctrl + V</strong> e envie.' + extraFoto + '</span>' +
                 '<button type="button" onclick="this.parentElement.remove()" class="text-ufcnavy-700 hover:text-ufcnavy-950 font-bold px-1">✕</button>';
         }
     }
@@ -1365,42 +1366,7 @@
         window.open(url, "_blank", "noopener,noreferrer");
     };
 
-    window.abrirModalApiGepro = function () {
-        document.getElementById("geproInputKey").value = localStorage.getItem("gepro_gemini_api_key") || "";
-        document.getElementById("geproModalApi").classList.remove("hidden");
-    };
-
-    window.fecharModalApiGepro = function () {
-        document.getElementById("geproModalApi").classList.add("hidden");
-    };
-
-    window.salvarKeyGepro = function () {
-        const k = document.getElementById("geproInputKey").value.trim();
-        if (!k) { alert("Cole uma chave válida ou clique em Remover."); return; }
-        localStorage.setItem("gepro_gemini_api_key", k);
-        fecharModalApiGepro();
-        alert("Modo Docente/Monitor ativado: as submissões nesta máquina usarão avaliação generativa automaticamente.");
-    };
-
-    window.removerKeyGepro = function () {
-        localStorage.removeItem("gepro_gemini_api_key");
-        document.getElementById("geproInputKey").value = "";
-        fecharModalApiGepro();
-    };
-
     function montarInterfaceBanca() {
-        // Suporte silencioso para link compartilhado pelo docente com ?k=CHAVE (salva e oculta da barra de endereço)
-        try {
-            const params = new URLSearchParams(window.location.search);
-            const kParam = params.get("k");
-            if (kParam) {
-                localStorage.setItem("gepro_gemini_api_key", kParam);
-                params.delete("k");
-                const novaUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
-                window.history.replaceState({}, "", novaUrl);
-            }
-        } catch (e) {}
-
         const espelho = document.getElementById("painelPadraoDiscursiva");
         if (!espelho || document.getElementById("geproCardSubmissao")) return;
 
@@ -1464,29 +1430,6 @@
             '<div id="geproDossieBanca" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-md border-2 border-ufcnavy-700 space-y-4"></div>';
 
         espelho.insertAdjacentHTML("beforebegin", cardSubmissao);
-
-        const modalHtml =
-            '<div id="geproModalApi" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">' +
-                '<div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-xl space-y-4 border border-slate-200">' +
-                    '<div class="flex items-center justify-between border-b border-slate-100 pb-2">' +
-                        '<h3 class="text-sm font-extrabold text-ufcnavy-900">Configuração Docente / Monitor (Opcional)</h3>' +
-                        '<button type="button" onclick="fecharModalApiGepro()" class="text-slate-400 hover:text-slate-700">✕</button>' +
-                    '</div>' +
-                    '<p class="text-xs text-slate-600">Quando configurada, o botão "Submeter à Banca Avaliadora" usa automaticamente avaliação generativa nos bastidores, mantendo o dossiê lacrado para o aluno.</p>' +
-                    '<input type="password" id="geproInputKey" placeholder="Chave API Google AI Studio (AIzaSy...)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">' +
-                    '<div class="flex justify-end gap-2">' +
-                        '<button type="button" onclick="removerKeyGepro()" class="px-3 py-2 rounded-xl text-xs font-bold text-rose-700 hover:bg-rose-50">Remover</button>' +
-                        '<button type="button" onclick="fecharModalApiGepro()" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancelar</button>' +
-                        '<button type="button" onclick="salvarKeyGepro()" class="px-4 py-2 rounded-xl text-xs font-bold bg-ufcnavy-700 text-white hover:bg-ufcnavy-900">Salvar</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-        document.body.insertAdjacentHTML("beforeend", modalHtml);
-
-        const footerRight = document.querySelector("footer .max-w-5xl > div:last-child");
-        if (footerRight) {
-            footerRight.insertAdjacentHTML("afterbegin", '<button type="button" onclick="abrirModalApiGepro()" class="text-[11px] text-slate-400 hover:text-ufcnavy-700 underline mr-2">Modo Docente</button>');
-        }
 
         const sel = document.getElementById("selectDiscursivaCe");
         const prev = document.getElementById("btnDiscPrev");
