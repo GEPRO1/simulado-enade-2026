@@ -684,7 +684,7 @@
                 <div class="mb-2.5 pb-2 border-b-2 border-slate-900">
                     <div class="flex items-center justify-between border-b border-slate-300 pb-1.5 mb-1.5">
                         <div class="flex items-center space-x-2.5">
-                            <img src="logo-ufc.png" alt="UFC Russas" class="h-9 w-auto object-contain">
+                            <img src="logo-ufc.png" onerror="this.onerror=null; this.src='logotipo%20vertical%20ufc%20russas.png';" alt="UFC Russas" class="h-9 w-auto object-contain">
                             <div>
                                 <h1 class="text-xs font-extrabold uppercase">UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS DE RUSSAS</h1>
                                 <h2 class="text-[10px] font-semibold text-slate-700">ENGENHARIA DE PRODUÇÃO — CADERNO DE QUESTÕES DISCURSIVAS (COMPONENTE ESPECÍFICO)</h2>
@@ -692,7 +692,7 @@
                         </div>
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] font-extrabold border-2 border-slate-900 px-2 py-0.5 rounded">ENADE 2026</span>
-                            <img src="logo-gepro.png" alt="GEPRO" class="h-8 w-auto object-contain">
+                            <img src="logo-gepro.png" onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';" alt="GEPRO" class="h-8 w-auto object-contain">
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-[10px] font-medium">
@@ -724,76 +724,103 @@
     </script>
 
 <!-- ===================================================================== -->
-<!-- MÓDULO DE CORREÇÃO (DIAGNÓSTICO OFFLINE + BANCA IA EM 1 CLIQUE)       -->
+<!-- PROTOCOLO DE AVALIAÇÃO LACRADO — BANCA EXAMINADORA INEP / GEPRO       -->
 <!-- ===================================================================== -->
 <script>
 (function () {
-    const CRITERIOS_CHAVE = {
+    const RUBRICA_INEP = {
         d1: {
             a: [
-                { label: "Tempo disponível (12.000 min)", termos: ["12.000", "12000", "480", "25"] },
-                { label: "Tempo de Ciclo = 10 min/unid", termos: ["10 min", "10,0", "10.0", "= 10", "tc = 10", "ciclo"] }
+                { pts: 15, label: "Tempo disponível mensal (12.000 min)", termos: ["12.000", "12000", "480 min", "25 dias"], falha: "Não ficou explícito o cálculo da capacidade disponível mensal (25 dias × 8 h × 60 min = 12.000 min)." },
+                { pts: 20, label: "Tempo de Ciclo (TC = 10 min/unid)", termos: ["10 min", "10,0", "10.0", "= 10", "tc = 10", "ciclo de 10", "10 minutos"], falha: "O valor exato do Tempo de Ciclo (TC = 12.000 / 1.200 = 10 min/unidade) não foi demonstrado." },
+                { pts: 5, label: "Unidade dimensional (min/unidade)", termos: ["min/un", "minutos/un", "min/peca", "minutos/peca", "minutos por"], falha: "Atenção ao rigor dimensional: explicite a unidade final em minutos/unidade produzida." }
             ],
             b: [
-                { label: "Soma dos tempos (30 min)", termos: ["30 min", "= 30", "soma"] },
-                { label: "4 estações (CT1 a CT4)", termos: ["4 estacoes", "4 centros", "quatro", "ct1", "ct4", "estacao 4"] },
-                { label: "Precedência respeitada", termos: ["precedencia", "sequencia"] },
-                { label: "Eficiência = 75%", termos: ["75%", "75,0%", "0,75", "eficiencia"] }
-            ]
+                { pts: 10, label: "Soma dos tempos das tarefas (∑t = 30 min)", termos: ["30 min", "= 30", "soma = 30", "total = 30"], falha: "Faltou indicar o tempo total de conteúdo de trabalho (∑t = 30 minutos)." },
+                { pts: 25, label: "Agrupamento em 4 centros de trabalho (CT1 a CT4)", termos: ["4 estacoes", "4 centros", "quatro estacoes", "quatro centros", "ct1", "ct4", "estacao 4"], falha: "O balanceamento exige 4 centros de trabalho: CT1={A,B} (10 min), CT2={C,D} (8 min), CT3={E,F} (9 min) e CT4={G,H} (3 min)." },
+                { pts: 10, label: "Respeito às restrições de precedência e TC ≤ 10", termos: ["precedencia", "sequencia", "ociosidade", "restric"], falha: "Justifique expressamente o atendimento às relações de precedência tecnológica e ao limite de 10 min por estação." },
+                { pts: 15, label: "Eficiência da linha projetada (75,0%)", termos: ["75%", "75,0%", "0,75", "eficiencia"], falha: "Faltou calcular a eficiência da linha: E = ∑t / (N_real × TC) = 30 / (4 × 10) = 75,0%." }
+            ],
+            armadilha: {
+                termos: ["3 estacoes", "3 centros", "tres estacoes", "tres centros"],
+                excecao: ["minimo teorico", "teorico", "4 estacoes", "4 centros", "quatro"],
+                alerta: "Você indicou o fechamento com 3 estações. Embora 3 seja o mínimo teórico (30/10), essa configuração viola as restrições de precedência tecnológica da tabela, exigindo 4 estações reais."
+            }
         },
         d2: {
             a: [
-                { label: "VPL(X) = +R$ 10.946,50", termos: ["10.946", "10946", "projeto x"] },
-                { label: "VPL(Y) = +R$ 5.815,40", termos: ["5.815", "5815", "projeto y"] }
+                { pts: 25, label: "VPL do Projeto X (+R$ 10.946,50)", termos: ["10.946", "10946"], falha: "O VPL do Projeto X (-100.000 + 35.000 × 3,1699 = +R$ 10.946,50) não foi encontrado corretamente." },
+                { pts: 25, label: "VPL do Projeto Y (+R$ 5.815,40)", termos: ["5.815", "5815"], falha: "O VPL do Projeto Y (-140.000 + 46.000 × 3,1699 = +R$ 5.815,40) não foi encontrado corretamente." }
             ],
             b: [
-                { label: "Escolha do Projeto X", termos: ["projeto x", "alternativa x", "escolher x"] },
-                { label: "Mutuamente excludentes / Maior VPL", termos: ["mutuamente excludente", "maior vpl", "riqueza"] },
-                { label: "VPL Incremental (-R$ 5.131,10)", termos: ["incremental", "5.131", "5131", "40.000"] }
-            ]
+                { pts: 20, label: "Recomendação pelo Projeto X", termos: ["projeto x", "alternativa x", "escolher x", "optar pelo x"], falha: "A recomendação gerencial deve indicar explicitamente a escolha do Projeto X." },
+                { pts: 15, label: "Critério de projetos mutuamente excludentes", termos: ["mutuamente excludente", "maior vpl", "riqueza"], falha: "Destaque que, por serem projetos mutuamente excludentes, escolhe-se o que maximiza o VPL." },
+                { pts: 15, label: "Análise do investimento incremental (-R$ 5.131,10)", termos: ["incremental", "5.131", "5131", "40.000"], falha: "Inclua a análise incremental (Δ = Y - X): o aporte extra de R$ 40.000 gera VPL incremental negativo (-R$ 5.131,10), não remunerando a TMA de 10% a.a." }
+            ],
+            armadilha: {
+                termos: ["escolher o projeto y", "escolher y", "optar pelo projeto y", "recomenda-se o projeto y"],
+                excecao: ["projeto x"],
+                alerta: "Você recomendou o Projeto Y, que possui maior fluxo de caixa anual absoluto, mas VPL inferior ao do Projeto X e VPL incremental negativo (-R$ 5.131,10)."
+            }
         },
         d3: {
             a: [
-                { label: "Índice Cp = 1,25", termos: ["1,25", "1.25", "cp"] },
-                { label: "Índice Cpk = 1,00", termos: ["1,00", "1.00", "= 1", "cpk"] }
+                { pts: 20, label: "Capabilidade potencial (Cp = 1,25)", termos: ["1,25", "1.25"], falha: "Faltou demonstrar Cp = (50,30 - 49,70) / (6 × 0,08) = 1,25." },
+                { pts: 10, label: "Capabilidades unilaterais (Cps = 1,00 e Cpi = 1,50)", termos: ["1,50", "1.50", "cps", "cpi", "0,24"], falha: "Apresente o cálculo dos dois lados (Cps = 1,00 e Cpi = 1,50) antes de extrair o mínimo." },
+                { pts: 20, label: "Capabilidade efetiva (Cpk = 1,00)", termos: ["cpk = 1", "cpk = 1,00", "cpk = 1.00", "1,00"], falha: "O índice Cpk = mín(1,00; 1,50) = 1,00 não ficou explicitado." }
             ],
             b: [
-                { label: "Processo incapaz (Cpk < 1,33)", termos: ["incapaz", "nao atende", "1,33", "1.33"] },
-                { label: "Centralização da média (50,00 mm)", termos: ["centraliz", "ajuste", "setup", "offset", "media"] },
-                { label: "Redução da variabilidade (σ)", termos: ["variabilidade", "dispersao", "manutencao", "dmaic", "desvio"] }
-            ]
+                { pts: 20, label: "Diagnóstico de incapacidade e descentramento", termos: ["incapaz", "nao atende", "descentr", "1,33"], falha: "Diagnostique que o processo não atende ao requisito (Cpk = 1,00 < 1,33) e está deslocado acima do valor nominal (50,06 mm)." },
+                { pts: 15, label: "Ação 1: Centralização da média (50,00 mm)", termos: ["centraliz", "ajuste", "setup", "offset", "media"], falha: "Proponha a centralização da média via ajuste de setup/offset da ferramenta para 50,00 mm." },
+                { pts: 15, label: "Ação 2: Redução da variabilidade inerente (σ)", termos: ["variabilidade", "dispersao", "manutencao", "dmaic", "desvio"], falha: "Indique ação sobre causas comuns para reduzir σ (manutenção preventiva de fusos, controle térmico ou padronização DMAIC)." }
+            ],
+            armadilha: {
+                termos: ["ampliar tolerancia", "aumentar tolerancia", "alterar especificac", "mudar limites"],
+                excecao: ["sem alterar"],
+                alerta: "O enunciado proíbe expressamente alterar as especificações do cliente; a adequação deve ocorrer atuando na média (μ) e na dispersão (σ) do processo."
+            }
         },
         d4: {
             a: [
-                { label: "LEC ≈ 632 ou 633 unidades", termos: ["632", "633", "lec"] },
-                { label: "Nº de pedidos ≈ 15,81/ano", termos: ["15,8", "15.8", "16 pedidos"] },
-                { label: "Ponto de Pedido = 160 unid.", termos: ["160", "ponto de pedido", "40"] }
+                { pts: 20, label: "Lote Econômico de Compras (LEC ≈ 632/633 unid.)", termos: ["632", "633"], falha: "O Lote Econômico de Compras LEC = √[(2×10.000×180)/9] ≈ 632,46 unidades não foi calculado." },
+                { pts: 15, label: "Número anual de pedidos (N ≈ 15,81 pedidos/ano)", termos: ["15,8", "15.8", "16 pedidos"], falha: "Calcule o número anual de pedidos: N = D / LEC = 10.000 / 632,46 ≈ 15,81 pedidos/ano." },
+                { pts: 15, label: "Ponto de Pedido (PP = 160 unidades)", termos: ["160"], falha: "Calcule a demanda diária (10.000 / 250 = 40 unid/dia) e o Ponto de Pedido (PP = 40 × 4 = 160 unidades)." }
             ],
             b: [
-                { label: "Amplificação da variabilidade", termos: ["amplific", "variabilidade", "montante", "distorcao", "bullwhip"] },
-                { label: "Compartilhamento da demanda (POS)", termos: ["pos", "point of sale", "compartilhamento", "informacao", "tempo real"] },
-                { label: "VMI / CPFR / Preços estáveis", termos: ["vmi", "cpfr", "edlp", "colaborativ", "reposicao continua"] }
-            ]
+                { pts: 20, label: "Conceito do Efeito Chicote (amplificação a montante)", termos: ["amplific", "variabilidade", "montante", "distorcao"], falha: "Explique que o Efeito Chicote é a amplificação progressiva da variabilidade dos pedidos a montante na cadeia de suprimentos." },
+                { pts: 15, label: "Prática 1: Compartilhamento da demanda final (POS)", termos: ["pos", "point of sale", "compartilhamento", "informacao", "tempo real"], falha: "Cite o compartilhamento em tempo real dos dados de venda ao consumidor final (POS) entre os elos." },
+                { pts: 15, label: "Prática 2: Reposição contínua (VMI / CPFR) ou EDLP", termos: ["vmi", "cpfr", "edlp", "colaborativ", "reposicao continua"], falha: "Inclua práticas como VMI (Estoque Gerenciado pelo Fornecedor), CPFR ou política de preços estáveis (EDLP)." }
+            ],
+            armadilha: {
+                termos: ["365"],
+                excecao: ["250"],
+                alerta: "Você utilizou 365 dias no cálculo; o enunciado especifica que o centro de distribuição opera 250 dias úteis por ano."
+            }
         },
         d5: {
             a: [
-                { label: "Função Objetivo (120x₁ + 150x₂)", termos: ["120", "150", "maximizar", "funcao objetivo"] },
-                { label: "Plano Ótimo (x₁ = 30, x₂ = 20)", termos: ["30", "20", "x1 = 30", "x2 = 20"] },
-                { label: "Lucro Máximo = R$ 6.600,00", termos: ["6.600", "6600"] }
+                { pts: 20, label: "Formulação PL (Max Z = 120x₁ + 150x₂ e restrições)", termos: ["120", "150", "maximizar", "funcao objetivo"], falha: "Formule explicitamente as variáveis (x₁, x₂ ≥ 0), a Função Objetivo (Max Z = 120x₁ + 150x₂) e as restrições de Corte e Acabamento." },
+                { pts: 15, label: "Plano ótimo de produção (x₁ = 30, x₂ = 20)", termos: ["30", "20"], falha: "Determine o ponto ótimo na interseção das restrições ativas: x₁ = 30 unidades e x₂ = 20 unidades." },
+                { pts: 15, label: "Lucro máximo semanal (Z* = R$ 6.600,00)", termos: ["6.600", "6600"], falha: "Calcule o lucro máximo semanal: Z* = 120(30) + 150(20) = R$ 6.600,00." }
             ],
             b: [
-                { label: "Preço-Sombra Corte = R$ 40,00/h", termos: ["40,00", "40", "preco-sombra", "preco sombra"] },
-                { label: "Preço-Sombra Acabamento = R$ 10,00/h", termos: ["10,00", "10"] },
-                { label: "Viabilidade da Hora Extra (+R$ 12/h)", termos: ["vale a pena", "sim", "viavel", "supera", "28"] }
-            ]
+                { pts: 18, label: "Preço-Sombra do Corte (+R$ 40,00/hora)", termos: ["40,00", "40"], falha: "Demonstre o Preço-Sombra do setor de Corte: +R$ 40,00 por hora adicional." },
+                { pts: 12, label: "Preço-Sombra do Acabamento (+R$ 10,00/hora)", termos: ["10,00", "10"], falha: "Demonstre o Preço-Sombra do setor de Acabamento: +R$ 10,00 por hora adicional." },
+                { pts: 20, label: "Decisão pela contratação de hora extra (+R$ 12/h líquido)", termos: ["vale a pena", "sim", "viavel", "supera", "28"], falha: "Conclua que vale a pena contratar horas extras no Corte, pois o benefício marginal (R$ 40,00/h) supera o custo adicional (R$ 28,00/h)." }
+            ],
+            armadilha: {
+                termos: ["nao vale a pena", "inviavel", "nao compensa"],
+                excecao: ["vale a pena"],
+                alerta: "Como o Preço-Sombra do Corte (R$ 40,00/h) já representa o acréscimo líquido no lucro por hora adicional, ele supera o custo da hora extra (R$ 28,00/h), tornando a contratação vantajosa."
+            }
         }
     };
 
-    function normalizar(txt) {
+    function norm(txt) {
         return (txt || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    function montarPromptINEP() {
+    function gerarPromptLacrado() {
         const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
         const respA = document.getElementById("textareaDiscA").value.trim() || "(Em branco)";
         const respB = document.getElementById("textareaDiscB").value.trim() || "(Em branco)";
@@ -819,131 +846,271 @@
                "4. Indique acertos, lacunas e um texto modelo aprimorado dentro de 30 linhas.";
     }
 
-    window.executarDiagnosticoOffline = function () {
-        const respA = document.getElementById("textareaDiscA").value.trim();
-        const respB = document.getElementById("textareaDiscB").value.trim();
-        if (!respA && !respB) {
-            alert("Escreva sua resposta nos campos do Item A e/ou Item B antes de analisar.");
-            return;
-        }
-
-        const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
-        const crit = CRITERIOS_CHAVE[discursivaAtualId] || { a: [], b: [] };
-        const normA = normalizar(respA);
-        const normB = normalizar(respB);
+    function avaliarLocalmente(id, respA, respB) {
+        const d = QUESTOES_DISCURSIVAS[id];
+        const rub = RUBRICA_INEP[id];
+        const nA = norm(respA);
+        const nB = norm(respB);
+        const nTotal = nA + " " + nB;
         const linhas = estimarLinhas(respA) + estimarLinhas(respB);
 
-        const temCalculoA = /[0-9]/.test(respA) && /[=×÷+\-*/]/.test(respA);
+        let ptsA = 0;
+        const acertosA = [];
+        const lacunasA = [];
+        rub.a.forEach(function (item) {
+            const ok = item.termos.some(function (t) { return nA.indexOf(norm(t)) !== -1; });
+            if (ok) {
+                ptsA += item.pts;
+                acertosA.push(item.label);
+            } else {
+                lacunasA.push(item.falha);
+            }
+        });
+
+        let ptsB = 0;
+        const acertosB = [];
+        const lacunasB = [];
+        rub.b.forEach(function (item) {
+            const ok = item.termos.some(function (t) { return nB.indexOf(norm(t)) !== -1; });
+            if (ok) {
+                ptsB += item.pts;
+                acertosB.push(item.label);
+            } else {
+                lacunasB.push(item.falha);
+            }
+        });
+
+        // Penalidade leve se estourar 30 linhas (padrão folha definitiva INEP)
+        const excessoLinhas = linhas > 30;
+        const notaFinal = Math.max(0, Math.min(100, ptsA + ptsB - (excessoLinhas ? 5 : 0)));
+
+        // Verifica pegadinha
+        let caiuArmadilha = false;
+        if (rub.armadilha) {
+            const bateuTermo = rub.armadilha.termos.some(function (t) { return nTotal.indexOf(norm(t)) !== -1; });
+            const temExcecao = rub.armadilha.excecao.some(function (e) { return nTotal.indexOf(norm(e)) !== -1; });
+            caiuArmadilha = bateuTermo && !temExcecao;
+        }
+
+        // Coesão e rigor formal
+        const temMemoriaA = /[0-9]/.test(respA) && /[=×÷+\-*/]/.test(respA);
         const conectivos = ["portanto", "dessa forma", "assim", "logo", "alem disso", "ademais", "contudo", "entretanto", "visto que", "uma vez que", "conclui-se", "recomenda-se"];
-        const qtdConectivos = conectivos.filter(function (c) { return (normA + " " + normB).indexOf(c) !== -1; }).length;
+        const qtdConectivos = conectivos.filter(function (c) { return nTotal.indexOf(c) !== -1; }).length;
 
-        let acertosA = 0;
-        const badgesA = crit.a.map(function (c) {
-            const ok = c.termos.some(function (t) { return normA.indexOf(normalizar(t)) !== -1; });
-            if (ok) acertosA++;
-            return '<span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ' +
-                   (ok ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200') + '">' +
-                   (ok ? '✓ ' : '! ') + c.label + '</span>';
-        }).join(" ");
+        let conceito = "Em Desenvolvimento";
+        let corNota = "text-amber-400";
+        if (notaFinal >= 85) { conceito = "Excelente (Padrão Conceito 5)"; corNota = "text-emerald-400"; }
+        else if (notaFinal >= 65) { conceito = "Satisfatório (Bom Domínio)"; corNota = "text-teal-300"; }
+        else if (notaFinal >= 40) { conceito = "Parcial (Requer Revisão)"; corNota = "text-amber-400"; }
+        else { conceito = "Insuficiente (Refazer Estudo)"; corNota = "text-rose-400"; }
 
-        let acertosB = 0;
-        const badgesB = crit.b.map(function (c) {
-            const ok = c.termos.some(function (t) { return normB.indexOf(normalizar(t)) !== -1; });
-            if (ok) acertosB++;
-            return '<span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border ' +
-                   (ok ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200') + '">' +
-                   (ok ? '✓ ' : '! ') + c.label + '</span>';
-        }).join(" ");
+        return {
+            d: d,
+            ptsA: ptsA,
+            ptsB: ptsB,
+            notaFinal: notaFinal,
+            conceito: conceito,
+            corNota: corNota,
+            linhas: linhas,
+            excessoLinhas: excessoLinhas,
+            temMemoriaA: temMemoriaA,
+            qtdConectivos: qtdConectivos,
+            acertosA: acertosA,
+            lacunasA: lacunasA,
+            acertosB: acertosB,
+            lacunasB: lacunasB,
+            caiuArmadilha: caiuArmadilha,
+            alertaArmadilha: rub.armadilha ? rub.armadilha.alerta : ""
+        };
+    }
 
-        const autoA = crit.a.length > 0 && (acertosA / crit.a.length) >= 0.6;
-        const autoB = crit.b.length > 0 && (acertosB / crit.b.length) >= 0.6;
+    function renderizarDossieDeslacrado(av, textoIA) {
+        const d = av.d;
+        const protocolo = "INEP-2026-" + d.codigo.replace(/\s+/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
 
-        const painel = document.getElementById("geproDiagPanel");
-        painel.innerHTML =
-            '<div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">' +
-                '<div><span class="bg-ufcnavy-50 text-ufcnavy-700 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full">Diagnóstico Instantâneo • ' + d.codigo + '</span>' +
-                '<h3 class="text-base font-extrabold text-ufcnavy-900 mt-1">Análise de Estrutura, Cálculos e Conceitos</h3></div>' +
-                '<div class="bg-ufcnavy-900 text-white px-4 py-2 rounded-xl text-center">' +
-                    '<span class="text-[10px] uppercase text-slate-300 block">Nota Estimada</span>' +
-                    '<span id="geproNotaDiag" class="text-xl font-extrabold text-amber-400">0 / 100</span>' +
+        const listaAcertos = av.acertosA.concat(av.acertosB);
+        const listaLacunas = av.lacunasA.concat(av.lacunasB);
+
+        const blocoIA = textoIA
+            ? '<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">' +
+                  '<div class="flex items-center gap-2 text-xs font-extrabold text-ufcnavy-900 uppercase tracking-wider">' +
+                      '<i class="fa-solid fa-feather-pointed text-ufcteal-600"></i>' +
+                      '<span>Parecer Detalhado da Banca Avaliadora</span>' +
+                  '</div>' +
+                  '<div class="text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">' + textoIA.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '</div>' +
+              '</div>'
+            : '<div class="grid md:grid-cols-2 gap-4 text-xs">' +
+                  '<div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 space-y-2">' +
+                      '<h4 class="font-extrabold text-emerald-900 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i>Elementos Validados pela Banca (' + listaAcertos.length + ')</h4>' +
+                      (listaAcertos.length
+                          ? '<ul class="space-y-1.5 text-emerald-950 list-disc list-inside">' + listaAcertos.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>'
+                          : '<p class="text-emerald-800 italic">Nenhum núcleo conceitual completo foi identificado automaticamente. Compare sua linha de raciocínio com os pontos abaixo.</p>') +
+                  '</div>' +
+                  '<div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 space-y-2">' +
+                      '<h4 class="font-extrabold text-amber-950 flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square text-amber-600"></i>Pontos a Aprimorar no Texto (' + listaLacunas.length + ')</h4>' +
+                      (listaLacunas.length
+                          ? '<ul class="space-y-1.5 text-amber-950 list-disc list-inside">' + listaLacunas.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>'
+                          : '<p class="text-emerald-800 font-semibold">Todos os núcleos conceituais e numéricos esperados pelo espelho foram contemplados!</p>') +
+                  '</div>' +
+              '</div>';
+
+        const alertaArmadilhaHtml = av.caiuArmadilha
+            ? '<div class="bg-rose-50 border-l-4 border-rose-600 p-3.5 rounded-r-xl text-xs text-rose-950">' +
+                  '<strong><i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i>Alerta Crítico da Banca (Pegadinha Detectada):</strong> ' + av.alertaArmadilha +
+              '</div>'
+            : '<div class="bg-slate-50 border-l-4 border-ufcnavy-700 p-3.5 rounded-r-xl text-xs text-slate-800">' +
+                  '<strong><i class="fa-solid fa-shield-halved text-ufcnavy-700 mr-1"></i>Radar de Pegadinha da Banca:</strong> ' + d.pegadinha +
+              '</div>';
+
+        return (
+            '<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">' +
+                '<div>' +
+                    '<div class="flex flex-wrap items-center gap-2">' +
+                        '<span class="bg-ufcnavy-700 text-white text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded">Dossiê Deslacrado</span>' +
+                        '<span class="font-mono text-[11px] font-bold text-slate-500">Protocolo: ' + protocolo + '</span>' +
+                    '</div>' +
+                    '<h3 class="text-base sm:text-lg font-extrabold text-ufcnavy-900 mt-1">Boletim Individual de Correção — ' + d.codigo + '</h3>' +
+                    '<p class="text-[11px] text-slate-500">' + av.conceito + ' • Matriz ENADE 2026 (Portarias MEC nº 154, 163 e 276/2026)</p>' +
+                '</div>' +
+                '<div class="bg-ufcnavy-900 text-white px-5 py-2.5 rounded-xl text-center shadow-sm">' +
+                    '<span class="text-[10px] uppercase tracking-wider text-slate-300 block">Nota da Banca</span>' +
+                    '<span class="text-2xl font-extrabold ' + av.corNota + '">' + av.notaFinal + ' / 100</span>' +
+                    '<span class="text-[10px] text-slate-300 block">A: ' + av.ptsA + '/' + d.pontosA + ' • B: ' + av.ptsB + '/' + d.pontosB + '</span>' +
                 '</div>' +
             '</div>' +
+
             '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">' +
                 '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
-                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Extensão da Resposta</span>' +
-                    '<strong class="text-sm ' + (linhas > 30 ? 'text-rose-700' : 'text-ufcnavy-900') + '">' + linhas + ' / 30 linhas</strong>' +
+                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Folha Definitiva (30 Linhas)</span>' +
+                    '<strong class="text-sm ' + (av.excessoLinhas ? 'text-rose-700' : 'text-ufcnavy-900') + '">' + av.linhas + ' / 30 linhas</strong>' +
+                    '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.excessoLinhas ? 'Excedeu o limite (-5 pts)' : 'Dentro do limite oficial') + '</span>' +
                 '</div>' +
                 '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
                     '<span class="text-[10px] font-bold uppercase text-slate-500 block">Memória de Cálculo (Item A)</span>' +
-                    '<strong class="text-sm ' + (temCalculoA ? 'text-emerald-700' : 'text-amber-700') + '">' + (temCalculoA ? 'Demonstrada' : 'Pouco explícita') + '</strong>' +
+                    '<strong class="text-sm ' + (av.temMemoriaA ? 'text-emerald-700' : 'text-amber-700') + '">' + (av.temMemoriaA ? 'Explicitada' : 'Sumária') + '</strong>' +
+                    '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.temMemoriaA ? 'Desenvolvimento numérico presente' : 'Registre fórmulas e etapas') + '</span>' +
                 '</div>' +
                 '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3">' +
-                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Coesão Técnica (Item B)</span>' +
-                    '<strong class="text-sm text-ufcnavy-900">' + qtdConectivos + ' conectivo(s)</strong>' +
+                    '<span class="text-[10px] font-bold uppercase text-slate-500 block">Coesão Argumentativa (Item B)</span>' +
+                    '<strong class="text-sm text-ufcnavy-900">' + av.qtdConectivos + ' articulador(es)</strong>' +
+                    '<span class="block text-[11px] text-slate-500 mt-0.5">' + (av.qtdConectivos >= 2 ? 'Encadeamento técnico adequado' : 'Reforce conectivos conclusivos') + '</span>' +
                 '</div>' +
             '</div>' +
-            '<div class="grid md:grid-cols-2 gap-4 text-xs">' +
-                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">' +
-                    '<div class="flex items-center justify-between"><span class="font-extrabold text-ufcnavy-900">Item A (' + acertosA + '/' + crit.a.length + ' conceitos)</span>' +
-                    '<label class="font-bold text-emerald-700 cursor-pointer"><input type="checkbox" id="geproChkA" ' + (autoA ? 'checked' : '') + ' onchange="atualizarGeproDiagNota()"> +' + d.pontosA + ' pts</label></div>' +
-                    '<div class="flex flex-wrap gap-1.5">' + badgesA + '</div>' +
+
+            blocoIA +
+            alertaArmadilhaHtml +
+
+            '<div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">' +
+                '<span class="text-slate-500 italic">Continue refinando sua escrita técnica: cada linha objetiva aproxima você do Conceito Máximo no ENADE 2026.</span>' +
+                '<div class="flex flex-wrap items-center gap-2">' +
+                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'gemini\')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition-colors" title="Copia seu dossiê lacrado em segundo plano e abre o Gemini">' +
+                        '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>2ª Opinião (Gemini)' +
+                    '</button>' +
+                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'chatgpt\')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition-colors" title="Copia seu dossiê lacrado em segundo plano e abre o ChatGPT">' +
+                        '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>2ª Opinião (ChatGPT)' +
+                    '</button>' +
                 '</div>' +
-                '<div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">' +
-                    '<div class="flex items-center justify-between"><span class="font-extrabold text-ufcnavy-900">Item B (' + acertosB + '/' + crit.b.length + ' conceitos)</span>' +
-                    '<label class="font-bold text-emerald-700 cursor-pointer"><input type="checkbox" id="geproChkB" ' + (autoB ? 'checked' : '') + ' onchange="atualizarGeproDiagNota()"> +' + d.pontosB + ' pts</label></div>' +
-                    '<div class="flex flex-wrap gap-1.5">' + badgesB + '</div>' +
-                '</div>' +
-            '</div>' +
-            '<div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-xl text-xs text-amber-950"><strong>Atenção à Pegadinha:</strong> ' + d.pegadinha + '</div>';
+            '</div>'
+        );
+    }
 
-        painel.classList.remove("hidden");
-        atualizarGeproDiagNota();
-        painel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    };
-
-    window.atualizarGeproDiagNota = function () {
-        const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
-        const a = document.getElementById("geproChkA")?.checked ? d.pontosA : 0;
-        const b = document.getElementById("geproChkB")?.checked ? d.pontosB : 0;
-        const el = document.getElementById("geproNotaDiag");
-        if (el) el.textContent = (a + b) + " / 100";
-    };
-
-    window.executarCorrecaoIA = function () {
+    window.submeterBancaAvaliadora = async function () {
         const respA = document.getElementById("textareaDiscA").value.trim();
         const respB = document.getElementById("textareaDiscB").value.trim();
         if (!respA && !respB) {
-            alert("Escreva sua resposta nos campos do Item A e/ou Item B antes de enviar para a IA.");
+            alert("Redija sua resposta nos campos do Item A e/ou Item B antes de submeter à Banca Avaliadora.");
             return;
         }
-        const prompt = montarPromptINEP();
-        const box = document.getElementById("geproPromptBox");
-        box.value = prompt;
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(prompt).catch(function () {});
-        } else {
-            box.select();
-            try { document.execCommand("copy"); } catch (e) {}
-        }
-        const painel = document.getElementById("geproIaPanel");
+
+        const painel = document.getElementById("geproDossieBanca");
+        const d = QUESTOES_DISCURSIVAS[discursivaAtualId];
+
+        // Fase 1: Suspense / Protocolo Lacrado (sem expor nenhum prompt)
         painel.classList.remove("hidden");
+        painel.innerHTML =
+            '<div class="py-6 px-4 text-center space-y-4">' +
+                '<div class="w-12 h-12 rounded-2xl bg-ufcnavy-900 text-amber-400 flex items-center justify-center mx-auto shadow-md animate-pulse">' +
+                    '<i class="fa-solid fa-stamp text-xl"></i>' +
+                '</div>' +
+                '<div>' +
+                    '<span class="text-[10px] font-extrabold uppercase tracking-widest text-ufcteal-700 bg-ufcteal-50 border border-ufcteal-200 px-3 py-0.5 rounded-full">Malote Lacrado • ' + d.codigo + '</span>' +
+                    '<h3 class="text-base font-extrabold text-ufcnavy-900 mt-2" id="geproStatusEtapa">Lacrado e protocolado — Recebendo folha discursiva...</h3>' +
+                    '<p class="text-xs text-slate-500 mt-1">A Banca Avaliadora (INEP / GEPRO) está auditando sua resposta. Aguarde o parecer oficial.</p>' +
+                '</div>' +
+                '<div class="max-w-md mx-auto bg-slate-100 rounded-full h-2 overflow-hidden">' +
+                    '<div id="geproBarraSuspense" class="bg-ufcnavy-700 h-full transition-all duration-700" style="width: 25%"></div>' +
+                '</div>' +
+            '</div>';
         painel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+        const etapas = [
+            { pct: "55%", txt: "Auditando memória de cálculo, fórmulas e unidades dimensionais..." },
+            { pct: "85%", txt: "Conferindo critérios das Portarias MEC nº 154, 163 e 276/2026..." },
+            { pct: "100%", txt: "Parecer consolidado — Deslacrando boletim individual..." }
+        ];
+
+        const t1 = setTimeout(function () {
+            const st = document.getElementById("geproStatusEtapa");
+            const br = document.getElementById("geproBarraSuspense");
+            if (st) st.textContent = etapas[0].txt;
+            if (br) br.style.width = etapas[0].pct;
+        }, 700);
+
+        const t2 = setTimeout(function () {
+            const st = document.getElementById("geproStatusEtapa");
+            const br = document.getElementById("geproBarraSuspense");
+            if (st) st.textContent = etapas[1].txt;
+            if (br) br.style.width = etapas[1].pct;
+        }, 1450);
+
+        const avaliacaoLocal = avaliarLocalmente(discursivaAtualId, respA, respB);
+        const chaveApi = localStorage.getItem("gepro_gemini_api_key");
+        let textoIA = null;
+
+        const esperaMinima = new Promise(function (resolve) { setTimeout(resolve, 2200); });
+
+        if (chaveApi) {
+            try {
+                const respApi = await fetch(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(chaveApi),
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: gerarPromptLacrado() }] }] })
+                    }
+                );
+                const dados = await respApi.json();
+                if (respApi.ok) {
+                    textoIA = dados.candidates?.[0]?.content?.parts?.[0]?.text || null;
+                }
+            } catch (e) {
+                textoIA = null;
+            }
+        }
+
+        await esperaMinima;
+        clearTimeout(t1);
+        clearTimeout(t2);
+
+        painel.innerHTML = renderizarDossieDeslacrado(avaliacaoLocal, textoIA);
     };
 
-    window.copiarPromptGepro = function () {
-        const box = document.getElementById("geproPromptBox");
-        if (!box) return;
+    window.consultarSegundaOpiniaoSilenciosa = function (destino) {
+        const promptSecreto = gerarPromptLacrado();
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(box.value);
+            navigator.clipboard.writeText(promptSecreto).catch(function () {});
         } else {
-            box.select();
-            document.execCommand("copy");
+            const tmp = document.createElement("textarea");
+            tmp.value = promptSecreto;
+            tmp.style.position = "fixed";
+            tmp.style.opacity = "0";
+            document.body.appendChild(tmp);
+            tmp.select();
+            try { document.execCommand("copy"); } catch (e) {}
+            document.body.removeChild(tmp);
         }
-        const lbl = document.getElementById("geproCopyLabel");
-        if (lbl) {
-            lbl.textContent = "Copiado!";
-            setTimeout(function () { lbl.textContent = "Copiar Novamente"; }, 2000);
-        }
+        const url = destino === "chatgpt" ? "https://chatgpt.com/" : "https://gemini.google.com/app";
+        window.open(url, "_blank", "noopener,noreferrer");
     };
 
     window.abrirModalApiGepro = function () {
@@ -959,120 +1126,64 @@
         const k = document.getElementById("geproInputKey").value.trim();
         if (!k) { alert("Cole uma chave válida ou clique em Remover."); return; }
         localStorage.setItem("gepro_gemini_api_key", k);
-        atualizarBotaoApiGepro();
         fecharModalApiGepro();
+        alert("Modo Docente/Monitor ativado: as submissões nesta máquina usarão avaliação generativa automaticamente.");
     };
 
     window.removerKeyGepro = function () {
         localStorage.removeItem("gepro_gemini_api_key");
         document.getElementById("geproInputKey").value = "";
-        atualizarBotaoApiGepro();
         fecharModalApiGepro();
     };
 
-    function atualizarBotaoApiGepro() {
-        const btn = document.getElementById("geproBtnApiMonitor");
-        if (!btn) return;
-        if (localStorage.getItem("gepro_gemini_api_key")) {
-            btn.classList.remove("hidden");
-        } else {
-            btn.classList.add("hidden");
-        }
-    }
-
-    window.executarApiMonitorGepro = async function () {
-        const k = localStorage.getItem("gepro_gemini_api_key");
-        if (!k) { abrirModalApiGepro(); return; }
-
-        const respA = document.getElementById("textareaDiscA").value.trim();
-        const respB = document.getElementById("textareaDiscB").value.trim();
-        if (!respA && !respB) {
-            alert("Escreva sua resposta antes de solicitar o parecer.");
-            return;
-        }
-
-        const painel = document.getElementById("geproApiPanel");
-        const out = document.getElementById("geproApiOut");
-        painel.classList.remove("hidden");
-        out.textContent = "Analisando resposta conforme critérios da banca do INEP... aguarde.";
-        painel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-
+    function montarInterfaceBanca() {
+        // Suporte silencioso para link compartilhado pelo docente com ?k=CHAVE (salva e oculta da barra de endereço)
         try {
-            const res = await fetch(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(k),
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: montarPromptINEP() }] }] })
-                }
-            );
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error?.message || "Erro na API");
-            out.textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sem resposta.";
-        } catch (err) {
-            out.textContent = "Não foi possível conectar à API (" + err.message + "). Utilize o botão '2. Corrigir com IA (Padrão Banca INEP)' acima.";
-        }
-    };
+            const params = new URLSearchParams(window.location.search);
+            const kParam = params.get("k");
+            if (kParam) {
+                localStorage.setItem("gepro_gemini_api_key", kParam);
+                params.delete("k");
+                const novaUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+                window.history.replaceState({}, "", novaUrl);
+            }
+        } catch (e) {}
 
-    document.addEventListener("DOMContentLoaded", function () {
         const espelho = document.getElementById("painelPadraoDiscursiva");
-        if (!espelho) return;
+        if (!espelho || document.getElementById("geproCardSubmissao")) return;
 
-        const htmlModulo =
-            '<div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3">' +
-                '<span class="text-[11px] font-extrabold uppercase tracking-wider text-ufcnavy-700 block"><i class="fa-solid fa-wand-magic-sparkles text-ufcteal-600 mr-1"></i>Correção da Redação Discursiva (Escolha o modo):</span>' +
-                '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
-                    '<button type="button" onclick="executarDiagnosticoOffline()" class="text-left bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white p-3.5 rounded-xl shadow-sm transition-all">' +
-                        '<span class="block text-xs sm:text-sm font-extrabold">1. Analisar Estrutura e Conceitos (Offline)</span>' +
-                        '<span class="block text-[11px] text-slate-200 mt-0.5">Diagnóstico instantâneo: linhas, cálculos, termos do espelho e nota (0–100).</span>' +
-                    '</button>' +
-                    '<button type="button" onclick="executarCorrecaoIA()" class="text-left bg-ufcteal-600 hover:bg-ufcteal-700 text-white p-3.5 rounded-xl shadow-sm transition-all">' +
-                        '<span class="block text-xs sm:text-sm font-extrabold">2. Corrigir com IA (Padrão Banca INEP)</span>' +
-                        '<span class="block text-[11px] text-teal-50 mt-0.5">Copia sua resposta + espelho oficial e abre Gemini ou ChatGPT em 1 clique.</span>' +
-                    '</button>' +
-                    '<button type="button" id="geproBtnApiMonitor" onclick="executarApiMonitorGepro()" class="hidden md:col-span-2 text-left bg-indigo-700 hover:bg-indigo-800 text-white p-3.5 rounded-xl shadow-sm transition-all">' +
-                        '<span class="block text-xs sm:text-sm font-extrabold">3. Parecer Direto na Tela (Modo Monitor Ativo)</span>' +
-                        '<span class="block text-[11px] text-indigo-100 mt-0.5">Correção automática via chave API configurada pelo monitor/docente.</span>' +
-                    '</button>' +
+        const cardSubmissao =
+            '<div id="geproCardSubmissao" class="bg-gradient-to-r from-ufcnavy-900 via-ufcnavy-700 to-ufcnavy-900 text-white rounded-2xl p-5 shadow-md border border-ufcnavy-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
+                '<div class="space-y-1">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="bg-amber-400 text-slate-950 text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded">Protocolo Oficial</span>' +
+                        '<span class="text-[11px] font-semibold text-slate-200">Banca Examinadora INEP / GEPRO</span>' +
+                    '</div>' +
+                    '<h3 class="text-sm sm:text-base font-extrabold tracking-tight">Pronto para receber o parecer da sua redação?</h3>' +
+                    '<p class="text-xs text-slate-200 leading-relaxed">Sua folha será lacrada, auditada segundo a matriz do ENADE 2026 e devolvida com nota (0–100) e diagnóstico técnico.</p>' +
                 '</div>' +
+                '<button type="button" onclick="submeterBancaAvaliadora()" class="shrink-0 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-5 py-3 rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer">' +
+                    '<i class="fa-solid fa-file-shield"></i>' +
+                    '<span>Submeter à Banca Avaliadora</span>' +
+                '</button>' +
             '</div>' +
-            '<div id="geproDiagPanel" class="hidden bg-white rounded-2xl p-5 shadow-sm border-2 border-ufcnavy-700 space-y-4"></div>' +
-            '<div id="geproIaPanel" class="hidden bg-ufcteal-50/80 rounded-2xl p-5 shadow-sm border-2 border-ufcteal-600 space-y-3">' +
-                '<div class="flex items-center justify-between">' +
-                    '<h3 class="text-sm sm:text-base font-extrabold text-ufcnavy-900">Banca Corretora com IA — Prompt Copiado!</h3>' +
-                    '<button type="button" onclick="document.getElementById(\'geproIaPanel\').classList.add(\'hidden\')" class="text-xs font-bold text-slate-500 hover:text-slate-800">Fechar</button>' +
-                '</div>' +
-                '<p class="text-xs sm:text-sm text-slate-700">As instruções do INEP, o espelho oficial e suas respostas já estão na área de transferência. Abra uma plataforma abaixo e pressione <strong>Ctrl + V</strong>:</p>' +
-                '<div class="flex flex-wrap gap-3">' +
-                    '<a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Abrir Google Gemini e Colar ↗</a>' +
-                    '<a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm">Abrir ChatGPT e Colar ↗</a>' +
-                    '<button type="button" onclick="copiarPromptGepro()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold px-3.5 py-2.5 rounded-xl text-xs"><span id="geproCopyLabel">Copiar Novamente</span></button>' +
-                '</div>' +
-                '<textarea id="geproPromptBox" rows="4" readonly class="w-full p-2.5 font-mono text-[11px] bg-white border border-slate-300 rounded-xl text-slate-700"></textarea>' +
-            '</div>' +
-            '<div id="geproApiPanel" class="hidden bg-white rounded-2xl p-5 shadow-sm border-2 border-indigo-700 space-y-3">' +
-                '<div class="flex items-center justify-between border-b border-slate-100 pb-2">' +
-                    '<h3 class="text-sm sm:text-base font-extrabold text-indigo-900">Parecer da Banca Avaliadora (Modo Monitor)</h3>' +
-                    '<button type="button" onclick="document.getElementById(\'geproApiPanel\').classList.add(\'hidden\')" class="text-xs font-bold text-slate-500 hover:text-slate-800">Fechar</button>' +
-                '</div>' +
-                '<div id="geproApiOut" class="text-xs sm:text-sm text-slate-800 whitespace-pre-wrap leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200"></div>' +
-            '</div>';
+            '<div id="geproDossieBanca" class="hidden bg-white rounded-2xl p-5 sm:p-6 shadow-md border-2 border-ufcnavy-700 space-y-4"></div>';
 
-        espelho.insertAdjacentHTML("beforebegin", htmlModulo);
+        espelho.insertAdjacentHTML("beforebegin", cardSubmissao);
 
         const modalHtml =
             '<div id="geproModalApi" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">' +
                 '<div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-xl space-y-4 border border-slate-200">' +
                     '<div class="flex items-center justify-between border-b border-slate-100 pb-2">' +
-                        '<h3 class="text-sm font-extrabold text-ufcnavy-900">Modo Monitor — Chave API Google Gemini</h3>' +
+                        '<h3 class="text-sm font-extrabold text-ufcnavy-900">Configuração Docente / Monitor (Opcional)</h3>' +
                         '<button type="button" onclick="fecharModalApiGepro()" class="text-slate-400 hover:text-slate-700">✕</button>' +
                     '</div>' +
-                    '<p class="text-xs text-slate-600">Uso opcional para monitores ou professores do GEPRO. A chave fica salva apenas localmente no navegador.</p>' +
-                    '<input type="password" id="geproInputKey" placeholder="Cole sua chave AIzaSy... do Google AI Studio" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">' +
+                    '<p class="text-xs text-slate-600">Quando configurada, o botão "Submeter à Banca Avaliadora" usa automaticamente avaliação generativa nos bastidores, mantendo o dossiê lacrado para o aluno.</p>' +
+                    '<input type="password" id="geproInputKey" placeholder="Chave API Google AI Studio (AIzaSy...)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">' +
                     '<div class="flex justify-end gap-2">' +
                         '<button type="button" onclick="removerKeyGepro()" class="px-3 py-2 rounded-xl text-xs font-bold text-rose-700 hover:bg-rose-50">Remover</button>' +
                         '<button type="button" onclick="fecharModalApiGepro()" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Cancelar</button>' +
-                        '<button type="button" onclick="salvarKeyGepro()" class="px-4 py-2 rounded-xl text-xs font-bold bg-ufcnavy-700 text-white hover:bg-ufcnavy-900">Salvar Chave</button>' +
+                        '<button type="button" onclick="salvarKeyGepro()" class="px-4 py-2 rounded-xl text-xs font-bold bg-ufcnavy-700 text-white hover:bg-ufcnavy-900">Salvar</button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -1080,23 +1191,25 @@
 
         const footerRight = document.querySelector("footer .max-w-5xl > div:last-child");
         if (footerRight) {
-            footerRight.insertAdjacentHTML("afterbegin", '<button type="button" onclick="abrirModalApiGepro()" class="text-[11px] text-slate-400 hover:text-ufcnavy-700 underline mr-2">Modo Monitor (API)</button>');
+            footerRight.insertAdjacentHTML("afterbegin", '<button type="button" onclick="abrirModalApiGepro()" class="text-[11px] text-slate-400 hover:text-ufcnavy-700 underline mr-2">Modo Docente</button>');
         }
-
-        atualizarBotaoApiGepro();
 
         const sel = document.getElementById("selectDiscursivaCe");
         const prev = document.getElementById("btnDiscPrev");
         const next = document.getElementById("btnDiscNext");
-        const fecharPaineis = function () {
-            document.getElementById("geproDiagPanel")?.classList.add("hidden");
-            document.getElementById("geproIaPanel")?.classList.add("hidden");
-            document.getElementById("geproApiPanel")?.classList.add("hidden");
+        const fecharDossie = function () {
+            document.getElementById("geproDossieBanca")?.classList.add("hidden");
         };
-        sel?.addEventListener("change", fecharPaineis);
-        prev?.addEventListener("click", fecharPaineis);
-        next?.addEventListener("click", fecharPaineis);
-    });
+        sel?.addEventListener("change", fecharDossie);
+        prev?.addEventListener("click", fecharDossie);
+        next?.addEventListener("click", fecharDossie);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", montarInterfaceBanca);
+    } else {
+        montarInterfaceBanca();
+    }
 })();
 </script>
 
