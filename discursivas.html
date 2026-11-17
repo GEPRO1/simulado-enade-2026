@@ -1003,10 +1003,10 @@
             '<div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">' +
                 '<span class="text-slate-500 italic">Continue refinando sua escrita técnica: cada linha objetiva aproxima você do Conceito Máximo no ENADE 2026.</span>' +
                 '<div class="flex flex-wrap items-center gap-2">' +
-                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'gemini\')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition-colors" title="Copia seu dossiê lacrado em segundo plano e abre o Gemini">' +
+                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'gemini\', this)" class="bg-ufcnavy-50 hover:bg-ufcnavy-100 border border-ufcnavy-200 text-ufcnavy-900 font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" title="Copia seu dossiê lacrado para a área de transferência e abre o Gemini">' +
                         '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>2ª Opinião (Gemini)' +
                     '</button>' +
-                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'chatgpt\')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition-colors" title="Copia seu dossiê lacrado em segundo plano e abre o ChatGPT">' +
+                    '<button type="button" onclick="consultarSegundaOpiniaoSilenciosa(\'chatgpt\', this)" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer" title="Copia seu dossiê lacrado e abre o ChatGPT">' +
                         '<i class="fa-solid fa-up-right-from-square mr-1 text-[10px]"></i>2ª Opinião (ChatGPT)' +
                     '</button>' +
                 '</div>' +
@@ -1095,21 +1095,75 @@
         painel.innerHTML = renderizarDossieDeslacrado(avaliacaoLocal, textoIA);
     };
 
-    window.consultarSegundaOpiniaoSilenciosa = function (destino) {
-        const promptSecreto = gerarPromptLacrado();
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(promptSecreto).catch(function () {});
-        } else {
-            const tmp = document.createElement("textarea");
-            tmp.value = promptSecreto;
-            tmp.style.position = "fixed";
-            tmp.style.opacity = "0";
-            document.body.appendChild(tmp);
-            tmp.select();
-            try { document.execCommand("copy"); } catch (e) {}
-            document.body.removeChild(tmp);
+    function copiarTextoAreaTransferencia(texto) {
+        let copiou = false;
+        const tmp = document.createElement("textarea");
+        tmp.value = texto;
+        tmp.setAttribute("readonly", "");
+        tmp.style.position = "fixed";
+        tmp.style.top = "0";
+        tmp.style.left = "-9999px";
+        tmp.style.width = "24px";
+        tmp.style.height = "24px";
+        tmp.style.fontSize = "16px";
+        document.body.appendChild(tmp);
+        tmp.focus();
+        tmp.select();
+        tmp.setSelectionRange(0, texto.length);
+        try {
+            copiou = document.execCommand("copy");
+        } catch (e) {
+            copiou = false;
         }
-        const url = destino === "chatgpt" ? "https://chatgpt.com/" : "https://gemini.google.com/app";
+        document.body.removeChild(tmp);
+        return copiou;
+    }
+
+    function mostrarAvisoCopiaSilenciosa(destino) {
+        const dossie = document.getElementById("geproDossieBanca");
+        if (!dossie) return;
+        let aviso = document.getElementById("geproAvisoCopia");
+        if (!aviso) {
+            aviso = document.createElement("div");
+            aviso.id = "geproAvisoCopia";
+            dossie.appendChild(aviso);
+        }
+        const nomePlataforma = destino === "chatgpt" ? "ChatGPT" : "Google Gemini";
+        aviso.className = "bg-emerald-50 border border-emerald-300 text-emerald-950 rounded-xl px-4 py-2.5 text-xs flex items-center justify-between gap-2 animate-fade-in";
+        aviso.innerHTML =
+            '<span><i class="fa-solid fa-clipboard-check text-emerald-600 mr-1.5"></i><strong>Dossiê lacrado copiado!</strong> Na aba do <strong>' + nomePlataforma + '</strong>, pressione <strong>Ctrl + V</strong> (ou <em>Colar</em>) caso o campo não abra preenchido.</span>' +
+            '<button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-950 font-bold px-1">✕</button>';
+    }
+
+    window.consultarSegundaOpiniaoSilenciosa = async function (destino, btnEl) {
+        const promptSecreto = gerarPromptLacrado();
+
+        // 1. Cópia síncrona imediata enquanto a aba atual ainda possui foco
+        copiarTextoAreaTransferencia(promptSecreto);
+
+        // 2. Reforço via Clipboard API assíncrona ANTES de abrir a nova aba
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+                await navigator.clipboard.writeText(promptSecreto);
+            } catch (e) {}
+        }
+
+        // 3. Feedback visual discreto (sem expor o prompt)
+        if (btnEl) {
+            const originalHtml = btnEl.innerHTML;
+            btnEl.innerHTML = '<i class="fa-solid fa-check mr-1 text-[10px]"></i>Copiado! Cole com Ctrl+V';
+            setTimeout(function () {
+                btnEl.innerHTML = originalHtml;
+            }, 3500);
+        }
+        mostrarAvisoCopiaSilenciosa(destino);
+
+        // 4. Abre o destino (ChatGPT já recebe parâmetro ?q= quando dentro do limite de URL)
+        let url = "https://gemini.google.com/app";
+        if (destino === "chatgpt") {
+            const encoded = encodeURIComponent(promptSecreto);
+            url = encoded.length <= 6000 ? "https://chatgpt.com/?q=" + encoded : "https://chatgpt.com/";
+        }
         window.open(url, "_blank", "noopener,noreferrer");
     };
 
