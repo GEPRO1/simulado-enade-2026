@@ -60,17 +60,15 @@
                 </div>
             </div>
 
-            <!-- Aviso de Janela Agendada (quando &inicio= ou &fim= forem definidos na URL) -->
             <div id="avisoJanelaHorario" class="hidden mx-6 mt-5 p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-1">
                 <p id="textoJanelaHorario" class="font-semibold"></p>
             </div>
 
             <form id="formIdentificacaoAluno" class="p-6 space-y-3.5 text-xs sm:text-sm">
                 <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    Preencha sua identificação para registrar o horário de início e liberar o caderno (45 questões). <strong>No ranking público aparecerá apenas o seu apelido.</strong>
+                    Preencha sua identificação para registrar o horário de início e liberar o caderno (44 objetivas + 1 discursiva). <strong>No ranking público aparecerá apenas o seu apelido.</strong>
                 </p>
 
-                <!-- Campo Código de Acesso (exibido apenas se o link não contiver &acesso=...) -->
                 <div id="campoCodigoAcessoWrapper" class="space-y-1">
                     <label for="inputCodigoAcesso" class="block text-xs font-bold text-slate-700">
                         Código de Acesso da Turma <span class="text-rose-600">*</span>
@@ -138,7 +136,6 @@
     <header class="bg-ufcnavy-700 text-white shadow-md sticky top-0 z-30">
         <div class="max-w-5xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
             
-            <!-- Esquerda: Voltar + Logo UFC + Título -->
             <div class="flex items-center space-x-2.5">
                 <a href="index.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors" title="Voltar ao Portal">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
@@ -154,9 +151,7 @@
                 </div>
             </div>
 
-            <!-- Direita: Controles do Simulado + Logo GEPRO -->
             <div class="flex flex-wrap items-center gap-2 text-xs">
-                <!-- Seletor Rápido dos Simulados Livres (Simulado 02 fica oculto da navegação pública) -->
                 <select id="selectSimuladoUrl" aria-label="Selecionar Simulado" class="bg-ufcnavy-900 border border-white/25 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500 cursor-pointer">
                     <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
                     <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
@@ -164,37 +159,31 @@
                     <option value="simulado05.xlsx">Simulado 05 (Completo V • 45Q)</option>
                 </select>
 
-                <!-- Badge do Aluno Identificado (Exibido apenas no Simulado 02) -->
                 <div id="badgeAlunoAtivo" class="hidden bg-ufcteal-700/90 border border-ufcteal-400/40 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-white font-semibold">
                     <i class="fa-solid fa-user-check text-ufcteal-300"></i>
                     <span id="labelAlunoAtivo" class="max-w-[160px] truncate">Aluno</span>
                 </div>
 
-                <!-- Cronômetro -->
                 <div class="bg-ufcnavy-900/70 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 border border-white/10 shrink-0">
                     <i class="fa-regular fa-clock text-ufcteal-500 text-xs"></i>
                     <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
                 </div>
 
-                <!-- Botão Mapas Mentais -->
                 <button id="btnOpenStudyAll" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-bold shadow-sm">
                     <i class="fa-solid fa-diagram-project"></i>
                     <span class="hidden md:inline">Mapas Mentais</span>
                 </button>
 
-                <!-- Botão Imprimir -->
                 <button type="button" onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
                     <i class="fa-solid fa-print"></i>
                     <span class="hidden lg:inline">Imprimir</span>
                 </button>
 
-                <!-- Botão Grade de Questões -->
                 <button id="btnOpenGrid" type="button" class="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors">
                     <i class="fa-solid fa-th"></i>
                     <span class="hidden sm:inline font-medium">Questões</span>
                 </button>
 
-                <!-- Logo GEPRO -->
                 <img src="logo-gepro.png" 
                      onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';" 
                      alt="GEPRO" 
@@ -202,7 +191,6 @@
             </div>
         </div>
 
-        <!-- Barra de Progresso -->
         <div class="w-full bg-ufcnavy-900 h-1.5">
             <div id="progressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300" style="width: 0%;"></div>
         </div>
@@ -277,11 +265,11 @@
 
                 <!-- Comando da Questão -->
                 <div class="pt-1 border-t border-slate-100">
-                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed"></p>
+                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed whitespace-pre-line"></p>
                 </div>
             </div>
 
-            <!-- Alternativas (A - E) -->
+            <!-- Alternativas (A - E) ou Caixa de Resposta Discursiva -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
                 <div id="containerOpcoes" class="space-y-2.5"></div>
             </div>
@@ -301,7 +289,7 @@
 
                 <div class="space-y-3 text-xs sm:text-sm">
                     <div>
-                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Análise de Distratores:</span>
+                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Padrão de Resposta:</span>
                         <div id="feedbackTexto" class="text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200"></div>
                     </div>
                     <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200/70 flex items-start space-x-2 text-xs">
@@ -347,11 +335,11 @@
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota ENADE (0–100)</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota Objetiva (0–100)</span>
                     <span id="resNota" class="text-xl font-extrabold text-ufcnavy-700">0.0</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Acertos Totais</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Acertos Objetivas</span>
                     <span id="resAcertos" class="text-xl font-extrabold text-emerald-600">0</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
@@ -364,9 +352,17 @@
                 </div>
             </div>
 
+            <!-- Aviso sobre Questão Discursiva (quando presente no caderno) -->
+            <div id="avisoDiscursivaResultado" class="hidden bg-indigo-50 border border-indigo-200 text-indigo-950 rounded-xl p-3.5 text-xs text-left flex items-start space-x-2.5">
+                <i class="fa-solid fa-pen-nib text-indigo-600 mt-0.5 text-sm"></i>
+                <div>
+                    <span class="font-bold block">Questão Discursiva (Q16) registrada para avaliação docente</span>
+                    <p id="textoAvisoDiscursiva" class="text-indigo-900/90 mt-0.5 leading-relaxed"></p>
+                </div>
+            </div>
+
             <!-- Bloco Exclusivo do Ranking Oficial & Dashboard da Turma (Simulado 02) -->
             <div id="blocoRankingSimulado02" class="hidden text-left space-y-4">
-                <!-- Mini-Dashboard Consolidado da Turma -->
                 <div class="bg-ufcnavy-50/70 border border-ufcnavy-100 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <h3 class="text-sm font-extrabold text-ufcnavy-900 flex items-center gap-2">
@@ -384,11 +380,11 @@
                             <span id="dashTotalAlunos" class="text-lg font-extrabold text-slate-800">-</span>
                         </div>
                         <div class="bg-white p-3 rounded-xl border border-slate-200/80">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Média da Turma</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Média Objetiva</span>
                             <span id="dashMediaTurma" class="text-lg font-extrabold text-ufcnavy-700">-</span>
                         </div>
                         <div class="bg-white p-3 rounded-xl border border-slate-200/80">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Maior Nota</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Maior Nota Obj.</span>
                             <span id="dashMaiorNota" class="text-lg font-extrabold text-emerald-600">-</span>
                         </div>
                         <div class="bg-white p-3 rounded-xl border border-slate-200/80">
@@ -397,7 +393,6 @@
                         </div>
                     </div>
 
-                    <!-- Destaques por Questão (quando houver dados em Respostas_Questoes) -->
                     <div id="dashDestaquesQuestoes" class="hidden grid sm:grid-cols-2 gap-3 pt-1 text-xs">
                         <div class="bg-white p-3 rounded-xl border border-emerald-200/80">
                             <span class="text-[10px] font-bold uppercase text-emerald-700 block mb-1">
@@ -436,8 +431,8 @@
                                 <tr class="bg-ufcnavy-700 text-white">
                                     <th class="py-2 px-3 rounded-tl-lg">Pos.</th>
                                     <th class="py-2 px-3">Apelido</th>
-                                    <th class="py-2 px-3 text-center">FG / CE</th>
-                                    <th class="py-2 px-3 text-center">Nota ENADE</th>
+                                    <th class="py-2 px-3 text-center">FG / CE Obj.</th>
+                                    <th class="py-2 px-3 text-center">Nota Obj.</th>
                                     <th class="py-2 px-3 text-center rounded-tr-lg">Tempo</th>
                                 </tr>
                             </thead>
@@ -477,7 +472,7 @@
                 </div>
                 <div class="flex flex-wrap gap-2 text-[10px] text-slate-600">
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-200 inline-block"></span> Aberta</span>
-                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-ufcnavy-700 inline-block"></span> Marcada</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-ufcnavy-700 inline-block"></span> Respondida</span>
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> Correta</span>
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> Incorreta</span>
                 </div>
@@ -531,12 +526,9 @@
 
     <!-- BASE DE MAPAS MENTAIS, CONTROLE DO SIMULADO 02 E LÓGICA DA APLICAÇÃO -->
     <script>
-        // =========================================================================
-        // CONFIGURAÇÃO DO SIMULADO 02 (ACESSO RESTRITO + RANKING GOOGLE SHEETS)
-        // =========================================================================
         const CONFIG_SIMULADO02 = {
             arquivo: 'simulado02.xlsx',
-            codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
+            codigoAcesso: 'GEPRO2026',
             rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
         };
 
@@ -658,6 +650,19 @@
         let simuladoFinalizado = false;
         let alunoIdentificado = null;
 
+        function isQuestionDiscursiva(q) {
+            if (!q) return false;
+            const tipo = (q.tipo || '').toLowerCase();
+            const gab = (q.gab || '').trim().toUpperCase();
+            return tipo.includes('discursiva') || gab === 'DISCURSIVA' || Object.keys(q.opcoes || {}).length === 0;
+        }
+
+        function formatNumeroQuestao(q, fallbackIndex) {
+            const raw = String(q?.num || '').trim();
+            const m = raw.match(/(\d+)/);
+            return m ? m[1].padStart(2, '0') : String(fallbackIndex + 1).padStart(2, '0');
+        }
+
         function gerarIdParticipanteLocal(matricula) {
             const str = String(matricula || '').trim();
             let hash = 0;
@@ -742,7 +747,6 @@
                 if (campoCodigoWrapper) campoCodigoWrapper.classList.remove('hidden');
             }
 
-            // Verifica janela de horário opcional (&inicio=AAAA-MM-DDTHH:MM &fim=AAAA-MM-DDTHH:MM)
             const avisoEl = document.getElementById('avisoJanelaHorario');
             const textoAviso = document.getElementById('textoJanelaHorario');
             const btnIniciar = document.getElementById('btnIniciarSimuladoOficial');
@@ -845,6 +849,7 @@
                 let numVal = String(row[numCol] || '').trim();
                 if (!numVal) continue;
 
+                let tipoRaw = String(row[colMap.tipo] || 'Alternativa Simples').trim();
                 let opObj = parseOpcoesString(String(row[colMap.opcoes] || ''));
                 let textoRaw = String(row[colMap.texto] || '').trim();
                 let comandoRaw = String(row[colMap.comando] || '').trim();
@@ -853,15 +858,20 @@
                     .replace(/\n/g, '<br>');
 
                 const gabRaw = String(row[colMap.gab] || 'A').trim().toUpperCase();
-                const gabMatch = gabRaw.match(/[A-E]/);
-                const gabClean = gabMatch ? gabMatch[0] : 'A';
+                let gabClean = 'A';
+                if (tipoRaw.toLowerCase().includes('discursiva') || gabRaw === 'DISCURSIVA') {
+                    gabClean = 'DISCURSIVA';
+                } else {
+                    const gabMatch = gabRaw.match(/[A-E]/);
+                    gabClean = gabMatch ? gabMatch[0] : 'A';
+                }
 
                 questaoData.push({
                     num: numVal,
                     cat: String(row[colMap.cat] || 'Componente Específico').trim(),
                     disc: String(row[colMap.disc] || '').trim(),
                     dif: String(row[colMap.dif] || 'Médio').trim(),
-                    tipo: String(row[colMap.tipo] || 'Alternativa Simples').trim(),
+                    tipo: tipoRaw,
                     comp: String(row[colMap.comp] || '').trim(),
                     hab: String(row[colMap.hab] || '').trim(),
                     conteudo: String(row[colMap.conteudo] || '').trim(),
@@ -921,6 +931,7 @@
 
         function parseOpcoesString(str) {
             let ops = {};
+            if (!str || str.trim().toUpperCase() === 'N/A') return ops;
             let lines = str.split('\n');
             let curr = null;
 
@@ -973,11 +984,22 @@
             const q = questaoData[index];
             if (!q) return;
 
-            document.getElementById('badgeNum').textContent = `Questão ${index + 1} de ${questaoData.length}`;
+            const isDisc = isQuestionDiscursiva(q);
+            const numOficial = formatNumeroQuestao(q, index);
+            const seqEsperado = String(index + 1).padStart(2, '0');
+
+            document.getElementById('badgeNum').textContent = (numOficial !== seqEsperado)
+                ? `Questão ${numOficial} (${index + 1} de ${questaoData.length})`
+                : `Questão ${numOficial} de ${questaoData.length}`;
             document.getElementById('badgeCat').textContent = q.cat;
             document.getElementById('badgeDisc').textContent = q.disc || 'Geral';
             document.getElementById('badgeDif').textContent = `Dificuldade: ${q.dif}`;
-            document.getElementById('badgeTipo').textContent = q.tipo;
+
+            const badgeTipoEl = document.getElementById('badgeTipo');
+            badgeTipoEl.textContent = q.tipo;
+            badgeTipoEl.className = isDisc
+                ? 'bg-indigo-100 text-indigo-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full'
+                : 'bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full';
 
             document.getElementById('textComp').textContent = q.comp || 'Não especificado na planilha.';
             document.getElementById('textHab').textContent = q.hab || 'Não especificado na planilha.';
@@ -1020,7 +1042,45 @@
             opcoesContainer.innerHTML = '';
             const selectedOpt = userAnswers[index];
 
-            if (q.opcoes) {
+            if (isDisc) {
+                const textoAtual = typeof selectedOpt === 'string' ? selectedOpt : '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'space-y-2.5';
+                wrapper.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <label for="textareaDiscursiva" class="text-xs font-bold text-indigo-900 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-pen-nib text-indigo-600"></i>
+                            <span>Resposta Discursiva — Desenvolva os cálculos e a análise dos itens a) e b):</span>
+                        </label>
+                        <span id="contadorCharsDiscursiva" class="text-[11px] font-mono text-slate-500">${textoAtual.length} caracteres</span>
+                    </div>
+                    <textarea id="textareaDiscursiva" rows="8"
+                        placeholder="Digite aqui sua resolução completa para o item a) e para o item b)..."
+                        ${simuladoFinalizado ? 'disabled' : ''}
+                        class="w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"></textarea>
+                    <p class="text-[11px] text-slate-500">
+                        Sua resposta escrita será registrada automaticamente para correção docente e não entra no cálculo automático da nota objetiva.
+                    </p>
+                `;
+                opcoesContainer.appendChild(wrapper);
+
+                const textareaEl = document.getElementById('textareaDiscursiva');
+                const counterEl = document.getElementById('contadorCharsDiscursiva');
+                if (textareaEl) {
+                    textareaEl.value = textoAtual;
+                    textareaEl.addEventListener('input', () => {
+                        if (simuladoFinalizado) return;
+                        const val = textareaEl.value;
+                        if (val.trim().length > 0) {
+                            userAnswers[index] = val;
+                        } else {
+                            delete userAnswers[index];
+                        }
+                        if (counterEl) counterEl.textContent = `${val.length} caracteres`;
+                        updateGridButtons();
+                    });
+                }
+            } else if (q.opcoes) {
                 Object.keys(q.opcoes).forEach(letra => {
                     const isSelected = selectedOpt === letra;
                     const optBtn = document.createElement('button');
@@ -1082,7 +1142,12 @@
             if (simuladoFinalizado || isModoRestritoSimulado02) return;
             const q = questaoData[currentIndex];
             const userAns = userAnswers[currentIndex];
-            if (!userAns) {
+            if (isQuestionDiscursiva(q)) {
+                if (!userAns || !String(userAns).trim()) {
+                    alert("Escreva sua resposta discursiva antes de conferir o padrão oficial.");
+                    return;
+                }
+            } else if (!userAns) {
                 alert("Selecione uma alternativa (A a E) antes de confirmar.");
                 return;
             }
@@ -1094,15 +1159,21 @@
         function showFeedback(q, selectedOpt) {
             if (isModoRestritoSimulado02) return;
             const cardFeedback = document.getElementById('cardFeedback');
-            const isCorrect = selectedOpt === q.gab;
 
-            document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
-            document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
-            document.getElementById('statusFeedbackTitle').textContent = isCorrect
-                ? `Resposta Correta! (Gabarito: ${q.gab})`
-                : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            if (isQuestionDiscursiva(q)) {
+                document.getElementById('statusFeedbackHeader').className = 'flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-indigo-50 text-indigo-900 border border-indigo-200';
+                document.getElementById('statusFeedbackIcon').className = 'fa-solid fa-pen-nib text-indigo-600 text-lg';
+                document.getElementById('statusFeedbackTitle').textContent = 'Resposta Discursiva Registrada — Compare com o Padrão de Resposta Oficial';
+            } else {
+                const isCorrect = selectedOpt === q.gab;
+                document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+                document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
+                document.getElementById('statusFeedbackTitle').textContent = isCorrect
+                    ? `Resposta Correta! (Gabarito: ${q.gab})`
+                    : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            }
 
-            document.getElementById('feedbackTexto').innerHTML = q.justificativa || 'Sem justificativa cadastrada.';
+            document.getElementById('feedbackTexto').innerHTML = (q.justificativa || 'Sem justificativa cadastrada.').replace(/\n/g, '<br>');
             document.getElementById('fonteAbnt').innerHTML = formatReferenceWithLinks(q.fonte);
 
             cardFeedback.classList.remove('hidden');
@@ -1192,12 +1263,10 @@
             if (listenersInitialized) return;
             listenersInitialized = true;
 
-            // Botão para consultar o Ranking & Dashboard ao vivo sem iniciar nova tentativa
             document.getElementById('btnVerDashboardDireto')?.addEventListener('click', () => {
                 abrirPainelPublicoRanking();
             });
 
-            // Formulário de Identificação e Código de Acesso do Simulado 02
             document.getElementById('formIdentificacaoAluno')?.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const erroEl = document.getElementById('erroIdentificacao');
@@ -1239,9 +1308,9 @@
                         document.getElementById('quizContainer')?.classList.add('hidden');
                         document.getElementById('btnRevisarProvas')?.classList.add('hidden');
                         document.getElementById('resNota').textContent = Number(regSalvo.notaEnade || 0).toFixed(1);
-                        document.getElementById('resAcertos').textContent = `${regSalvo.acertosTotal ?? '-'} / 45`;
+                        document.getElementById('resAcertos').textContent = `${regSalvo.acertosTotal ?? '-'} / ${regSalvo.totalObjetivas ?? 44}`;
                         document.getElementById('resFg').textContent = `${regSalvo.acertosFG ?? '-'}/${regSalvo.totalFG ?? 15}`;
-                        document.getElementById('resCe').textContent = `${regSalvo.acertosCE ?? '-'}/${regSalvo.totalCE ?? 30}`;
+                        document.getElementById('resCe').textContent = `${regSalvo.acertosCE ?? '-'}/${regSalvo.totalCE ?? 29}`;
                         document.getElementById('resSubtituloAluno').textContent =
                             `Apelido: ${alunoIdentificado.apelido} • Prova já finalizada e bloqueada para alterações (Duração: ${regSalvo.tempoFormatado || '-'})`;
                         document.getElementById('statusEnvioRanking').textContent =
@@ -1282,7 +1351,6 @@
                 carregarExcelRemote(CONFIG_SIMULADO02.arquivo, true);
             });
 
-            // Troca de simulado livre
             document.getElementById('selectSimuladoUrl')?.addEventListener('change', (e) => {
                 const novoArquivo = e.target.value;
                 arquivoAtual = novoArquivo;
@@ -1366,11 +1434,11 @@
             const total = questaoData.length;
             if (isModoRestritoSimulado02) {
                 const aviso = respondidas < total
-                    ? `Você marcou ${respondidas} de ${total} questões.\n\nATENÇÃO: Após finalizar, não será possível alterar suas respostas nem visualizar o gabarito. Deseja encerrar agora?`
+                    ? `Você respondeu ${respondidas} de ${total} questões.\n\nATENÇÃO: Após finalizar, não será possível alterar suas respostas (nem o texto discursivo da Q16) nem visualizar o gabarito. Deseja encerrar agora?`
                     : `Você respondeu todas as ${total} questões.\n\nATENÇÃO: Após finalizar, suas respostas ficarão bloqueadas definitivamente. Confirma o envio?`;
                 if (!confirm(aviso)) return;
             } else if (respondidas < total) {
-                const ok = confirm(`Você marcou ${respondidas} de ${total} questões. Deseja finalizar e apurar sua nota agora?`);
+                const ok = confirm(`Você respondeu ${respondidas} de ${total} questões. Deseja finalizar e apurar sua nota agora?`);
                 if (!ok) return;
             }
             finishSimulado();
@@ -1400,15 +1468,22 @@
                 if (!btn) return;
                 const isCurrent = idx === currentIndex;
                 const userAns = userAnswers[idx];
+                const isDisc = isQuestionDiscursiva(q);
+                const temResposta = isDisc ? Boolean(userAns && String(userAns).trim()) : Boolean(userAns);
+
                 let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
-                if (userAns) {
-                    bgClass = (q.answered && !isModoRestritoSimulado02)
-                        ? (userAns === q.gab ? "bg-emerald-500 text-white font-bold" : "bg-rose-500 text-white font-bold")
-                        : "bg-ufcnavy-700 text-white font-bold";
+                if (temResposta) {
+                    if (isDisc) {
+                        bgClass = "bg-indigo-600 text-white font-bold";
+                    } else {
+                        bgClass = (q.answered && !isModoRestritoSimulado02)
+                            ? (userAns === q.gab ? "bg-emerald-500 text-white font-bold" : "bg-rose-500 text-white font-bold")
+                            : "bg-ufcnavy-700 text-white font-bold";
+                    }
                 }
                 if (isCurrent) bgClass += " ring-2 ring-offset-2 ring-ufcteal-500";
                 btn.className = `w-10 h-10 rounded-lg text-xs font-bold flex items-center justify-center ${bgClass}`;
-                btn.textContent = String(idx + 1).padStart(2, '0');
+                btn.textContent = formatNumeroQuestao(q, idx);
             });
         }
 
@@ -1419,11 +1494,26 @@
             document.getElementById('gridModal')?.classList.add('hidden');
             document.getElementById('quizContainer')?.classList.add('hidden');
 
-            let totalAcertos = 0, fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
+            let totalObjAcertos = 0, totalObjQuestoes = 0;
+            let fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
             const detalhesQuestoes = [];
+            const respostasDiscursivas = [];
 
             questaoData.forEach((q, idx) => {
                 q.answered = !isModoRestritoSimulado02;
+                const qLabel = q.num || ('Q' + String(idx + 1).padStart(2, '0'));
+
+                if (isQuestionDiscursiva(q)) {
+                    const textoResp = String(userAnswers[idx] || '').trim();
+                    respostasDiscursivas.push({
+                        questao: qLabel,
+                        disciplina: q.disc || '',
+                        respostaTexto: textoResp
+                    });
+                    return;
+                }
+
+                totalObjQuestoes++;
                 const marcada = userAnswers[idx] || '-';
                 const isCorrect = marcada === q.gab;
 
@@ -1434,10 +1524,10 @@
                     ceTotal++;
                     if (isCorrect) ceAcertos++;
                 }
-                if (isCorrect) totalAcertos++;
+                if (isCorrect) totalObjAcertos++;
 
                 detalhesQuestoes.push({
-                    questao: q.num || ('Q' + String(idx + 1).padStart(2, '0')),
+                    questao: qLabel,
                     marcada: marcada,
                     gabarito: q.gab,
                     acertou: isCorrect
@@ -1448,15 +1538,25 @@
             const pctCe = ceTotal > 0 ? (ceAcertos / ceTotal) : 0;
             const notaEnade100 = (fgTotal > 0 && ceTotal > 0)
                 ? ((pctFg * 25) + (pctCe * 75))
-                : ((totalAcertos / questaoData.length) * 100);
+                : (totalObjQuestoes > 0 ? ((totalObjAcertos / totalObjQuestoes) * 100) : 0);
 
             const tempoFormatado = formatSecondsToClock(timerSeconds);
             const horaFim = new Date().toLocaleString('pt-BR');
 
             document.getElementById('resNota').textContent = notaEnade100.toFixed(1);
-            document.getElementById('resAcertos').textContent = `${totalAcertos} / ${questaoData.length}`;
+            document.getElementById('resAcertos').textContent = `${totalObjAcertos} / ${totalObjQuestoes}`;
             document.getElementById('resFg').textContent = `${(pctFg * 100).toFixed(0)}% (${fgAcertos}/${fgTotal})`;
             document.getElementById('resCe').textContent = `${(pctCe * 100).toFixed(0)}% (${ceAcertos}/${ceTotal})`;
+
+            const avisoDiscEl = document.getElementById('avisoDiscursivaResultado');
+            const textoAvisoDiscEl = document.getElementById('textoAvisoDiscursiva');
+            if (respostasDiscursivas.length > 0 && avisoDiscEl && textoAvisoDiscEl) {
+                const respondida = respostasDiscursivas[0].respostaTexto.length > 0;
+                textoAvisoDiscEl.textContent = respondida
+                    ? `Nota objetiva calculada sobre as ${totalObjQuestoes} questões de múltipla escolha (${fgTotal} FG + ${ceTotal} CE). Sua resposta discursiva da ${respostasDiscursivas[0].questao} (${respostasDiscursivas[0].respostaTexto.length} caracteres) foi enviada ao professor para correção.`
+                    : `Nota objetiva calculada sobre as ${totalObjQuestoes} questões de múltipla escolha (${fgTotal} FG + ${ceTotal} CE). A ${respostasDiscursivas[0].questao} (Discursiva) foi entregue em branco.`;
+                avisoDiscEl.classList.remove('hidden');
+            }
 
             const blocoRanking = document.getElementById('blocoRankingSimulado02');
             if (isModoRestritoSimulado02 && alunoIdentificado) {
@@ -1465,6 +1565,10 @@
                 document.getElementById('resSubtituloAluno').textContent =
                     `Apelido no Ranking: ${alunoIdentificado.apelido} • Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}`;
                 blocoRanking?.classList.remove('hidden');
+
+                const statusDiscursiva = respostasDiscursivas.length > 0
+                    ? (respostasDiscursivas[0].respostaTexto.length > 0 ? 'Respondida' : 'Em branco')
+                    : 'N/A';
 
                 const registro = {
                     simulado: 'simulado02',
@@ -1479,11 +1583,14 @@
                     totalFG: fgTotal,
                     acertosCE: ceAcertos,
                     totalCE: ceTotal,
-                    acertosTotal: totalAcertos,
+                    acertosTotal: totalObjAcertos,
+                    totalObjetivas: totalObjQuestoes,
                     notaEnade: Number(notaEnade100.toFixed(2)),
                     tempoSegundos: timerSeconds,
                     tempoFormatado: tempoFormatado,
-                    detalhesQuestoes: detalhesQuestoes
+                    statusDiscursiva: statusDiscursiva,
+                    detalhesQuestoes: detalhesQuestoes,
+                    respostasDiscursivas: respostasDiscursivas
                 };
 
                 try {
@@ -1495,6 +1602,7 @@
                         acertosCE: registro.acertosCE,
                         totalCE: registro.totalCE,
                         acertosTotal: registro.acertosTotal,
+                        totalObjetivas: registro.totalObjetivas,
                         notaEnade: registro.notaEnade,
                         tempoFormatado: registro.tempoFormatado
                     }));
@@ -1511,7 +1619,6 @@
         async function registrarResultadoRanking(registro) {
             const statusEl = document.getElementById('statusEnvioRanking');
 
-            // 1. Cópia local anonimizada para fallback offline
             try {
                 const localList = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
                 const registroPublico = {
@@ -1536,17 +1643,16 @@
                 localStorage.setItem('gepro_ranking_sim02', JSON.stringify(localList));
             } catch (e) {}
 
-            // 2. Envia para o Google Sheets via Apps Script
             if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
                 try {
-                    if (statusEl) statusEl.textContent = 'Gravando horários, respostas e nota na planilha oficial...';
+                    if (statusEl) statusEl.textContent = 'Gravando horários, respostas objetivas, texto discursivo e nota na planilha oficial...';
                     await fetch(CONFIG_SIMULADO02.rankingApiUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(registro)
                     });
-                    if (statusEl) statusEl.textContent = 'Resultado e horário registrados com sucesso! Seu nome permanece privado com o professor.';
+                    if (statusEl) statusEl.textContent = 'Resultado e questão discursiva registrados com sucesso! Seu nome permanece privado com o professor.';
                 } catch (err) {
                     console.error(err);
                     if (statusEl) statusEl.textContent = 'Aviso: falha de rede ao sincronizar. Exibindo registro local.';
@@ -1568,12 +1674,8 @@
                     const resp = await fetch(`${CONFIG_SIMULADO02.rankingApiUrl}?simulado=simulado02`);
                     if (resp.ok) {
                         const json = await resp.json();
-                        if (Array.isArray(json.ranking)) {
-                            lista = json.ranking;
-                        }
-                        if (Array.isArray(json.resumoQuestoes)) {
-                            resumoQuestoes = json.resumoQuestoes;
-                        }
+                        if (Array.isArray(json.ranking)) lista = json.ranking;
+                        if (Array.isArray(json.resumoQuestoes)) resumoQuestoes = json.resumoQuestoes;
                     }
                 } catch (err) {
                     console.warn('Falha ao ler ranking remoto, usando local:', err);
@@ -1593,7 +1695,6 @@
                 return Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999);
             });
 
-            // Atualiza Mini-Dashboard da Turma
             atualizarMiniDashboardTurma(lista, resumoQuestoes);
 
             if (lista.length === 0) {
@@ -1613,7 +1714,7 @@
                     <tr class="${rowClass}">
                         <td class="py-2.5 px-3 font-extrabold">${badgePos}</td>
                         <td class="py-2.5 px-3">${apelidoExibir} ${isMe ? '<span class="text-[10px] bg-ufcteal-600 text-white px-1.5 py-0.5 rounded ml-1">Você</span>' : ''}</td>
-                        <td class="py-2.5 px-3 text-center">${item.acertosFG ?? '-'}/${item.totalFG ?? 15} • ${item.acertosCE ?? '-'}/${item.totalCE ?? 30}</td>
+                        <td class="py-2.5 px-3 text-center">${item.acertosFG ?? '-'}/${item.totalFG ?? 15} • ${item.acertosCE ?? '-'}/${item.totalCE ?? 29}</td>
                         <td class="py-2.5 px-3 text-center font-extrabold text-ufcnavy-700">${Number(item.notaEnade).toFixed(1)}</td>
                         <td class="py-2.5 px-3 text-center font-mono">${item.tempoFormatado || '-'}</td>
                     </tr>
@@ -1680,8 +1781,16 @@
                 </div><div class="space-y-6">`;
 
             questaoData.forEach((q, idx) => {
+                const numOficial = formatNumeroQuestao(q, idx);
+                const isDisc = isQuestionDiscursiva(q);
                 let optionsHTML = '';
-                if (q.opcoes) {
+
+                if (isDisc) {
+                    optionsHTML = `<div class="mt-3 space-y-2 border border-slate-300 rounded p-3">
+                        <div class="text-[10px] font-bold uppercase text-slate-500">Espaço para Resposta Discursiva (Itens a e b):</div>
+                        ${Array.from({ length: 10 }).map(() => '<div class="border-b border-slate-400 h-5"></div>').join('')}
+                    </div>`;
+                } else if (q.opcoes) {
                     Object.keys(q.opcoes).forEach(letra => {
                         optionsHTML += `<div class="flex items-start space-x-2 my-1 text-xs"><span class="font-bold border border-slate-400 rounded w-5 h-5 flex items-center justify-center shrink-0">(${letra})</span><span>${q.opcoes[letra]}</span></div>`;
                     });
@@ -1692,11 +1801,11 @@
 
                 printHTML += `
                     <div class="page-break-avoid border-b border-slate-200 pb-4 mb-4">
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">QUESTÃO ${String(idx + 1).padStart(2, '0')} • ${q.cat} (${q.disc})</div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase">QUESTÃO ${numOficial} • ${q.cat} (${q.disc}) ${isDisc ? '• DISCURSIVA' : ''}</div>
                         ${showTexto ? `<div class="text-xs text-slate-900 leading-relaxed my-2">${q.texto}</div>` : ''}
                         ${q.imagem && q.imagem !== 'N/A' && q.imagem.trim() !== '' ? `<div class="my-2 text-center"><img src="${q.imagem}" class="max-h-64 mx-auto object-contain" /></div>` : ''}
                         ${q.afirmativas && q.afirmativas !== "N/A" ? `<div class="my-2 p-2 bg-slate-50 border-l-2 border-slate-400 text-xs">${q.afirmativas}</div>` : ''}
-                        <div class="text-xs font-semibold text-slate-900 mb-2">${q.comando}</div>
+                        <div class="text-xs font-semibold text-slate-900 mb-2 whitespace-pre-line">${q.comando}</div>
                         <div class="space-y-1">${optionsHTML}</div>
                     </div>`;
             });
