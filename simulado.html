@@ -466,7 +466,7 @@
         const CONFIG_SIMULADO02 = {
             arquivo: 'simulado02.xlsx',
             codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
-            rankingApiUrl: ''          // Cole aqui a URL do Web App do Google Apps Script após publicar
+            rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
         };
 
         const BASE_MAPAS_MENTAIS = {
@@ -717,8 +717,7 @@
                 let comandoRaw = String(row[colMap.comando] || '').trim();
                 let textoLimpo = textoRaw
                     .replace(/Cenário inédito de avaliação/gi, 'Estudo de caso')
-                    .replace(/
-/g, '<br>');
+                    .replace(/\n/g, '<br>');
 
                 const gabRaw = String(row[colMap.gab] || 'A').trim().toUpperCase();
                 const gabMatch = gabRaw.match(/[A-E]/);
@@ -788,8 +787,7 @@
 
         function parseOpcoesString(str) {
             let ops = {};
-            let lines = str.split('
-');
+            let lines = str.split('\n');
             let curr = null;
 
             lines.forEach(line => {
