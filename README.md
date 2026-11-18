@@ -30,7 +30,8 @@ Os simulados livres oferecem **correção comentada imediata**, **Matriz de Refe
 
 ## 🏆 Links Exclusivos — Simulado 02 Oficial (13h00 às 17h00 • Ranking Top 3)
 
-O **Simulado 02 (44 Questões Objetivas + 1 Discursiva — Q16)** opera em **modo oficial restrito** com **janela padrão automática das 13h00 às 17h00**:
+O **Simulado 02 (45 Questões Objetivas + 1 Discursiva — D1)** opera em **modo oficial restrito** com **janela padrão automática das 13h00 às 17h00** e **correção automática integral no padrão ENADE**:
+* **Cálculo oficial ponderado ENADE (0 a 100 pontos):** **25%** Formação Geral (15 objetivas) + **75%** Componente Específico, subdividido em **85% Objetiva** (30 questões = 63,75% da nota final) e **15% Discursiva D1** (corrigida automaticamente pela rubrica analítica INEP = 11,25% da nota final);
 * **Janela padrão (13h00 às 17h00):** libera o caderno automaticamente às **13h00** (desbloqueando o botão na tela mesmo que o estudante abra o link antes), exibe contador `Encerra às 17:00`, emite aviso quando faltam **5 minutos (16h55)** e realiza o **envio automático às 17h00**;
 * Exige identificação do estudante (Nome Completo, Apelido para o placar, Matrícula e Turma) e **Código de Acesso**;
 * Oculta gabarito comentado, Mapas Mentais, Matriz MEC, botão de impressão/`Ctrl+P` (exportação PDF) e seleção/cópia dos enunciados durante a aplicação;
@@ -57,7 +58,7 @@ O portal funciona em arquitetura aberta (*client-side* em HTML5, Tailwind CSS e 
 * `index.html` — Página inicial do portal com seleção dos cadernos de simulados livres e materiais de apoio.
 * `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando automaticamente entre **Modo Treino Livre** (Simulados 01, 03, 04 e 05) e **Modo Oficial Restrito** (Simulado 02, janela padrão 13h00–17h00).
 * `simulado01.xlsx` — **Simulado 01 (Formação Geral):** Temas transversais contemporâneos (Sustentabilidade, ESG, Economia Circular, Direitos Humanos e LGPD).
-* `simulado02.xlsx` — **Simulado 02 (Prova Oficial • 44 Objetivas + 1 Discursiva):** Caderno fechado no padrão INEP (15 FG + 29 CE objetivas + Q16 discursiva) para aplicação supervisionada.
+* `simulado02.xlsx` — **Simulado 02 (Prova Oficial • 45 Objetivas + 1 Discursiva):** Caderno fechado no padrão INEP (15 FG + 30 CE objetivas + D1 discursiva autoavaliada) para aplicação supervisionada.
 * `simulado03.xlsx` — **Simulado 03 (Aprofundamento):** Banco complementar de questões aplicadas.
 * `simulado04.xlsx` — **Simulado 04 (Completo IV • 45Q + Discursiva):** Caderno inédito (15 FG + 30 CE) com foco em PCP, Operações, Logística, Engenharia Organizacional, Simulação e Sustentabilidade.
 * `simulado05.xlsx` — **Simulado 05 (Completo V • 45Q + Discursiva):** Caderno inédito (15 FG + 30 CE) cobrindo todas as subáreas ABEPRO (Lean, CEP, Pesquisa Operacional, Engenharia Econômica e Ergonomia).

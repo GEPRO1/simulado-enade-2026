@@ -67,7 +67,7 @@
 
             <form id="formIdentificacaoAluno" class="p-6 space-y-3.5 text-xs sm:text-sm">
                 <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    Preencha sua identificação para registrar o horário de início e liberar o caderno (44 objetivas + 1 discursiva). <strong>O ranking oficial destacará os 3 primeiros colocados (maior nota e menor tempo)</strong> e será revelado pelo professor após o encerramento (identificado apenas pelo seu apelido).
+                    Preencha sua identificação para registrar o horário de início e liberar o caderno (45 objetivas + 1 discursiva). <strong>A nota segue o padrão oficial do ENADE (25% Formação Geral + 75% Componente Específico, com 85% Objetiva e 15% Discursiva corrigida automaticamente)</strong>, e o ranking oficial destacará os 3 primeiros colocados (maior nota e menor tempo).
                 </p>
 
                 <!-- Campo Código de Acesso (exibido apenas se o link não contiver &acesso=...) -->
@@ -355,8 +355,8 @@
                 <p id="resSubtituloAluno" class="text-xs sm:text-sm text-slate-500">Confira abaixo a apuração do seu desempenho por componente.</p>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota Objetiva (0–100)</span>
+                <div class="bg-ufcnavy-50/70 p-3.5 rounded-xl border border-ufcnavy-200">
+                    <span class="text-[10px] font-bold text-ufcnavy-700 uppercase block">Nota Geral ENADE (0–100)</span>
                     <span id="resNota" class="text-xl font-extrabold text-ufcnavy-700">0.0</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
@@ -373,11 +373,11 @@
                 </div>
             </div>
 
-            <!-- Aviso sobre Questão Discursiva (quando presente no caderno) -->
+            <!-- Aviso sobre Questão Discursiva (correção automática pela rubrica INEP) -->
             <div id="avisoDiscursivaResultado" class="hidden bg-indigo-50 border border-indigo-200 text-indigo-950 rounded-xl p-3.5 text-xs text-left flex items-start space-x-2.5">
                 <i class="fa-solid fa-pen-nib text-indigo-600 mt-0.5 text-sm"></i>
                 <div>
-                    <span class="font-bold block">Questão Discursiva (Q16) registrada para avaliação docente</span>
+                    <span class="font-bold block">Questão Discursiva (D1) — Correção Automática pela Rubrica INEP (15% do CE)</span>
                     <p id="textoAvisoDiscursiva" class="text-indigo-900/90 mt-0.5 leading-relaxed"></p>
                 </div>
             </div>
@@ -454,8 +454,8 @@
                                 <tr class="bg-ufcnavy-700 text-white">
                                     <th class="py-2 px-3 rounded-tl-lg">Pos.</th>
                                     <th class="py-2 px-3">Apelido</th>
-                                    <th class="py-2 px-3 text-center">FG / CE Obj.</th>
-                                    <th class="py-2 px-3 text-center">Nota Obj.</th>
+                                    <th class="py-2 px-3 text-center">FG • CE Obj • D1</th>
+                                    <th class="py-2 px-3 text-center">Nota ENADE</th>
                                     <th class="py-2 px-3 text-center rounded-tr-lg">Tempo</th>
                                 </tr>
                             </thead>
@@ -757,13 +757,154 @@
             if (!q) return false;
             const tipo = (q.tipo || '').toLowerCase();
             const gab = (q.gab || '').trim().toUpperCase();
-            return tipo.includes('discursiva') || gab === 'DISCURSIVA' || Object.keys(q.opcoes || {}).length === 0;
+            const num = (q.num || '').trim().toUpperCase();
+            return tipo.includes('discursiva') || gab === 'DISCURSIVA' || num.startsWith('D') || Object.keys(q.opcoes || {}).length === 0;
         }
 
         function formatNumeroQuestao(q, fallbackIndex) {
-            const raw = String(q?.num || '').trim();
+            const raw = String(q?.num || '').trim().toUpperCase();
+            if (raw.startsWith('D')) return raw;
             const m = raw.match(/(\d+)/);
             return m ? m[1].padStart(2, '0') : String(fallbackIndex + 1).padStart(2, '0');
+        }
+
+        const TAREFAS_D1_BALANCEAMENTO = {
+            A: { duracao: 6, preds: [] },
+            B: { duracao: 4, preds: ['A'] },
+            C: { duracao: 3, preds: ['A'] },
+            D: { duracao: 5, preds: ['B', 'C'] },
+            E: { duracao: 4, preds: ['D'] },
+            F: { duracao: 5, preds: ['D'] },
+            G: { duracao: 2, preds: ['E', 'F'] },
+            H: { duracao: 1, preds: ['G'] }
+        };
+
+        function parseNumeroBr(val) {
+            if (val === null || val === undefined) return NaN;
+            let s = String(val).trim().replace(/\s+/g, '').replace('%', '');
+            if (!s) return NaN;
+            if (s.includes(',') && s.includes('.')) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else if (s.includes(',')) {
+                s = s.replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+                s = s.replace(/\./g, '');
+            }
+            return Number(s);
+        }
+
+        function temAlgumaRespostaDiscursiva(ans) {
+            if (!ans) return false;
+            if (typeof ans === 'string') return ans.trim().length > 0;
+            const hasInputs = [ans.tempoDisp, ans.tempoCiclo, ans.nMin, ans.nReal, ans.eficiencia, ans.memorial]
+                .some(v => String(v || '').trim().length > 0);
+            const hasCts = ans.cts && Object.values(ans.cts).some(arr => Array.isArray(arr) && arr.length > 0);
+            return hasInputs || hasCts;
+        }
+
+        function avaliarDiscursivaD1(ans) {
+            const emptyResult = {
+                notaTotal: 0,
+                c1: 0,
+                c2: 0,
+                c3: 0,
+                c4: 0,
+                c5: 0,
+                respondida: false,
+                resumoFormatado: '(Entregue em branco)'
+            };
+            if (!ans || !temAlgumaRespostaDiscursiva(ans)) return emptyResult;
+
+            const dados = (typeof ans === 'string')
+                ? { memorial: ans, cts: { ct1: [], ct2: [], ct3: [], ct4: [] } }
+                : ans;
+
+            // Critério 1 (1,5 pt): Tempo disponível mensal = 12.000 min (ou 200 h)
+            const vTempoDisp = parseNumeroBr(dados.tempoDisp);
+            const c1 = (!isNaN(vTempoDisp) && (Math.abs(vTempoDisp - 12000) <= 10 || Math.abs(vTempoDisp - 200) <= 0.5)) ? 1.5 : 0;
+
+            // Critério 2 (2,5 pts): Tempo de ciclo requerido = 10,0 min/un
+            const vTC = parseNumeroBr(dados.tempoCiclo);
+            const c2 = (!isNaN(vTC) && Math.abs(vTC - 10) <= 0.1) ? 2.5 : 0;
+
+            // Critério 3 (1,5 pt): N_min = 3 estações (0,75) e N_real = 4 centros de trabalho (0,75)
+            const vNMin = parseNumeroBr(dados.nMin);
+            const vNReal = parseNumeroBr(dados.nReal);
+            let c3 = 0;
+            if (!isNaN(vNMin) && Math.round(vNMin) === 3) c3 += 0.75;
+            if (!isNaN(vNReal) && Math.round(vNReal) === 4) c3 += 0.75;
+
+            // Critério 4 (3,0 pts): Agrupamento viável dos Centros de Trabalho (precedência e TC <= 10 min)
+            const ctsObj = dados.cts || { ct1: [], ct2: [], ct3: [], ct4: [] };
+            const orderedKeys = ['ct1', 'ct2', 'ct3', 'ct4'];
+            const nonEmptyStations = orderedKeys
+                .map(k => Array.isArray(ctsObj[k]) ? ctsObj[k].filter(t => TAREFAS_D1_BALANCEAMENTO[t]) : [])
+                .filter(st => st.length > 0);
+
+            const completed = new Set();
+            const seenTasks = new Set();
+            let hasDuplicate = false;
+            let validStations = 0;
+
+            nonEmptyStations.forEach(st => {
+                let stTime = 0;
+                const stSet = new Set(st);
+                st.forEach(t => {
+                    if (seenTasks.has(t)) hasDuplicate = true;
+                    seenTasks.add(t);
+                    stTime += TAREFAS_D1_BALANCEAMENTO[t].duracao;
+                });
+
+                const predsOk = st.every(t =>
+                    TAREFAS_D1_BALANCEAMENTO[t].preds.every(p => completed.has(p) || stSet.has(p))
+                );
+
+                if (!hasDuplicate && stTime > 0 && stTime <= 10 && predsOk) {
+                    validStations++;
+                    st.forEach(t => completed.add(t));
+                }
+            });
+
+            let c4 = 0;
+            if (!hasDuplicate && seenTasks.size === 8 && validStations === nonEmptyStations.length) {
+                if (nonEmptyStations.length === 4) c4 = 3.0;
+                else if (nonEmptyStations.length === 5) c4 = 2.0;
+                else c4 = 1.5;
+            } else if (!hasDuplicate) {
+                c4 = Math.min(2.25, Number((validStations * 0.75).toFixed(2)));
+            }
+
+            // Critério 5 (1,5 pt): Eficiência da linha = 75,0%
+            const vEfic = parseNumeroBr(dados.eficiencia);
+            const c5 = (!isNaN(vEfic) && (Math.abs(vEfic - 75) <= 0.5 || Math.abs(vEfic - 0.75) <= 0.005)) ? 1.5 : 0;
+
+            const notaTotal = Number((c1 + c2 + c3 + c4 + c5).toFixed(2));
+            const resumoCTs = orderedKeys.map((k, idx) => {
+                const list = Array.isArray(ctsObj[k]) ? ctsObj[k] : [];
+                const tempo = list.reduce((acc, t) => acc + (TAREFAS_D1_BALANCEAMENTO[t]?.duracao || 0), 0);
+                return `CT${idx + 1}={${list.join(',') || '-'}} (${tempo} min)`;
+            }).join(' | ');
+
+            const memorialTxt = String(dados.memorial || '').trim();
+            const resumoFormatado =
+                `[Item A] Tempo Disp.: ${dados.tempoDisp || '-'} min | TC: ${dados.tempoCiclo || '-'} min/un
+` +
+                `[Item B] N_mín: ${dados.nMin || '-'} | Nº CTs: ${dados.nReal || '-'} | ${resumoCTs} | Eficiência: ${dados.eficiencia || '-'}%
+` +
+                `[Rubrica Auto: ${notaTotal.toFixed(1)}/10,0 → C1:${c1} | C2:${c2} | C3:${c3} | C4:${c4} | C5:${c5}]` +
+                (memorialTxt ? `
+[Memorial]: ${memorialTxt}` : '');
+
+            return {
+                notaTotal,
+                c1,
+                c2,
+                c3,
+                c4,
+                c5,
+                respondida: true,
+                resumoFormatado
+            };
         }
 
         function gerarIdParticipanteLocal(matricula) {
@@ -1164,10 +1305,9 @@
 
             const isDisc = isQuestionDiscursiva(q);
             const numOficial = formatNumeroQuestao(q, index);
-            const seqEsperado = String(index + 1).padStart(2, '0');
-            document.getElementById('badgeNum').textContent = (numOficial !== seqEsperado)
-                ? `Questão ${numOficial} (${index + 1} de ${questaoData.length})`
-                : `Questão ${numOficial} de ${questaoData.length}`;
+            document.getElementById('badgeNum').textContent = isDisc
+                ? `Questão Discursiva (${numOficial}) • Item ${index + 1} de ${questaoData.length}`
+                : `Questão ${numOficial} (${index + 1} de ${questaoData.length})`;
             document.getElementById('badgeCat').textContent = q.cat;
             document.getElementById('badgeDisc').textContent = q.disc || 'Geral';
             document.getElementById('badgeDif').textContent = `Dificuldade: ${q.dif}`;
@@ -1215,43 +1355,202 @@
             const selectedOpt = userAnswers[index];
 
             if (isDisc) {
-                const textoAtual = typeof selectedOpt === 'string' ? selectedOpt : '';
+                const stateAtual = (selectedOpt && typeof selectedOpt === 'object')
+                    ? selectedOpt
+                    : {
+                        tempoDisp: '',
+                        tempoCiclo: '',
+                        nMin: '',
+                        nReal: '',
+                        cts: { ct1: [], ct2: [], ct3: [], ct4: [] },
+                        eficiencia: '',
+                        memorial: typeof selectedOpt === 'string' ? selectedOpt : ''
+                    };
+
                 const wrapper = document.createElement('div');
-                wrapper.className = 'space-y-2.5';
+                wrapper.className = 'space-y-4';
+
+                const allTaskLetters = Object.keys(TAREFAS_D1_BALANCEAMENTO);
+                const ctRowsHTML = [1, 2, 3, 4].map(ctNum => {
+                    const key = `ct${ctNum}`;
+                    const selectedList = Array.isArray(stateAtual.cts?.[key]) ? stateAtual.cts[key] : [];
+                    const somaMin = selectedList.reduce((acc, t) => acc + (TAREFAS_D1_BALANCEAMENTO[t]?.duracao || 0), 0);
+                    const pills = allTaskLetters.map(letra => {
+                        const active = selectedList.includes(letra);
+                        const dur = TAREFAS_D1_BALANCEAMENTO[letra].duracao;
+                        const btnStyle = active
+                            ? 'bg-indigo-600 text-white border-indigo-700 font-bold shadow-sm'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 font-semibold';
+                        return `<button type="button" data-ct="${key}" data-task="${letra}" ${simuladoFinalizado ? 'disabled' : ''}
+                            class="btn-ct-task px-2.5 py-1 rounded-lg border text-xs transition-colors ${btnStyle}">
+                            ${letra} <span class="text-[10px] opacity-80">(${dur}m)</span>
+                        </button>`;
+                    }).join('');
+
+                    return `
+                        <div class="bg-white border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div class="flex items-center justify-between sm:justify-start gap-2 min-w-[140px]">
+                                <span class="text-xs font-extrabold text-ufcnavy-800">Centro de Trabalho ${ctNum}</span>
+                                <span id="tempo_${key}" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded ${somaMin > 10 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}">${somaMin} min</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${pills}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
                 wrapper.innerHTML = `
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <label for="textareaDiscursiva" class="text-xs font-bold text-indigo-900 flex items-center space-x-1.5">
-                            <i class="fa-solid fa-pen-nib text-indigo-600"></i>
-                            <span>Resposta Discursiva — Desenvolva os cálculos e a análise dos itens a) e b):</span>
-                        </label>
-                        <span id="contadorCharsDiscursiva" class="text-[11px] font-mono text-slate-500">${textoAtual.length} caracteres</span>
+                    <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-950 flex items-start space-x-2.5">
+                        <i class="fa-solid fa-robot text-indigo-600 mt-0.5 text-sm"></i>
+                        <div>
+                            <span class="font-bold block">Folha de Resposta Discursiva — Correção Automática pelo Padrão INEP (15% do CE)</span>
+                            <p class="text-indigo-900/90 mt-0.5 leading-relaxed">
+                                Preencha os resultados numéricos dos itens <strong>A</strong> e <strong>B</strong> e selecione as tarefas de cada Centro de Trabalho. Sua pontuação (0,0 a 10,0) será apurada automaticamente na entrega e integrada com peso oficial à sua Nota Geral ENADE.
+                            </p>
+                        </div>
                     </div>
-                    <textarea id="textareaDiscursiva" rows="8"
-                        placeholder="Digite aqui sua resolução completa para o item a) e para o item b)..."
-                        ${simuladoFinalizado ? 'disabled' : ''}
-                        class="select-text w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"></textarea>
-                    <p class="text-[11px] text-slate-500">
-                        Sua resposta escrita será registrada automaticamente para correção docente e não entra no cálculo automático da nota objetiva.
-                    </p>
+
+                    <!-- ITEM A -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-ufcnavy-800">
+                            Item A — Dimensionamento do Tempo de Ciclo (4,0 pontos)
+                        </h4>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label for="discTempoDisp" class="block text-xs font-bold text-slate-700">
+                                    1. Tempo disponível mensal (em minutos):
+                                </label>
+                                <input type="text" id="discTempoDisp" inputmode="decimal" placeholder="Ex.: 12000"
+                                    ${simuladoFinalizado ? 'disabled' : ''}
+                                    class="select-text w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label for="discTempoCiclo" class="block text-xs font-bold text-slate-700">
+                                    2. Tempo de ciclo requerido — TC (min/unidade):
+                                </label>
+                                <input type="text" id="discTempoCiclo" inputmode="decimal" placeholder="Ex.: 10.0"
+                                    ${simuladoFinalizado ? 'disabled' : ''}
+                                    class="select-text w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ITEM B -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-ufcnavy-800">
+                            Item B — Projeto dos Centros de Trabalho e Balanceamento (6,0 pontos)
+                        </h4>
+                        <div class="grid sm:grid-cols-3 gap-3">
+                            <div class="space-y-1">
+                                <label for="discNMin" class="block text-xs font-bold text-slate-700">
+                                    3. Nº mínimo teórico (N<sub>mín</sub>):
+                                </label>
+                                <input type="text" id="discNMin" inputmode="numeric" placeholder="Ex.: 3"
+                                    ${simuladoFinalizado ? 'disabled' : ''}
+                                    class="select-text w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label for="discNReal" class="block text-xs font-bold text-slate-700">
+                                    4. Nº de Centros de Trabalho:
+                                </label>
+                                <input type="text" id="discNReal" inputmode="numeric" placeholder="Ex.: 4"
+                                    ${simuladoFinalizado ? 'disabled' : ''}
+                                    class="select-text w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label for="discEficiencia" class="block text-xs font-bold text-slate-700">
+                                    5. Eficiência da linha (%):
+                                </label>
+                                <input type="text" id="discEficiencia" inputmode="decimal" placeholder="Ex.: 75.0"
+                                    ${simuladoFinalizado ? 'disabled' : ''}
+                                    class="select-text w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-1">
+                            <span class="block text-xs font-bold text-slate-700">
+                                6. Selecione as tarefas alocadas em cada Centro de Trabalho (respeitando precedência e TC):
+                            </span>
+                            <div class="space-y-2">
+                                ${ctRowsHTML}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Memorial de Cálculo Complementar -->
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label for="textareaDiscursiva" class="text-xs font-bold text-slate-700">
+                                Memorial de Cálculo / Justificativa Técnica (opcional — registrado na planilha):
+                            </label>
+                            <span id="contadorCharsDiscursiva" class="text-[11px] font-mono text-slate-500">${(stateAtual.memorial || '').length} caracteres</span>
+                        </div>
+                        <textarea id="textareaDiscursiva" rows="3"
+                            placeholder="Descreva brevemente as fórmulas utilizadas e as restrições de precedência..."
+                            ${simuladoFinalizado ? 'disabled' : ''}
+                            class="select-text w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3 text-xs text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"></textarea>
+                    </div>
                 `;
                 opcoesContainer.appendChild(wrapper);
+
+                const syncDiscursivaState = () => {
+                    if (simuladoFinalizado) return;
+                    if (temAlgumaRespostaDiscursiva(stateAtual)) {
+                        userAnswers[index] = JSON.parse(JSON.stringify(stateAtual));
+                    } else {
+                        delete userAnswers[index];
+                    }
+                    updateGridButtons();
+                };
+
+                const bindInput = (id, field) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.value = stateAtual[field] || '';
+                    el.addEventListener('input', () => {
+                        stateAtual[field] = el.value;
+                        syncDiscursivaState();
+                    });
+                };
+
+                bindInput('discTempoDisp', 'tempoDisp');
+                bindInput('discTempoCiclo', 'tempoCiclo');
+                bindInput('discNMin', 'nMin');
+                bindInput('discNReal', 'nReal');
+                bindInput('discEficiencia', 'eficiencia');
 
                 const textareaEl = document.getElementById('textareaDiscursiva');
                 const counterEl = document.getElementById('contadorCharsDiscursiva');
                 if (textareaEl) {
-                    textareaEl.value = textoAtual;
+                    textareaEl.value = stateAtual.memorial || '';
                     textareaEl.addEventListener('input', () => {
-                        if (simuladoFinalizado) return;
-                        const val = textareaEl.value;
-                        if (val.trim().length > 0) {
-                            userAnswers[index] = val;
-                        } else {
-                            delete userAnswers[index];
-                        }
-                        if (counterEl) counterEl.textContent = `${val.length} caracteres`;
-                        updateGridButtons();
+                        stateAtual.memorial = textareaEl.value;
+                        if (counterEl) counterEl.textContent = `${textareaEl.value.length} caracteres`;
+                        syncDiscursivaState();
                     });
                 }
+
+                opcoesContainer.querySelectorAll('.btn-ct-task').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (simuladoFinalizado) return;
+                        const ctKey = btn.getAttribute('data-ct');
+                        const task = btn.getAttribute('data-task');
+                        if (!stateAtual.cts) stateAtual.cts = { ct1: [], ct2: [], ct3: [], ct4: [] };
+
+                        const alreadyInThisCt = stateAtual.cts[ctKey].includes(task);
+                        // Remove task from all CTs first so each task is allocated at most once
+                        ['ct1', 'ct2', 'ct3', 'ct4'].forEach(k => {
+                            stateAtual.cts[k] = (stateAtual.cts[k] || []).filter(t => t !== task);
+                        });
+                        if (!alreadyInThisCt) {
+                            stateAtual.cts[ctKey].push(task);
+                            stateAtual.cts[ctKey].sort();
+                        }
+                        syncDiscursivaState();
+                        renderQuestion(index);
+                    });
+                });
             } else if (q.opcoes) {
                 Object.keys(q.opcoes).forEach(letra => {
                     const isSelected = selectedOpt === letra;
@@ -1314,8 +1613,11 @@
             if (simuladoFinalizado || isModoRestritoSimulado02) return;
             const q = questaoData[currentIndex];
             const userAns = userAnswers[currentIndex];
-            if (!userAns) {
-                alert("Selecione uma alternativa (A a E) antes de confirmar.");
+            const hasAns = isQuestionDiscursiva(q) ? temAlgumaRespostaDiscursiva(userAns) : Boolean(userAns);
+            if (!hasAns) {
+                alert(isQuestionDiscursiva(q)
+                    ? "Preencha ao menos um campo da questão discursiva antes de confirmar."
+                    : "Selecione uma alternativa (A a E) antes de confirmar.");
                 return;
             }
             q.answered = true;
@@ -1326,15 +1628,24 @@
         function showFeedback(q, selectedOpt) {
             if (isModoRestritoSimulado02) return;
             const cardFeedback = document.getElementById('cardFeedback');
-            const isCorrect = selectedOpt === q.gab;
 
-            document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
-            document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
-            document.getElementById('statusFeedbackTitle').textContent = isCorrect
-                ? `Resposta Correta! (Gabarito: ${q.gab})`
-                : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            if (isQuestionDiscursiva(q)) {
+                const av = avaliarDiscursivaD1(selectedOpt);
+                const aprovado = av.notaTotal >= 6.0;
+                document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${aprovado ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-900 border border-amber-200'}`;
+                document.getElementById('statusFeedbackIcon').className = `fa-solid ${aprovado ? 'fa-circle-check text-emerald-600' : 'fa-clipboard-check text-amber-600'} text-lg`;
+                document.getElementById('statusFeedbackTitle').textContent =
+                    `Nota Automática Discursiva: ${av.notaTotal.toFixed(1)} / 10,0 pts (C1: ${av.c1} | C2: ${av.c2} | C3: ${av.c3} | C4: ${av.c4} | C5: ${av.c5})`;
+            } else {
+                const isCorrect = selectedOpt === q.gab;
+                document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+                document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
+                document.getElementById('statusFeedbackTitle').textContent = isCorrect
+                    ? `Resposta Correta! (Gabarito: ${q.gab})`
+                    : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
+            }
 
-            document.getElementById('feedbackTexto').innerHTML = q.justificativa || 'Sem justificativa cadastrada.';
+            document.getElementById('feedbackTexto').innerHTML = (q.justificativa || 'Sem justificativa cadastrada.').replace(/\n/g, '<br>');
             document.getElementById('fonteAbnt').innerHTML = formatReferenceWithLinks(q.fonte);
 
             cardFeedback.classList.remove('hidden');
@@ -1640,7 +1951,7 @@
                 const isCurrent = idx === currentIndex;
                 const userAns = userAnswers[idx];
                 const isDisc = isQuestionDiscursiva(q);
-                const temResposta = isDisc ? Boolean(userAns && String(userAns).trim()) : Boolean(userAns);
+                const temResposta = isDisc ? temAlgumaRespostaDiscursiva(userAns) : Boolean(userAns);
                 let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
                 if (temResposta) {
                     if (isDisc) {
@@ -1674,11 +1985,18 @@
                 const qLabel = q.num || ('Q' + String(idx + 1).padStart(2, '0'));
 
                 if (isQuestionDiscursiva(q)) {
-                    const textoResp = String(userAnswers[idx] || '').trim();
+                    const avaliacaoDisc = avaliarDiscursivaD1(userAnswers[idx]);
                     respostasDiscursivas.push({
                         questao: qLabel,
                         disciplina: q.disc || '',
-                        respostaTexto: textoResp
+                        respostaTexto: avaliacaoDisc.resumoFormatado,
+                        respondida: avaliacaoDisc.respondida,
+                        notaDiscursiva: avaliacaoDisc.notaTotal,
+                        c1: avaliacaoDisc.c1,
+                        c2: avaliacaoDisc.c2,
+                        c3: avaliacaoDisc.c3,
+                        c4: avaliacaoDisc.c4,
+                        c5: avaliacaoDisc.c5
                     });
                     return;
                 }
@@ -1704,10 +2022,20 @@
                 });
             });
 
-            const pctFg = fgTotal > 0 ? (fgAcertos / fgTotal) : 0;
-            const pctCe = ceTotal > 0 ? (ceAcertos / ceTotal) : 0;
+            // Cálculo oficial ponderado ENADE:
+            // - Formação Geral (FG): 25% da nota geral (15 objetivas)
+            // - Componente Específico (CE): 75% da nota geral, composto por 85% Objetiva (30 questões) + 15% Discursiva (D1, 0-10 pts)
+            const notaFg100 = fgTotal > 0 ? ((fgAcertos / fgTotal) * 100) : 0;
+            const notaCeObj100 = ceTotal > 0 ? ((ceAcertos / ceTotal) * 100) : 0;
+            const temDiscursiva = respostasDiscursivas.length > 0;
+            const notaDiscursiva10 = temDiscursiva ? respostasDiscursivas[0].notaDiscursiva : 0;
+            const notaCeDisc100 = notaDiscursiva10 * 10;
+            const notaCeTotal100 = temDiscursiva
+                ? ((0.85 * notaCeObj100) + (0.15 * notaCeDisc100))
+                : notaCeObj100;
+
             const notaEnade100 = (fgTotal > 0 && ceTotal > 0)
-                ? ((pctFg * 25) + (pctCe * 75))
+                ? ((0.25 * notaFg100) + (0.75 * notaCeTotal100))
                 : (totalObjQuestoes > 0 ? ((totalObjAcertos / totalObjQuestoes) * 100) : 0);
 
             const tempoFormatado = formatSecondsToClock(timerSeconds);
@@ -1715,16 +2043,18 @@
 
             document.getElementById('resNota').textContent = notaEnade100.toFixed(1);
             document.getElementById('resAcertos').textContent = `${totalObjAcertos} / ${totalObjQuestoes}`;
-            document.getElementById('resFg').textContent = `${(pctFg * 100).toFixed(0)}% (${fgAcertos}/${fgTotal})`;
-            document.getElementById('resCe').textContent = `${(pctCe * 100).toFixed(0)}% (${ceAcertos}/${ceTotal})`;
+            document.getElementById('resFg').textContent = `${notaFg100.toFixed(0)}% (${fgAcertos}/${fgTotal})`;
+            document.getElementById('resCe').textContent = temDiscursiva
+                ? `${notaCeTotal100.toFixed(1)}% (Obj ${ceAcertos}/${ceTotal} + D1 ${notaDiscursiva10.toFixed(1)})`
+                : `${notaCeObj100.toFixed(0)}% (${ceAcertos}/${ceTotal})`;
 
             const avisoDiscEl = document.getElementById('avisoDiscursivaResultado');
             const textoAvisoDiscEl = document.getElementById('textoAvisoDiscursiva');
-            if (respostasDiscursivas.length > 0 && avisoDiscEl && textoAvisoDiscEl) {
-                const respondida = respostasDiscursivas[0].respostaTexto.length > 0;
-                textoAvisoDiscEl.textContent = respondida
-                    ? `Nota objetiva calculada sobre as ${totalObjQuestoes} questões de múltipla escolha (${fgTotal} FG + ${ceTotal} CE). Sua resposta discursiva da ${respostasDiscursivas[0].questao} (${respostasDiscursivas[0].respostaTexto.length} caracteres) foi enviada ao professor para correção.`
-                    : `Nota objetiva calculada sobre as ${totalObjQuestoes} questões de múltipla escolha (${fgTotal} FG + ${ceTotal} CE). A ${respostasDiscursivas[0].questao} (Discursiva) foi entregue em branco.`;
+            if (temDiscursiva && avisoDiscEl && textoAvisoDiscEl) {
+                const d0 = respostasDiscursivas[0];
+                textoAvisoDiscEl.textContent = d0.respondida
+                    ? `Nota Discursiva (${d0.questao}): ${d0.notaDiscursiva.toFixed(1)} / 10,0 pts (Critérios: C1=${d0.c1} | C2=${d0.c2} | C3=${d0.c3} | C4=${d0.c4} | C5=${d0.c5}). Sua Nota Geral ENADE (${notaEnade100.toFixed(1)}) já integra 25% FG + 75% CE (85% Objetiva + 15% Discursiva).`
+                    : `A ${d0.questao} (Discursiva) foi entregue em branco (0,0 / 10,0 pts). Sua Nota Geral ENADE (${notaEnade100.toFixed(1)}) já aplica os pesos oficiais (25% FG + 75% CE [85% Obj + 15% Disc]).`;
                 avisoDiscEl.classList.remove('hidden');
             }
 
@@ -1737,8 +2067,10 @@
                     `${prefixoPrazo}Participação de ${alunoIdentificado.apelido} registrada! Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}. Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo)!`;
                 blocoRanking?.classList.add('hidden');
 
-                const statusDiscursiva = respostasDiscursivas.length > 0
-                    ? (respostasDiscursivas[0].respostaTexto.length > 0 ? 'Respondida' : 'Em branco')
+                const statusDiscursiva = temDiscursiva
+                    ? (respostasDiscursivas[0].respondida
+                        ? `Auto: ${notaDiscursiva10.toFixed(1)}/10`
+                        : 'Em branco (0,0)')
                     : 'N/A';
 
                 const registro = {
@@ -1752,8 +2084,12 @@
                     horaFim: horaFim,
                     acertosFG: fgAcertos,
                     totalFG: fgTotal,
+                    notaFg: Number(notaFg100.toFixed(2)),
                     acertosCE: ceAcertos,
                     totalCE: ceTotal,
+                    notaCeObj: Number(notaCeObj100.toFixed(2)),
+                    notaDiscursiva: Number(notaDiscursiva10.toFixed(2)),
+                    notaCeTotal: Number(notaCeTotal100.toFixed(2)),
                     acertosTotal: totalObjAcertos,
                     totalObjetivas: totalObjQuestoes,
                     notaEnade: Number(notaEnade100.toFixed(2)),
@@ -1800,6 +2136,7 @@
                     totalFG: registro.totalFG,
                     acertosCE: registro.acertosCE,
                     totalCE: registro.totalCE,
+                    notaDiscursiva: registro.notaDiscursiva,
                     acertosTotal: registro.acertosTotal,
                     notaEnade: registro.notaEnade,
                     tempoSegundos: registro.tempoSegundos,
@@ -1891,7 +2228,7 @@
                     <tr class="${rowClass}">
                         <td class="py-2.5 px-3 font-extrabold">${badgePos}</td>
                         <td class="py-2.5 px-3">${apelidoExibir} ${isMe ? '<span class="text-[10px] bg-ufcteal-600 text-white px-1.5 py-0.5 rounded ml-1">Você</span>' : ''}</td>
-                        <td class="py-2.5 px-3 text-center">${item.acertosFG ?? '-'}/${item.totalFG ?? 15} • ${item.acertosCE ?? '-'}/${item.totalCE ?? 29}</td>
+                        <td class="py-2.5 px-3 text-center">${item.acertosFG ?? '-'}/${item.totalFG ?? 15} • ${item.acertosCE ?? '-'}/${item.totalCE ?? 30} • ${item.notaDiscursiva !== undefined ? Number(item.notaDiscursiva).toFixed(1) : '-'}</td>
                         <td class="py-2.5 px-3 text-center font-extrabold text-ufcnavy-700">${Number(item.notaEnade).toFixed(1)}</td>
                         <td class="py-2.5 px-3 text-center font-mono">${item.tempoFormatado || '-'}</td>
                     </tr>
