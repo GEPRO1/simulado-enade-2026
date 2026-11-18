@@ -28,25 +28,25 @@ Os simulados livres oferecem **correção comentada imediata**, **Matriz de Refe
 
 ---
 
-## 🏆 Links Exclusivos — Simulado 02 Oficial (Aplicação Avaliativa & Sorteio)
+## 🏆 Links Exclusivos — Simulado 02 Oficial (13h00 às 17h00 • Ranking Top 3)
 
-O **Simulado 02 (44 Questões Objetivas + 1 Discursiva — Q16)** opera em **modo oficial restrito**:
+O **Simulado 02 (44 Questões Objetivas + 1 Discursiva — Q16)** opera em **modo oficial restrito** com **janela padrão automática das 13h00 às 17h00**:
+* **Janela padrão (13h00 às 17h00):** libera o caderno automaticamente às **13h00** (desbloqueando o botão na tela mesmo que o estudante abra o link antes), exibe contador `Encerra às 17:00`, emite aviso quando faltam **5 minutos (16h55)** e realiza o **envio automático às 17h00**;
 * Exige identificação do estudante (Nome Completo, Apelido para o placar, Matrícula e Turma) e **Código de Acesso**;
 * Oculta gabarito comentado, Mapas Mentais, Matriz MEC, botão de impressão/`Ctrl+P` (exportação PDF) e seleção/cópia dos enunciados durante a aplicação;
 * Registra horário de início, horário de término, duração, respostas por questão e resposta discursiva diretamente na planilha oficial no Google Sheets;
-* Mantém o placar geral oculto para os estudantes durante a prova, preservando a expectativa para o sorteio de brindes.
+* Mantém o placar geral oculto para os estudantes durante a prova, revelando ao final o **pódio dos 3 primeiros colocados (critério: maior nota objetiva e menor tempo de conclusão)**.
 
 ### 🔗 Links de Aplicação e Projeção (Simulado 02)
 
-* 🎓 **Link Direto para os Estudantes (com código de acesso `GEPRO2026`):**
+* 🎓 **Link Oficial para os Estudantes (Janela Padrão 13h00 às 17h00 + Código `GEPRO2026`):**
   [https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026](https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026)
-* ⏰ **Modelo com Janela de Horário Agendada e Encerramento Automático (`&inicio=` e `&fim=`):**
-  ```text
-  https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026&inicio=2026-11-18T14:00&fim=2026-11-18T17:00
-  ```
-  *(Basta ajustar data e hora em `inicio` e `fim` no formato `AAAA-MM-DDTHH:MM`. O sistema avisa o horário de término na entrada, alerta quando faltam 5 minutos e envia automaticamente ao atingir o limite.)*
-* 📊 **Painel de Projeção ao Vivo — Ranking (por Apelido) & Dashboard da Turma (Uso Docente / Sorteio):**
+* 📊 **Painel de Projeção ao Vivo — Ranking Top 3 (por Apelido) & Dashboard da Turma (Uso Docente):**
   [https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&ranking=1](https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&ranking=1)
+* 🧪 **Link de Teste Docente (ignora a trava das 13h00–17h00 para validação prévia):**
+  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026&teste=1`
+* ⏰ **Substituição Opcional de Horário (caso precise aplicar em outro turno):**
+  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026&inicio=2026-11-18T18:30&fim=2026-11-18T22:00`
 
 ---
 
@@ -55,7 +55,7 @@ O **Simulado 02 (44 Questões Objetivas + 1 Discursiva — Q16)** opera em **mod
 O portal funciona em arquitetura aberta (*client-side* em HTML5, Tailwind CSS e SheetJS), integrada ao **Google Apps Script + Google Sheets** para coleta dos resultados oficiais do Simulado 02:
 
 * `index.html` — Página inicial do portal com seleção dos cadernos de simulados livres e materiais de apoio.
-* `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando automaticamente entre **Modo Treino Livre** (Simulados 01, 03, 04 e 05) e **Modo Oficial Restrito** (Simulado 02).
+* `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando automaticamente entre **Modo Treino Livre** (Simulados 01, 03, 04 e 05) e **Modo Oficial Restrito** (Simulado 02, janela padrão 13h00–17h00).
 * `simulado01.xlsx` — **Simulado 01 (Formação Geral):** Temas transversais contemporâneos (Sustentabilidade, ESG, Economia Circular, Direitos Humanos e LGPD).
 * `simulado02.xlsx` — **Simulado 02 (Prova Oficial • 44 Objetivas + 1 Discursiva):** Caderno fechado no padrão INEP (15 FG + 29 CE objetivas + Q16 discursiva) para aplicação supervisionada.
 * `simulado03.xlsx` — **Simulado 03 (Aprofundamento):** Banco complementar de questões aplicadas.
