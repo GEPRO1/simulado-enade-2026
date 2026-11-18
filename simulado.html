@@ -67,7 +67,7 @@
 
             <form id="formIdentificacaoAluno" class="p-6 space-y-3.5 text-xs sm:text-sm">
                 <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    Preencha sua identificação para registrar o horário de início e liberar o caderno (44 objetivas + 1 discursiva). <strong>No ranking público aparecerá apenas o seu apelido.</strong>
+                    Preencha sua identificação para registrar o horário de início e liberar o caderno (44 objetivas + 1 discursiva). <strong>O ranking oficial será revelado pelo professor no momento do sorteio de brindes</strong> (identificado apenas pelo seu apelido).
                 </p>
 
                 <!-- Campo Código de Acesso (exibido apenas se o link não contiver &acesso=...) -->
@@ -124,12 +124,7 @@
                     </button>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 text-center">
-                    <button type="button" id="btnVerDashboardDireto" class="text-[11px] font-bold text-ufcnavy-700 hover:text-ufcteal-700 inline-flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-column"></i>
-                        <span>Ver Ranking & Dashboard da Turma ao Vivo</span>
-                    </button>
-                </div>
+
             </form>
         </div>
     </div>
@@ -176,6 +171,12 @@
                     <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
                 </div>
 
+                <!-- Badge Horário de Término (exibido quando &fim=... estiver na URL) -->
+                <div id="badgeHorarioTermino" class="hidden bg-amber-500/20 border border-amber-400/40 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-amber-200 font-semibold shrink-0">
+                    <i class="fa-solid fa-hourglass-half text-amber-300 text-xs"></i>
+                    <span id="labelHorarioTermino">Encerra às --:--</span>
+                </div>
+
                 <!-- Botão Mapas Mentais -->
                 <button id="btnOpenStudyAll" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-bold shadow-sm">
                     <i class="fa-solid fa-diagram-project"></i>
@@ -214,6 +215,13 @@
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
         <!-- Container das Questões -->
         <div id="quizContainer" class="space-y-5">
+            <!-- Aviso discreto de encerramento próximo (5 min antes do horário limite) -->
+            <div id="bannerAvisoTermino" class="hidden bg-amber-50 border-l-4 border-amber-500 text-amber-950 px-4 py-3 rounded-r-xl shadow-sm text-xs flex items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-hourglass-end text-amber-600 text-sm"></i>
+                    <span id="textoBannerAvisoTermino" class="font-semibold">Atenção ao horário de encerramento da aplicação.</span>
+                </div>
+            </div>
             
             <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200 space-y-5">
                 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
@@ -667,6 +675,9 @@
         let isModoRestritoSimulado02 = false;
         let simuladoFinalizado = false;
         let alunoIdentificado = null;
+        let deadlineTimestamp = null;
+        let aviso5MinExibido = false;
+        let encerradoPorPrazo = false;
 
         function tentarImprimir() {
             if (isModoRestritoSimulado02) {
@@ -845,27 +856,35 @@
             const btnIniciar = document.getElementById('btnIniciarSimuladoOficial');
             const agora = new Date();
 
-            if (inicioParam) {
-                const dtInicio = new Date(inicioParam);
-                if (!isNaN(dtInicio.getTime()) && agora < dtInicio) {
-                    avisoEl?.classList.remove('hidden');
-                    textoAviso.textContent = `Aplicação agendada: este simulado será liberado em ${dtInicio.toLocaleString('pt-BR')}.`;
-                    if (btnIniciar) {
-                        btnIniciar.disabled = true;
-                        btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                }
+            const dtInicio = inicioParam ? new Date(inicioParam) : null;
+            const dtFim = fimParam ? new Date(fimParam) : null;
+            const hasValidInicio = dtInicio && !isNaN(dtInicio.getTime());
+            const hasValidFim = dtFim && !isNaN(dtFim.getTime());
+
+            if (hasValidFim) {
+                deadlineTimestamp = dtFim.getTime();
             }
-            if (fimParam) {
-                const dtFim = new Date(fimParam);
-                if (!isNaN(dtFim.getTime()) && agora > dtFim) {
-                    avisoEl?.classList.remove('hidden');
-                    textoAviso.textContent = `Prazo encerrado em ${dtFim.toLocaleString('pt-BR')}. Você ainda pode consultar o ranking e o dashboard da turma abaixo.`;
-                    if (btnIniciar) {
-                        btnIniciar.disabled = true;
-                        btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
+
+            if (hasValidFim && agora > dtFim) {
+                avisoEl?.classList.remove('hidden');
+                textoAviso.textContent = `Prazo encerrado em ${dtFim.toLocaleString('pt-BR')}. A apuração oficial será divulgada pelo professor no momento do sorteio.`;
+                if (btnIniciar) {
+                    btnIniciar.disabled = true;
+                    btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
                 }
+            } else if (hasValidInicio && agora < dtInicio) {
+                avisoEl?.classList.remove('hidden');
+                const fimStr = hasValidFim ? ` e encerramento previsto para ${dtFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : '';
+                textoAviso.textContent = `Aplicação agendada: liberação em ${dtInicio.toLocaleString('pt-BR')}${fimStr}.`;
+                if (btnIniciar) {
+                    btnIniciar.disabled = true;
+                    btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            } else if (hasValidFim) {
+                avisoEl?.classList.remove('hidden');
+                const horaFimCurta = dtFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const dataFimCurta = dtFim.toLocaleDateString('pt-BR');
+                textoAviso.textContent = `Horário de término: esta aplicação encerra às ${horaFimCurta} (${dataFimCurta}). Ao atingir esse horário, suas respostas marcadas serão enviadas automaticamente.`;
             }
 
             try {
@@ -1063,6 +1082,28 @@
                 const mins = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
                 const secs = String(timerSeconds % 60).padStart(2, '0');
                 if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
+
+                if (deadlineTimestamp && !simuladoFinalizado) {
+                    const restanteMs = deadlineTimestamp - Date.now();
+                    const horaFimFmt = new Date(deadlineTimestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                    if (restanteMs <= 5 * 60 * 1000 && restanteMs > 0 && !aviso5MinExibido) {
+                        aviso5MinExibido = true;
+                        const badgeFim = document.getElementById('badgeHorarioTermino');
+                        if (badgeFim) {
+                            badgeFim.className = 'bg-rose-600/90 border border-rose-300 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-white font-bold shrink-0 animate-pulse';
+                        }
+                        const banner = document.getElementById('bannerAvisoTermino');
+                        const textoBanner = document.getElementById('textoBannerAvisoTermino');
+                        if (banner && textoBanner) {
+                            textoBanner.textContent = `Atenção: faltam menos de 5 minutos para o encerramento automático às ${horaFimFmt}. Revise suas marcações e clique em Finalizar.`;
+                            banner.classList.remove('hidden');
+                        }
+                    } else if (restanteMs <= 0) {
+                        encerradoPorPrazo = true;
+                        finishSimulado();
+                    }
+                }
             }, 1000);
         }
 
@@ -1390,12 +1431,9 @@
                         document.getElementById('resFg').textContent = `${regSalvo.acertosFG ?? '-'}/${regSalvo.totalFG ?? 15}`;
                         document.getElementById('resCe').textContent = `${regSalvo.acertosCE ?? '-'}/${regSalvo.totalCE ?? 29}`;
                         document.getElementById('resSubtituloAluno').textContent =
-                            `Apelido: ${alunoIdentificado.apelido} • Prova já finalizada e bloqueada para alterações (Duração: ${regSalvo.tempoFormatado || '-'})`;
-                        document.getElementById('statusEnvioRanking').textContent =
-                            'Envio oficial já registrado para esta matrícula. Não é possível alterar respostas após a finalização.';
-                        document.getElementById('blocoRankingSimulado02')?.classList.remove('hidden');
+                            `Participação de ${alunoIdentificado.apelido} já registrada e bloqueada para alterações (Duração: ${regSalvo.tempoFormatado || '-'}). Aguarde o sorteio de brindes!`;
+                        document.getElementById('blocoRankingSimulado02')?.classList.add('hidden');
                         document.getElementById('resultsContainer')?.classList.remove('hidden');
-                        carregarRankingSimulado02();
                         return;
                     }
                 } catch (err) {}
@@ -1423,6 +1461,16 @@
                 if (badgeAluno && labelAluno) {
                     labelAluno.textContent = `${apelido} • Início ${horaInicio.split(' ')[1] || ''}`;
                     badgeAluno.classList.remove('hidden');
+                }
+
+                if (deadlineTimestamp) {
+                    const badgeFim = document.getElementById('badgeHorarioTermino');
+                    const labelFim = document.getElementById('labelHorarioTermino');
+                    const horaFimFmt = new Date(deadlineTimestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    if (badgeFim && labelFim) {
+                        labelFim.textContent = `Encerra às ${horaFimFmt}`;
+                        badgeFim.classList.remove('hidden');
+                    }
                 }
 
                 document.getElementById('modalAcessoSimulado02')?.classList.add('hidden');
@@ -1640,9 +1688,10 @@
             if (isModoRestritoSimulado02 && alunoIdentificado) {
                 document.getElementById('btnRevisarProvas')?.classList.add('hidden');
                 const horaInicio = alunoIdentificado.horaInicio || horaFim;
+                const prefixoPrazo = encerradoPorPrazo ? 'Tempo limite atingido (envio automático) • ' : '';
                 document.getElementById('resSubtituloAluno').textContent =
-                    `Apelido no Ranking: ${alunoIdentificado.apelido} • Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}`;
-                blocoRanking?.classList.remove('hidden');
+                    `${prefixoPrazo}Participação de ${alunoIdentificado.apelido} registrada! Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}. Aguarde a divulgação do ranking no sorteio de brindes!`;
+                blocoRanking?.classList.add('hidden');
 
                 const statusDiscursiva = respostasDiscursivas.length > 0
                     ? (respostasDiscursivas[0].respostaTexto.length > 0 ? 'Respondida' : 'Em branco')
