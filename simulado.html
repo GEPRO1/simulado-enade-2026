@@ -60,6 +60,7 @@
                 </div>
             </div>
 
+            <!-- Aviso de Janela Agendada (quando &inicio= ou &fim= forem definidos na URL) -->
             <div id="avisoJanelaHorario" class="hidden mx-6 mt-5 p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-1">
                 <p id="textoJanelaHorario" class="font-semibold"></p>
             </div>
@@ -69,6 +70,7 @@
                     Preencha sua identificação para registrar o horário de início e liberar o caderno (44 objetivas + 1 discursiva). <strong>No ranking público aparecerá apenas o seu apelido.</strong>
                 </p>
 
+                <!-- Campo Código de Acesso (exibido apenas se o link não contiver &acesso=...) -->
                 <div id="campoCodigoAcessoWrapper" class="space-y-1">
                     <label for="inputCodigoAcesso" class="block text-xs font-bold text-slate-700">
                         Código de Acesso da Turma <span class="text-rose-600">*</span>
@@ -136,6 +138,7 @@
     <header class="bg-ufcnavy-700 text-white shadow-md sticky top-0 z-30">
         <div class="max-w-5xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
             
+            <!-- Esquerda: Voltar + Logo UFC + Título -->
             <div class="flex items-center space-x-2.5">
                 <a href="index.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors" title="Voltar ao Portal">
                     <i class="fa-solid fa-arrow-left text-sm"></i>
@@ -151,7 +154,9 @@
                 </div>
             </div>
 
+            <!-- Direita: Controles do Simulado + Logo GEPRO -->
             <div class="flex flex-wrap items-center gap-2 text-xs">
+                <!-- Seletor Rápido dos Simulados Livres (Simulado 02 fica oculto da navegação pública) -->
                 <select id="selectSimuladoUrl" aria-label="Selecionar Simulado" class="bg-ufcnavy-900 border border-white/25 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500 cursor-pointer">
                     <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
                     <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
@@ -159,31 +164,37 @@
                     <option value="simulado05.xlsx">Simulado 05 (Completo V • 45Q)</option>
                 </select>
 
+                <!-- Badge do Aluno Identificado (Exibido apenas no Simulado 02) -->
                 <div id="badgeAlunoAtivo" class="hidden bg-ufcteal-700/90 border border-ufcteal-400/40 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-white font-semibold">
                     <i class="fa-solid fa-user-check text-ufcteal-300"></i>
                     <span id="labelAlunoAtivo" class="max-w-[160px] truncate">Aluno</span>
                 </div>
 
+                <!-- Cronômetro -->
                 <div class="bg-ufcnavy-900/70 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 border border-white/10 shrink-0">
                     <i class="fa-regular fa-clock text-ufcteal-500 text-xs"></i>
                     <span id="timerDisplay" class="font-mono font-semibold text-slate-200">00:00:00</span>
                 </div>
 
+                <!-- Botão Mapas Mentais -->
                 <button id="btnOpenStudyAll" type="button" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-bold shadow-sm">
                     <i class="fa-solid fa-diagram-project"></i>
                     <span class="hidden md:inline">Mapas Mentais</span>
                 </button>
 
-                <button type="button" onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
+                <!-- Botão Imprimir (desabilitado no Simulado 02 Oficial) -->
+                <button id="btnImprimirSimulado" type="button" onclick="tentarImprimir()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
                     <i class="fa-solid fa-print"></i>
                     <span class="hidden lg:inline">Imprimir</span>
                 </button>
 
+                <!-- Botão Grade de Questões -->
                 <button id="btnOpenGrid" type="button" class="bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors">
                     <i class="fa-solid fa-th"></i>
                     <span class="hidden sm:inline font-medium">Questões</span>
                 </button>
 
+                <!-- Logo GEPRO -->
                 <img src="logo-gepro.png" 
                      onerror="this.onerror=null; this.src='Captura%20de%20tela%20de%202026-11-05%2009-16-17.png';" 
                      alt="GEPRO" 
@@ -191,12 +202,14 @@
             </div>
         </div>
 
+        <!-- Barra de Progresso -->
         <div class="w-full bg-ufcnavy-900 h-1.5">
             <div id="progressBar" class="bg-ufcteal-500 h-1.5 transition-all duration-300" style="width: 0%;"></div>
         </div>
     </header>
 
     <div id="printExamContainer"></div>
+    <div id="printBlockedNotice" class="hidden"></div>
 
     <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
         <!-- Container das Questões -->
@@ -265,11 +278,11 @@
 
                 <!-- Comando da Questão -->
                 <div class="pt-1 border-t border-slate-100">
-                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed whitespace-pre-line"></p>
+                    <p id="comandoQuestao" class="text-sm font-semibold text-slate-900 leading-relaxed"></p>
                 </div>
             </div>
 
-            <!-- Alternativas (A - E) ou Caixa de Resposta Discursiva -->
+            <!-- Alternativas (A - E) -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
                 <div id="containerOpcoes" class="space-y-2.5"></div>
             </div>
@@ -289,7 +302,7 @@
 
                 <div class="space-y-3 text-xs sm:text-sm">
                     <div>
-                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Padrão de Resposta:</span>
+                        <span class="font-bold text-slate-900 block mb-1">Justificativa Pedagógica & Análise de Distratores:</span>
                         <div id="feedbackTexto" class="text-slate-700 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200"></div>
                     </div>
                     <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200/70 flex items-start space-x-2 text-xs">
@@ -363,6 +376,7 @@
 
             <!-- Bloco Exclusivo do Ranking Oficial & Dashboard da Turma (Simulado 02) -->
             <div id="blocoRankingSimulado02" class="hidden text-left space-y-4">
+                <!-- Mini-Dashboard Consolidado da Turma -->
                 <div class="bg-ufcnavy-50/70 border border-ufcnavy-100 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <h3 class="text-sm font-extrabold text-ufcnavy-900 flex items-center gap-2">
@@ -393,6 +407,7 @@
                         </div>
                     </div>
 
+                    <!-- Destaques por Questão (quando houver dados em Respostas_Questoes) -->
                     <div id="dashDestaquesQuestoes" class="hidden grid sm:grid-cols-2 gap-3 pt-1 text-xs">
                         <div class="bg-white p-3 rounded-xl border border-emerald-200/80">
                             <span class="text-[10px] font-bold uppercase text-emerald-700 block mb-1">
@@ -472,7 +487,7 @@
                 </div>
                 <div class="flex flex-wrap gap-2 text-[10px] text-slate-600">
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-200 inline-block"></span> Aberta</span>
-                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-ufcnavy-700 inline-block"></span> Respondida</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-ufcnavy-700 inline-block"></span> Marcada</span>
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span> Correta</span>
                     <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-rose-500 inline-block"></span> Incorreta</span>
                 </div>
@@ -526,9 +541,12 @@
 
     <!-- BASE DE MAPAS MENTAIS, CONTROLE DO SIMULADO 02 E LÓGICA DA APLICAÇÃO -->
     <script>
+        // =========================================================================
+        // CONFIGURAÇÃO DO SIMULADO 02 (ACESSO RESTRITO + RANKING GOOGLE SHEETS)
+        // =========================================================================
         const CONFIG_SIMULADO02 = {
             arquivo: 'simulado02.xlsx',
-            codigoAcesso: 'GEPRO2026',
+            codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
             rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
         };
 
@@ -650,6 +668,78 @@
         let simuladoFinalizado = false;
         let alunoIdentificado = null;
 
+        function tentarImprimir() {
+            if (isModoRestritoSimulado02) {
+                alert('A impressão e a exportação em PDF estão desabilitadas para o Simulado Oficial 02.');
+                return;
+            }
+            window.print();
+        }
+
+        function ativarProtecaoProvaOficial() {
+            if (!isModoRestritoSimulado02) return;
+
+            // Remove o container de impressão do DOM para não haver caderno completo oculto
+            const printContainer = document.getElementById('printExamContainer');
+            if (printContainer) {
+                printContainer.innerHTML = '';
+                printContainer.remove();
+            }
+
+            // Injeta regra @media print bloqueando qualquer tentativa via menu do navegador
+            if (!document.getElementById('styleBloqueioImpressaoSim02')) {
+                const styleEl = document.createElement('style');
+                styleEl.id = 'styleBloqueioImpressaoSim02';
+                styleEl.textContent = `
+                    @media print {
+                        body > *:not(#printBlockedNotice) {
+                            display: none !important;
+                        }
+                        #printBlockedNotice {
+                            display: flex !important;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 80vh;
+                            text-align: center;
+                            font-family: 'Inter', sans-serif;
+                            font-size: 14pt;
+                            font-weight: 700;
+                            color: #003366;
+                            padding: 2cm;
+                        }
+                    }
+                `;
+                document.head.appendChild(styleEl);
+            }
+
+            const noticeEl = document.getElementById('printBlockedNotice');
+            if (noticeEl) {
+                noticeEl.textContent = 'Impressão e exportação em PDF desabilitadas para o Simulado Oficial 02 — Engenharia de Produção (UFC Russas).';
+            }
+
+            // Bloqueia atalho Ctrl+P / Cmd+P
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && String(e.key || '').toLowerCase() === 'p') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alert('A impressão e o salvamento em PDF estão desabilitados neste simulado.');
+                }
+            }, true);
+
+            // Impede seleção/cópia rápida dos enunciados e alternativas (mantendo edição livre na discursiva Q16)
+            const quizEl = document.getElementById('quizContainer');
+            if (quizEl) {
+                quizEl.classList.add('select-none');
+                ['copy', 'cut', 'contextmenu'].forEach((evtName) => {
+                    quizEl.addEventListener(evtName, (e) => {
+                        const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+                        if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+                        e.preventDefault();
+                    });
+                });
+            }
+        }
+
         function isQuestionDiscursiva(q) {
             if (!q) return false;
             const tipo = (q.tipo || '').toLowerCase();
@@ -691,11 +781,13 @@
             const selectEl = document.getElementById('selectSimuladoUrl');
             if (isModoRestritoSimulado02) {
                 if (selectEl) selectEl.classList.add('hidden');
+                document.getElementById('btnImprimirSimulado')?.classList.add('hidden');
                 document.getElementById('btnOpenStudyAll')?.classList.add('hidden');
                 document.getElementById('btnTopicMindmap')?.classList.add('hidden');
                 document.getElementById('btnToggleMec')?.classList.add('hidden');
                 document.getElementById('btnConfirmar')?.classList.add('hidden');
                 document.getElementById('btnRevisarProvas')?.classList.add('hidden');
+                ativarProtecaoProvaOficial();
             } else if (selectEl) {
                 if (![...selectEl.options].some(o => o.value === provaParam)) {
                     const opt = document.createElement('option');
@@ -747,6 +839,7 @@
                 if (campoCodigoWrapper) campoCodigoWrapper.classList.remove('hidden');
             }
 
+            // Verifica janela de horário opcional (&inicio=AAAA-MM-DDTHH:MM &fim=AAAA-MM-DDTHH:MM)
             const avisoEl = document.getElementById('avisoJanelaHorario');
             const textoAviso = document.getElementById('textoJanelaHorario');
             const btnIniciar = document.getElementById('btnIniciarSimuladoOficial');
@@ -849,7 +942,6 @@
                 let numVal = String(row[numCol] || '').trim();
                 if (!numVal) continue;
 
-                let tipoRaw = String(row[colMap.tipo] || 'Alternativa Simples').trim();
                 let opObj = parseOpcoesString(String(row[colMap.opcoes] || ''));
                 let textoRaw = String(row[colMap.texto] || '').trim();
                 let comandoRaw = String(row[colMap.comando] || '').trim();
@@ -857,6 +949,7 @@
                     .replace(/Cenário inédito de avaliação/gi, 'Estudo de caso')
                     .replace(/\n/g, '<br>');
 
+                let tipoRaw = String(row[colMap.tipo] || 'Alternativa Simples').trim();
                 const gabRaw = String(row[colMap.gab] || 'A').trim().toUpperCase();
                 let gabClean = 'A';
                 if (tipoRaw.toLowerCase().includes('discursiva') || gabRaw === 'DISCURSIVA') {
@@ -987,19 +1080,13 @@
             const isDisc = isQuestionDiscursiva(q);
             const numOficial = formatNumeroQuestao(q, index);
             const seqEsperado = String(index + 1).padStart(2, '0');
-
             document.getElementById('badgeNum').textContent = (numOficial !== seqEsperado)
                 ? `Questão ${numOficial} (${index + 1} de ${questaoData.length})`
                 : `Questão ${numOficial} de ${questaoData.length}`;
             document.getElementById('badgeCat').textContent = q.cat;
             document.getElementById('badgeDisc').textContent = q.disc || 'Geral';
             document.getElementById('badgeDif').textContent = `Dificuldade: ${q.dif}`;
-
-            const badgeTipoEl = document.getElementById('badgeTipo');
-            badgeTipoEl.textContent = q.tipo;
-            badgeTipoEl.className = isDisc
-                ? 'bg-indigo-100 text-indigo-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full'
-                : 'bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-0.5 rounded-full';
+            document.getElementById('badgeTipo').textContent = q.tipo;
 
             document.getElementById('textComp').textContent = q.comp || 'Não especificado na planilha.';
             document.getElementById('textHab').textContent = q.hab || 'Não especificado na planilha.';
@@ -1057,7 +1144,7 @@
                     <textarea id="textareaDiscursiva" rows="8"
                         placeholder="Digite aqui sua resolução completa para o item a) e para o item b)..."
                         ${simuladoFinalizado ? 'disabled' : ''}
-                        class="w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"></textarea>
+                        class="select-text w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"></textarea>
                     <p class="text-[11px] text-slate-500">
                         Sua resposta escrita será registrada automaticamente para correção docente e não entra no cálculo automático da nota objetiva.
                     </p>
@@ -1142,12 +1229,7 @@
             if (simuladoFinalizado || isModoRestritoSimulado02) return;
             const q = questaoData[currentIndex];
             const userAns = userAnswers[currentIndex];
-            if (isQuestionDiscursiva(q)) {
-                if (!userAns || !String(userAns).trim()) {
-                    alert("Escreva sua resposta discursiva antes de conferir o padrão oficial.");
-                    return;
-                }
-            } else if (!userAns) {
+            if (!userAns) {
                 alert("Selecione uma alternativa (A a E) antes de confirmar.");
                 return;
             }
@@ -1159,21 +1241,15 @@
         function showFeedback(q, selectedOpt) {
             if (isModoRestritoSimulado02) return;
             const cardFeedback = document.getElementById('cardFeedback');
+            const isCorrect = selectedOpt === q.gab;
 
-            if (isQuestionDiscursiva(q)) {
-                document.getElementById('statusFeedbackHeader').className = 'flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-indigo-50 text-indigo-900 border border-indigo-200';
-                document.getElementById('statusFeedbackIcon').className = 'fa-solid fa-pen-nib text-indigo-600 text-lg';
-                document.getElementById('statusFeedbackTitle').textContent = 'Resposta Discursiva Registrada — Compare com o Padrão de Resposta Oficial';
-            } else {
-                const isCorrect = selectedOpt === q.gab;
-                document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
-                document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
-                document.getElementById('statusFeedbackTitle').textContent = isCorrect
-                    ? `Resposta Correta! (Gabarito: ${q.gab})`
-                    : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
-            }
+            document.getElementById('statusFeedbackHeader').className = `flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+            document.getElementById('statusFeedbackIcon').className = `fa-solid ${isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg`;
+            document.getElementById('statusFeedbackTitle').textContent = isCorrect
+                ? `Resposta Correta! (Gabarito: ${q.gab})`
+                : `Resposta Incorreta. Sua opção: ${selectedOpt} | Gabarito: ${q.gab}`;
 
-            document.getElementById('feedbackTexto').innerHTML = (q.justificativa || 'Sem justificativa cadastrada.').replace(/\n/g, '<br>');
+            document.getElementById('feedbackTexto').innerHTML = q.justificativa || 'Sem justificativa cadastrada.';
             document.getElementById('fonteAbnt').innerHTML = formatReferenceWithLinks(q.fonte);
 
             cardFeedback.classList.remove('hidden');
@@ -1263,10 +1339,12 @@
             if (listenersInitialized) return;
             listenersInitialized = true;
 
+            // Botão para consultar o Ranking & Dashboard ao vivo sem iniciar nova tentativa
             document.getElementById('btnVerDashboardDireto')?.addEventListener('click', () => {
                 abrirPainelPublicoRanking();
             });
 
+            // Formulário de Identificação e Código de Acesso do Simulado 02
             document.getElementById('formIdentificacaoAluno')?.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const erroEl = document.getElementById('erroIdentificacao');
@@ -1351,6 +1429,7 @@
                 carregarExcelRemote(CONFIG_SIMULADO02.arquivo, true);
             });
 
+            // Troca de simulado livre
             document.getElementById('selectSimuladoUrl')?.addEventListener('change', (e) => {
                 const novoArquivo = e.target.value;
                 arquivoAtual = novoArquivo;
@@ -1434,11 +1513,11 @@
             const total = questaoData.length;
             if (isModoRestritoSimulado02) {
                 const aviso = respondidas < total
-                    ? `Você respondeu ${respondidas} de ${total} questões.\n\nATENÇÃO: Após finalizar, não será possível alterar suas respostas (nem o texto discursivo da Q16) nem visualizar o gabarito. Deseja encerrar agora?`
+                    ? `Você marcou ${respondidas} de ${total} questões.\n\nATENÇÃO: Após finalizar, não será possível alterar suas respostas nem visualizar o gabarito. Deseja encerrar agora?`
                     : `Você respondeu todas as ${total} questões.\n\nATENÇÃO: Após finalizar, suas respostas ficarão bloqueadas definitivamente. Confirma o envio?`;
                 if (!confirm(aviso)) return;
             } else if (respondidas < total) {
-                const ok = confirm(`Você respondeu ${respondidas} de ${total} questões. Deseja finalizar e apurar sua nota agora?`);
+                const ok = confirm(`Você marcou ${respondidas} de ${total} questões. Deseja finalizar e apurar sua nota agora?`);
                 if (!ok) return;
             }
             finishSimulado();
@@ -1470,7 +1549,6 @@
                 const userAns = userAnswers[idx];
                 const isDisc = isQuestionDiscursiva(q);
                 const temResposta = isDisc ? Boolean(userAns && String(userAns).trim()) : Boolean(userAns);
-
                 let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
                 if (temResposta) {
                     if (isDisc) {
@@ -1602,7 +1680,6 @@
                         acertosCE: registro.acertosCE,
                         totalCE: registro.totalCE,
                         acertosTotal: registro.acertosTotal,
-                        totalObjetivas: registro.totalObjetivas,
                         notaEnade: registro.notaEnade,
                         tempoFormatado: registro.tempoFormatado
                     }));
@@ -1619,6 +1696,7 @@
         async function registrarResultadoRanking(registro) {
             const statusEl = document.getElementById('statusEnvioRanking');
 
+            // 1. Cópia local anonimizada para fallback offline
             try {
                 const localList = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
                 const registroPublico = {
@@ -1643,16 +1721,17 @@
                 localStorage.setItem('gepro_ranking_sim02', JSON.stringify(localList));
             } catch (e) {}
 
+            // 2. Envia para o Google Sheets via Apps Script
             if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
                 try {
-                    if (statusEl) statusEl.textContent = 'Gravando horários, respostas objetivas, texto discursivo e nota na planilha oficial...';
+                    if (statusEl) statusEl.textContent = 'Gravando horários, respostas e nota na planilha oficial...';
                     await fetch(CONFIG_SIMULADO02.rankingApiUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(registro)
                     });
-                    if (statusEl) statusEl.textContent = 'Resultado e questão discursiva registrados com sucesso! Seu nome permanece privado com o professor.';
+                    if (statusEl) statusEl.textContent = 'Resultado e horário registrados com sucesso! Seu nome permanece privado com o professor.';
                 } catch (err) {
                     console.error(err);
                     if (statusEl) statusEl.textContent = 'Aviso: falha de rede ao sincronizar. Exibindo registro local.';
@@ -1674,8 +1753,12 @@
                     const resp = await fetch(`${CONFIG_SIMULADO02.rankingApiUrl}?simulado=simulado02`);
                     if (resp.ok) {
                         const json = await resp.json();
-                        if (Array.isArray(json.ranking)) lista = json.ranking;
-                        if (Array.isArray(json.resumoQuestoes)) resumoQuestoes = json.resumoQuestoes;
+                        if (Array.isArray(json.ranking)) {
+                            lista = json.ranking;
+                        }
+                        if (Array.isArray(json.resumoQuestoes)) {
+                            resumoQuestoes = json.resumoQuestoes;
+                        }
                     }
                 } catch (err) {
                     console.warn('Falha ao ler ranking remoto, usando local:', err);
@@ -1695,6 +1778,7 @@
                 return Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999);
             });
 
+            // Atualiza Mini-Dashboard da Turma
             atualizarMiniDashboardTurma(lista, resumoQuestoes);
 
             if (lista.length === 0) {
@@ -1762,6 +1846,10 @@
         function setupPrintMode() {
             const printContainer = document.getElementById('printExamContainer');
             if (!printContainer) return;
+            if (isModoRestritoSimulado02) {
+                printContainer.innerHTML = '';
+                return;
+            }
             const nomePrint = alunoIdentificado ? alunoIdentificado.nome : '____________________________________________________';
             const matPrint = alunoIdentificado ? alunoIdentificado.matricula : '____________________';
 
@@ -1784,7 +1872,6 @@
                 const numOficial = formatNumeroQuestao(q, idx);
                 const isDisc = isQuestionDiscursiva(q);
                 let optionsHTML = '';
-
                 if (isDisc) {
                     optionsHTML = `<div class="mt-3 space-y-2 border border-slate-300 rounded p-3">
                         <div class="text-[10px] font-bold uppercase text-slate-500">Espaço para Resposta Discursiva (Itens a e b):</div>
@@ -1805,7 +1892,7 @@
                         ${showTexto ? `<div class="text-xs text-slate-900 leading-relaxed my-2">${q.texto}</div>` : ''}
                         ${q.imagem && q.imagem !== 'N/A' && q.imagem.trim() !== '' ? `<div class="my-2 text-center"><img src="${q.imagem}" class="max-h-64 mx-auto object-contain" /></div>` : ''}
                         ${q.afirmativas && q.afirmativas !== "N/A" ? `<div class="my-2 p-2 bg-slate-50 border-l-2 border-slate-400 text-xs">${q.afirmativas}</div>` : ''}
-                        <div class="text-xs font-semibold text-slate-900 mb-2 whitespace-pre-line">${q.comando}</div>
+                        <div class="text-xs font-semibold text-slate-900 mb-2">${q.comando}</div>
                         <div class="space-y-1">${optionsHTML}</div>
                     </div>`;
             });
