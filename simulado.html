@@ -48,21 +48,26 @@
     </div>
 
     <!-- Modal Exclusivo de Acesso e Identificação (Apenas Simulado 02) -->
-    <div id="modalAcessoSimulado02" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+    <div id="modalAcessoSimulado02" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-40 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
             <div class="bg-ufcnavy-700 text-white px-6 py-4 flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-ufcteal-600 flex items-center justify-center shrink-0">
                     <i class="fa-solid fa-ranking-star text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-ufcteal-300 block">Acesso Exclusivo • Ranking Oficial</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-ufcteal-300 block">Acesso Exclusivo • Ranking & Dashboard</span>
                     <h2 class="text-base font-extrabold leading-tight">Simulado 02 — ENADE 2026</h2>
                 </div>
             </div>
 
-            <form id="formIdentificacaoAluno" class="p-6 space-y-4 text-xs sm:text-sm">
+            <!-- Aviso de Janela Agendada (quando &inicio= ou &fim= forem definidos na URL) -->
+            <div id="avisoJanelaHorario" class="hidden mx-6 mt-5 p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-1">
+                <p id="textoJanelaHorario" class="font-semibold"></p>
+            </div>
+
+            <form id="formIdentificacaoAluno" class="p-6 space-y-3.5 text-xs sm:text-sm">
                 <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    Preencha sua identificação abaixo para liberar o caderno oficial (45 questões) e registrar sua pontuação no ranking da turma.
+                    Preencha sua identificação para registrar o horário de início e liberar o caderno (45 questões). <strong>No ranking público aparecerá apenas o seu apelido.</strong>
                 </p>
 
                 <!-- Campo Código de Acesso (exibido apenas se o link não contiver &acesso=...) -->
@@ -71,15 +76,23 @@
                         Código de Acesso da Turma <span class="text-rose-600">*</span>
                     </label>
                     <input type="text" id="inputCodigoAcesso" placeholder="Informe o código fornecido pelo professor"
-                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
                 </div>
 
                 <div class="space-y-1">
                     <label for="inputAlunoNome" class="block text-xs font-bold text-slate-700">
-                        Nome Completo <span class="text-rose-600">*</span>
+                        Nome Completo <span class="text-rose-600">*</span> <span class="text-[10px] font-normal text-slate-500">(restrito ao professor)</span>
                     </label>
                     <input type="text" id="inputAlunoNome" required placeholder="Ex.: Maria Clara Silva Santos"
-                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                </div>
+
+                <div class="space-y-1">
+                    <label for="inputAlunoApelido" class="block text-xs font-bold text-slate-700">
+                        Apelido para o Ranking Público <span class="text-[10px] font-normal text-ufcteal-700">(visível no placar)</span>
+                    </label>
+                    <input type="text" id="inputAlunoApelido" maxlength="24" placeholder="Ex.: Águia_GEPRO ou EngProd2026"
+                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -88,26 +101,33 @@
                             Matrícula UFC <span class="text-rose-600">*</span>
                         </label>
                         <input type="text" id="inputAlunoMatricula" required placeholder="Ex.: 512345"
-                               class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                               class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
                     </div>
                     <div class="space-y-1">
                         <label for="inputAlunoTurma" class="block text-xs font-bold text-slate-700">
                             Semestre / Turma
                         </label>
                         <input type="text" id="inputAlunoTurma" placeholder="Ex.: 2026.2"
-                               class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                               class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
                     </div>
                 </div>
 
                 <div id="erroIdentificacao" class="hidden text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl"></div>
 
                 <div class="pt-2 flex items-center justify-between gap-3">
-                    <a href="index.html" class="text-xs font-semibold text-slate-500 hover:text-slate-800 px-3 py-2">
+                    <a href="index.html" class="text-xs font-semibold text-slate-500 hover:text-slate-800 px-2 py-2">
                         Voltar ao Portal
                     </a>
-                    <button type="submit" class="flex-1 bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-colors flex items-center justify-center space-x-2">
+                    <button type="submit" id="btnIniciarSimuladoOficial" class="flex-1 bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-colors flex items-center justify-center space-x-2">
                         <span>Iniciar Simulado Oficial</span>
                         <i class="fa-solid fa-play text-xs"></i>
+                    </button>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 text-center">
+                    <button type="button" id="btnVerDashboardDireto" class="text-[11px] font-bold text-ufcnavy-700 hover:text-ufcteal-700 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-column"></i>
+                        <span>Ver Ranking & Dashboard da Turma ao Vivo</span>
                     </button>
                 </div>
             </form>
@@ -344,39 +364,90 @@
                 </div>
             </div>
 
-            <!-- Bloco Exclusivo do Ranking Oficial (Simulado 02) -->
-            <div id="blocoRankingSimulado02" class="hidden text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                    <div>
+            <!-- Bloco Exclusivo do Ranking Oficial & Dashboard da Turma (Simulado 02) -->
+            <div id="blocoRankingSimulado02" class="hidden text-left space-y-4">
+                <!-- Mini-Dashboard Consolidado da Turma -->
+                <div class="bg-ufcnavy-50/70 border border-ufcnavy-100 rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <h3 class="text-sm font-extrabold text-ufcnavy-900 flex items-center gap-2">
-                            <i class="fa-solid fa-ranking-star text-ufcteal-600"></i>
-                            <span>Ranking Oficial da Turma — Simulado 02</span>
+                            <i class="fa-solid fa-chart-pie text-ufcnavy-700"></i>
+                            <span>Dashboard Analítico da Turma — Simulado 02</span>
                         </h3>
-                        <p id="statusEnvioRanking" class="text-[11px] text-slate-500 mt-0.5">Sincronizando resultado...</p>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-white text-ufcnavy-700 border border-ufcnavy-200 px-2.5 py-0.5 rounded-full">
+                            Sincronizado com Google Sheets
+                        </span>
                     </div>
-                    <button id="btnAtualizarRanking" type="button" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
-                        <i class="fa-solid fa-rotate"></i>
-                        <span>Atualizar Ranking</span>
-                    </button>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Participantes</span>
+                            <span id="dashTotalAlunos" class="text-lg font-extrabold text-slate-800">-</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Média da Turma</span>
+                            <span id="dashMediaTurma" class="text-lg font-extrabold text-ufcnavy-700">-</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Maior Nota</span>
+                            <span id="dashMaiorNota" class="text-lg font-extrabold text-emerald-600">-</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200/80">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">Tempo Médio</span>
+                            <span id="dashTempoMedio" class="text-lg font-extrabold text-ufcteal-700">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Destaques por Questão (quando houver dados em Respostas_Questoes) -->
+                    <div id="dashDestaquesQuestoes" class="hidden grid sm:grid-cols-2 gap-3 pt-1 text-xs">
+                        <div class="bg-white p-3 rounded-xl border border-emerald-200/80">
+                            <span class="text-[10px] font-bold uppercase text-emerald-700 block mb-1">
+                                <i class="fa-solid fa-arrow-trend-up mr-1"></i>Maior Índice de Acerto
+                            </span>
+                            <p id="dashQuestoesFaceis" class="text-slate-700 font-medium">-</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-rose-200/80">
+                            <span class="text-[10px] font-bold uppercase text-rose-700 block mb-1">
+                                <i class="fa-solid fa-bullseye mr-1"></i>Pontos de Atenção (Menor Acerto)
+                            </span>
+                            <p id="dashQuestoesDificeis" class="text-slate-700 font-medium">-</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left border-collapse">
-                        <thead>
-                            <tr class="bg-ufcnavy-700 text-white">
-                                <th class="py-2 px-3 rounded-tl-lg">Pos.</th>
-                                <th class="py-2 px-3">Estudante</th>
-                                <th class="py-2 px-3 text-center">FG / CE</th>
-                                <th class="py-2 px-3 text-center">Nota ENADE</th>
-                                <th class="py-2 px-3 text-center rounded-tr-lg">Tempo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaRankingBody" class="divide-y divide-slate-200 bg-white">
-                            <tr>
-                                <td colspan="5" class="py-4 text-center text-slate-500">Carregando classificação...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Placar Público Anonimizado por Apelido -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                        <div>
+                            <h3 class="text-sm font-extrabold text-ufcnavy-900 flex items-center gap-2">
+                                <i class="fa-solid fa-ranking-star text-ufcteal-600"></i>
+                                <span>Ranking da Turma (Identificação por Apelido)</span>
+                            </h3>
+                            <p id="statusEnvioRanking" class="text-[11px] text-slate-500 mt-0.5">Sincronizando resultado...</p>
+                        </div>
+                        <button id="btnAtualizarRanking" type="button" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Atualizar Placar</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="bg-ufcnavy-700 text-white">
+                                    <th class="py-2 px-3 rounded-tl-lg">Pos.</th>
+                                    <th class="py-2 px-3">Apelido</th>
+                                    <th class="py-2 px-3 text-center">FG / CE</th>
+                                    <th class="py-2 px-3 text-center">Nota ENADE</th>
+                                    <th class="py-2 px-3 text-center rounded-tr-lg">Tempo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaRankingBody" class="divide-y divide-slate-200 bg-white">
+                                <tr>
+                                    <td colspan="5" class="py-4 text-center text-slate-500">Carregando classificação...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -586,10 +657,23 @@
         let isModoRestritoSimulado02 = false;
         let alunoIdentificado = null;
 
+        function gerarIdParticipanteLocal(matricula) {
+            const str = String(matricula || '').trim();
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return 'ID_' + Math.abs(hash).toString(36).toUpperCase();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             let provaParam = urlParams.get('prova') || urlParams.get('arquivo') || 'simulado01.xlsx';
             const acessoParam = (urlParams.get('acesso') || '').trim().toUpperCase();
+            const inicioParam = (urlParams.get('inicio') || '').trim();
+            const fimParam = (urlParams.get('fim') || '').trim();
+            const verRankingDireto = urlParams.get('ranking') === '1';
 
             if (!provaParam.endsWith('.xlsx') && !provaParam.endsWith('.xls')) {
                 provaParam = `simulado${provaParam.padStart(2, '0')}.xlsx`;
@@ -600,7 +684,6 @@
 
             const selectEl = document.getElementById('selectSimuladoUrl');
             if (isModoRestritoSimulado02) {
-                // Oculta o seletor de troca de prova durante o Simulado 02 oficial
                 if (selectEl) selectEl.classList.add('hidden');
             } else if (selectEl) {
                 if (![...selectEl.options].some(o => o.value === provaParam)) {
@@ -616,13 +699,29 @@
             setupEventListenersOnce();
 
             if (isModoRestritoSimulado02) {
-                prepararAcessoSimulado02(acessoParam);
+                if (verRankingDireto) {
+                    abrirPainelPublicoRanking();
+                } else {
+                    prepararAcessoSimulado02(acessoParam, inicioParam, fimParam);
+                }
             } else {
                 carregarExcelRemote(arquivoAtual, true);
             }
         });
 
-        function prepararAcessoSimulado02(acessoParamUrl) {
+        function abrirPainelPublicoRanking() {
+            document.getElementById('loadingScreen')?.classList.add('hidden');
+            document.getElementById('modalAcessoSimulado02')?.classList.add('hidden');
+            document.getElementById('quizContainer')?.classList.add('hidden');
+            document.getElementById('resSubtituloAluno').textContent = 'Acompanhamento em tempo real do desempenho da turma (identificação protegida por apelido).';
+            document.getElementById('statusEnvioRanking').textContent = 'Placar atualizado diretamente da planilha oficial.';
+            document.getElementById('blocoRankingSimulado02')?.classList.remove('hidden');
+            document.getElementById('btnRevisarProvas')?.classList.add('hidden');
+            document.getElementById('resultsContainer')?.classList.remove('hidden');
+            carregarRankingSimulado02();
+        }
+
+        function prepararAcessoSimulado02(acessoParamUrl, inicioParam, fimParam) {
             document.getElementById('loadingScreen')?.classList.add('hidden');
             document.getElementById('quizContainer')?.classList.add('hidden');
 
@@ -630,7 +729,6 @@
             const campoCodigoWrapper = document.getElementById('campoCodigoAcessoWrapper');
             const inputCodigo = document.getElementById('inputCodigoAcesso');
 
-            // Se o link do professor já contém ?prova=simulado02.xlsx&acesso=GEPRO2026, libera automaticamente o código
             if (acessoParamUrl === CONFIG_SIMULADO02.codigoAcesso.toUpperCase()) {
                 if (inputCodigo) inputCodigo.value = CONFIG_SIMULADO02.codigoAcesso;
                 if (campoCodigoWrapper) campoCodigoWrapper.classList.add('hidden');
@@ -638,12 +736,41 @@
                 if (campoCodigoWrapper) campoCodigoWrapper.classList.remove('hidden');
             }
 
-            // Recupera dados se o aluno já preencheu nesta sessão
+            // Verifica janela de horário opcional (&inicio=AAAA-MM-DDTHH:MM &fim=AAAA-MM-DDTHH:MM)
+            const avisoEl = document.getElementById('avisoJanelaHorario');
+            const textoAviso = document.getElementById('textoJanelaHorario');
+            const btnIniciar = document.getElementById('btnIniciarSimuladoOficial');
+            const agora = new Date();
+
+            if (inicioParam) {
+                const dtInicio = new Date(inicioParam);
+                if (!isNaN(dtInicio.getTime()) && agora < dtInicio) {
+                    avisoEl?.classList.remove('hidden');
+                    textoAviso.textContent = `Aplicação agendada: este simulado será liberado em ${dtInicio.toLocaleString('pt-BR')}.`;
+                    if (btnIniciar) {
+                        btnIniciar.disabled = true;
+                        btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+            if (fimParam) {
+                const dtFim = new Date(fimParam);
+                if (!isNaN(dtFim.getTime()) && agora > dtFim) {
+                    avisoEl?.classList.remove('hidden');
+                    textoAviso.textContent = `Prazo encerrado em ${dtFim.toLocaleString('pt-BR')}. Você ainda pode consultar o ranking e o dashboard da turma abaixo.`;
+                    if (btnIniciar) {
+                        btnIniciar.disabled = true;
+                        btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+
             try {
                 const saved = sessionStorage.getItem('gepro_aluno_sim02');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed.nome) document.getElementById('inputAlunoNome').value = parsed.nome;
+                    if (parsed.apelido) document.getElementById('inputAlunoApelido').value = parsed.apelido;
                     if (parsed.matricula) document.getElementById('inputAlunoMatricula').value = parsed.matricula;
                     if (parsed.turma) document.getElementById('inputAlunoTurma').value = parsed.turma;
                 }
@@ -1053,12 +1180,18 @@
             if (listenersInitialized) return;
             listenersInitialized = true;
 
+            // Botão para consultar o Ranking & Dashboard ao vivo sem iniciar nova tentativa
+            document.getElementById('btnVerDashboardDireto')?.addEventListener('click', () => {
+                abrirPainelPublicoRanking();
+            });
+
             // Formulário de Identificação e Código de Acesso do Simulado 02
             document.getElementById('formIdentificacaoAluno')?.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const erroEl = document.getElementById('erroIdentificacao');
                 const codigoDigitado = (document.getElementById('inputCodigoAcesso')?.value || '').trim().toUpperCase();
                 const nome = (document.getElementById('inputAlunoNome')?.value || '').trim();
+                const apelidoDigitado = (document.getElementById('inputAlunoApelido')?.value || '').trim();
                 const matricula = (document.getElementById('inputAlunoMatricula')?.value || '').trim();
                 const turma = (document.getElementById('inputAlunoTurma')?.value || '').trim() || '2026';
 
@@ -1078,8 +1211,19 @@
                     return;
                 }
 
+                const idParticipante = gerarIdParticipanteLocal(matricula);
+                const apelido = apelidoDigitado || (`Estudante_${idParticipante.slice(-4)}`);
+                const horaInicio = new Date().toLocaleString('pt-BR');
+
                 erroEl.classList.add('hidden');
-                alunoIdentificado = { nome, matricula, turma };
+                alunoIdentificado = {
+                    nome,
+                    apelido,
+                    matricula,
+                    turma,
+                    idParticipante,
+                    horaInicio
+                };
 
                 try {
                     sessionStorage.setItem('gepro_aluno_sim02', JSON.stringify(alunoIdentificado));
@@ -1088,7 +1232,7 @@
                 const badgeAluno = document.getElementById('badgeAlunoAtivo');
                 const labelAluno = document.getElementById('labelAlunoAtivo');
                 if (badgeAluno && labelAluno) {
-                    labelAluno.textContent = `${nome.split(' ')[0]} • ${matricula}`;
+                    labelAluno.textContent = `${apelido} • Início ${horaInicio.split(' ')[1] || ''}`;
                     badgeAluno.classList.remove('hidden');
                 }
 
@@ -1225,9 +1369,13 @@
             document.getElementById('quizContainer')?.classList.add('hidden');
 
             let totalAcertos = 0, fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
+            const detalhesQuestoes = [];
+
             questaoData.forEach((q, idx) => {
-                q.answered = true; // Libera visualização do gabarito na revisão pós-prova
-                const isCorrect = userAnswers[idx] === q.gab;
+                q.answered = true;
+                const marcada = userAnswers[idx] || '-';
+                const isCorrect = marcada === q.gab;
+
                 if (q.cat.toLowerCase().includes('formação geral')) {
                     fgTotal++;
                     if (isCorrect) fgAcertos++;
@@ -1236,9 +1384,15 @@
                     if (isCorrect) ceAcertos++;
                 }
                 if (isCorrect) totalAcertos++;
+
+                detalhesQuestoes.push({
+                    questao: q.num || ('Q' + String(idx + 1).padStart(2, '0')),
+                    marcada: marcada,
+                    gabarito: q.gab,
+                    acertou: isCorrect
+                });
             });
 
-            // Cálculo Ponderado Oficial ENADE (25% FG + 75% CE, escala 0 a 100)
             const pctFg = fgTotal > 0 ? (fgAcertos / fgTotal) : 0;
             const pctCe = ceTotal > 0 ? (ceAcertos / ceTotal) : 0;
             const notaEnade100 = (fgTotal > 0 && ceTotal > 0)
@@ -1246,6 +1400,7 @@
                 : ((totalAcertos / questaoData.length) * 100);
 
             const tempoFormatado = formatSecondsToClock(timerSeconds);
+            const horaFim = new Date().toLocaleString('pt-BR');
 
             document.getElementById('resNota').textContent = notaEnade100.toFixed(1);
             document.getElementById('resAcertos').textContent = `${totalAcertos} / ${questaoData.length}`;
@@ -1254,15 +1409,20 @@
 
             const blocoRanking = document.getElementById('blocoRankingSimulado02');
             if (isModoRestritoSimulado02 && alunoIdentificado) {
+                const horaInicio = alunoIdentificado.horaInicio || horaFim;
                 document.getElementById('resSubtituloAluno').textContent =
-                    `Estudante: ${alunoIdentificado.nome} (Matrícula: ${alunoIdentificado.matricula}) • Tempo: ${tempoFormatado}`;
+                    `Apelido no Ranking: ${alunoIdentificado.apelido} • Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}`;
                 blocoRanking?.classList.remove('hidden');
 
                 const registro = {
                     simulado: 'simulado02',
+                    idParticipante: alunoIdentificado.idParticipante || gerarIdParticipanteLocal(alunoIdentificado.matricula),
                     nome: alunoIdentificado.nome,
+                    apelido: alunoIdentificado.apelido,
                     matricula: alunoIdentificado.matricula,
                     turma: alunoIdentificado.turma,
+                    horaInicio: horaInicio,
+                    horaFim: horaFim,
                     acertosFG: fgAcertos,
                     totalFG: fgTotal,
                     acertosCE: ceAcertos,
@@ -1271,7 +1431,7 @@
                     notaEnade: Number(notaEnade100.toFixed(2)),
                     tempoSegundos: timerSeconds,
                     tempoFormatado: tempoFormatado,
-                    dataHora: new Date().toLocaleString('pt-BR')
+                    detalhesQuestoes: detalhesQuestoes
                 };
 
                 await registrarResultadoRanking(registro);
@@ -1285,36 +1445,45 @@
         async function registrarResultadoRanking(registro) {
             const statusEl = document.getElementById('statusEnvioRanking');
 
-            // 1. Salva cópia local no navegador como fallback
+            // 1. Cópia local anonimizada para fallback offline
             try {
                 const localList = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
-                const idxExist = localList.findIndex(item => item.matricula === registro.matricula);
+                const registroPublico = {
+                    idParticipante: registro.idParticipante,
+                    apelido: registro.apelido,
+                    turma: registro.turma,
+                    acertosFG: registro.acertosFG,
+                    totalFG: registro.totalFG,
+                    acertosCE: registro.acertosCE,
+                    totalCE: registro.totalCE,
+                    acertosTotal: registro.acertosTotal,
+                    notaEnade: registro.notaEnade,
+                    tempoSegundos: registro.tempoSegundos,
+                    tempoFormatado: registro.tempoFormatado
+                };
+                const idxExist = localList.findIndex(item => item.idParticipante === registroPublico.idParticipante);
                 if (idxExist >= 0) {
-                    localList[idxExist] = registro;
+                    localList[idxExist] = registroPublico;
                 } else {
-                    localList.push(registro);
+                    localList.push(registroPublico);
                 }
                 localStorage.setItem('gepro_ranking_sim02', JSON.stringify(localList));
             } catch (e) {}
 
-            // 2. Envia para o Google Sheets via Apps Script (se configurado)
+            // 2. Envia para o Google Sheets via Apps Script
             if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
                 try {
-                    if (statusEl) statusEl.textContent = 'Enviando pontuação para a planilha oficial...';
+                    if (statusEl) statusEl.textContent = 'Gravando horários, respostas e nota na planilha oficial...';
                     await fetch(CONFIG_SIMULADO02.rankingApiUrl, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(registro)
                     });
-                    if (statusEl) statusEl.textContent = 'Resultado registrado com sucesso no Ranking Oficial!';
+                    if (statusEl) statusEl.textContent = 'Resultado e horário registrados com sucesso! Seu nome permanece privado com o professor.';
                 } catch (err) {
                     console.error(err);
                     if (statusEl) statusEl.textContent = 'Aviso: falha de rede ao sincronizar. Exibindo registro local.';
-                }
-            } else {
-                if (statusEl) {
-                    statusEl.textContent = 'Modo Local ativo (configure rankingApiUrl no simulado.html para sincronizar toda a turma no Google Sheets).';
                 }
             }
 
@@ -1326,6 +1495,7 @@
             if (!tbody) return;
 
             let lista = [];
+            let resumoQuestoes = [];
 
             if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
                 try {
@@ -1334,6 +1504,9 @@
                         const json = await resp.json();
                         if (Array.isArray(json.ranking)) {
                             lista = json.ranking;
+                        }
+                        if (Array.isArray(json.resumoQuestoes)) {
+                            resumoQuestoes = json.resumoQuestoes;
                         }
                     }
                 } catch (err) {
@@ -1347,7 +1520,6 @@
                 } catch (e) {}
             }
 
-            // Ordena: Maior Nota ENADE primeiro; desempate pelo menor tempo
             lista.sort((a, b) => {
                 if (Number(b.notaEnade) !== Number(a.notaEnade)) {
                     return Number(b.notaEnade) - Number(a.notaEnade);
@@ -1355,27 +1527,69 @@
                 return Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999);
             });
 
+            // Atualiza Mini-Dashboard da Turma
+            atualizarMiniDashboardTurma(lista, resumoQuestoes);
+
             if (lista.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-500">Nenhum resultado registrado ainda.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = lista.slice(0, 20).map((item, idx) => {
+            tbody.innerHTML = lista.slice(0, 30).map((item, idx) => {
                 const pos = idx + 1;
-                const isMe = alunoIdentificado && String(item.matricula) === String(alunoIdentificado.matricula);
+                const meuId = alunoIdentificado ? alunoIdentificado.idParticipante : null;
+                const isMe = meuId && String(item.idParticipante) === String(meuId);
+                const apelidoExibir = item.apelido || item.nome || `Participante #${pos}`;
                 const badgePos = pos === 1 ? '🥇 1º' : pos === 2 ? '🥈 2º' : pos === 3 ? '🥉 3º' : `${pos}º`;
                 const rowClass = isMe ? 'bg-ufcteal-50 font-bold text-ufcnavy-900' : 'text-slate-700';
 
                 return `
                     <tr class="${rowClass}">
                         <td class="py-2.5 px-3 font-extrabold">${badgePos}</td>
-                        <td class="py-2.5 px-3">${item.nome} ${isMe ? '<span class="text-[10px] bg-ufcteal-600 text-white px-1.5 py-0.5 rounded ml-1">Você</span>' : ''}</td>
+                        <td class="py-2.5 px-3">${apelidoExibir} ${isMe ? '<span class="text-[10px] bg-ufcteal-600 text-white px-1.5 py-0.5 rounded ml-1">Você</span>' : ''}</td>
                         <td class="py-2.5 px-3 text-center">${item.acertosFG ?? '-'}/${item.totalFG ?? 15} • ${item.acertosCE ?? '-'}/${item.totalCE ?? 30}</td>
                         <td class="py-2.5 px-3 text-center font-extrabold text-ufcnavy-700">${Number(item.notaEnade).toFixed(1)}</td>
                         <td class="py-2.5 px-3 text-center font-mono">${item.tempoFormatado || '-'}</td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function atualizarMiniDashboardTurma(lista, resumoQuestoes) {
+            const elTotal = document.getElementById('dashTotalAlunos');
+            const elMedia = document.getElementById('dashMediaTurma');
+            const elMaior = document.getElementById('dashMaiorNota');
+            const elTempo = document.getElementById('dashTempoMedio');
+
+            if (!lista || lista.length === 0) {
+                if (elTotal) elTotal.textContent = '0';
+                if (elMedia) elMedia.textContent = '-';
+                if (elMaior) elMaior.textContent = '-';
+                if (elTempo) elTempo.textContent = '-';
+                return;
+            }
+
+            const n = lista.length;
+            const somaNotas = lista.reduce((acc, item) => acc + Number(item.notaEnade || 0), 0);
+            const maiorNota = Math.max(...lista.map(item => Number(item.notaEnade || 0)));
+            const somaSeg = lista.reduce((acc, item) => acc + Number(item.tempoSegundos || 0), 0);
+            const mediaSeg = Math.round(somaSeg / n);
+
+            if (elTotal) elTotal.textContent = String(n);
+            if (elMedia) elMedia.textContent = (somaNotas / n).toFixed(1);
+            if (elMaior) elMaior.textContent = maiorNota.toFixed(1);
+            if (elTempo) elTempo.textContent = formatSecondsToClock(mediaSeg);
+
+            const boxDestaques = document.getElementById('dashDestaquesQuestoes');
+            if (Array.isArray(resumoQuestoes) && resumoQuestoes.length > 0 && boxDestaques) {
+                const ordenadas = [...resumoQuestoes].sort((a, b) => Number(b.taxaAcerto) - Number(a.taxaAcerto));
+                const topFaceis = ordenadas.slice(0, 3).map(q => `${q.questao} (${q.taxaAcerto}%)`).join(' • ');
+                const topDificeis = ordenadas.slice(-3).reverse().map(q => `${q.questao} (${q.taxaAcerto}%)`).join(' • ');
+
+                document.getElementById('dashQuestoesFaceis').textContent = topFaceis || '-';
+                document.getElementById('dashQuestoesDificeis').textContent = topDificeis || '-';
+                boxDestaques.classList.remove('hidden');
+            }
         }
 
         function setupPrintMode() {
