@@ -28,7 +28,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         @media print {
-            header, footer, nav, button, #quizContainer, #gridModal, #studyModal, #resultsContainer, #loadingScreen {
+            header, footer, nav, button, #quizContainer, #gridModal, #studyModal, #resultsContainer, #loadingScreen, #modalAcessoSimulado02 {
                 display: none !important;
             }
             #printExamContainer { display: block !important; }
@@ -45,6 +45,73 @@
     <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-4">
         <div class="w-12 h-12 border-4 border-ufcnavy-700 border-t-ufcteal-500 rounded-full animate-spin"></div>
         <p id="loadingText" class="text-sm font-semibold text-slate-700">Carregando Caderno de Questões...</p>
+    </div>
+
+    <!-- Modal Exclusivo de Acesso e Identificação (Apenas Simulado 02) -->
+    <div id="modalAcessoSimulado02" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-ufcnavy-700 text-white px-6 py-4 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-ufcteal-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-ranking-star text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-ufcteal-300 block">Acesso Exclusivo • Ranking Oficial</span>
+                    <h2 class="text-base font-extrabold leading-tight">Simulado 02 — ENADE 2026</h2>
+                </div>
+            </div>
+
+            <form id="formIdentificacaoAluno" class="p-6 space-y-4 text-xs sm:text-sm">
+                <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    Preencha sua identificação abaixo para liberar o caderno oficial (45 questões) e registrar sua pontuação no ranking da turma.
+                </p>
+
+                <!-- Campo Código de Acesso (exibido apenas se o link não contiver &acesso=...) -->
+                <div id="campoCodigoAcessoWrapper" class="space-y-1">
+                    <label for="inputCodigoAcesso" class="block text-xs font-bold text-slate-700">
+                        Código de Acesso da Turma <span class="text-rose-600">*</span>
+                    </label>
+                    <input type="text" id="inputCodigoAcesso" placeholder="Informe o código fornecido pelo professor"
+                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                </div>
+
+                <div class="space-y-1">
+                    <label for="inputAlunoNome" class="block text-xs font-bold text-slate-700">
+                        Nome Completo <span class="text-rose-600">*</span>
+                    </label>
+                    <input type="text" id="inputAlunoNome" required placeholder="Ex.: Maria Clara Silva Santos"
+                           class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label for="inputAlunoMatricula" class="block text-xs font-bold text-slate-700">
+                            Matrícula UFC <span class="text-rose-600">*</span>
+                        </label>
+                        <input type="text" id="inputAlunoMatricula" required placeholder="Ex.: 512345"
+                               class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label for="inputAlunoTurma" class="block text-xs font-bold text-slate-700">
+                            Semestre / Turma
+                        </label>
+                        <input type="text" id="inputAlunoTurma" placeholder="Ex.: 2026.2"
+                               class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-ufcteal-500">
+                    </div>
+                </div>
+
+                <div id="erroIdentificacao" class="hidden text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl"></div>
+
+                <div class="pt-2 flex items-center justify-between gap-3">
+                    <a href="index.html" class="text-xs font-semibold text-slate-500 hover:text-slate-800 px-3 py-2">
+                        Voltar ao Portal
+                    </a>
+                    <button type="submit" class="flex-1 bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-colors flex items-center justify-center space-x-2">
+                        <span>Iniciar Simulado Oficial</span>
+                        <i class="fa-solid fa-play text-xs"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Header Institucional Unificado -->
@@ -69,14 +136,19 @@
 
             <!-- Direita: Controles do Simulado + Logo GEPRO -->
             <div class="flex flex-wrap items-center gap-2 text-xs">
-                <!-- Seletor Rápido de Simulado (Troca a qualquer momento) -->
+                <!-- Seletor Rápido dos Simulados Livres (Simulado 02 fica oculto da navegação pública) -->
                 <select id="selectSimuladoUrl" aria-label="Selecionar Simulado" class="bg-ufcnavy-900 border border-white/25 text-white text-xs rounded-lg px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-ufcteal-500 cursor-pointer">
                     <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
-                    <option value="simulado02.xlsx">Simulado 02 (Completo 45Q)</option>
                     <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
                     <option value="simulado04.xlsx">Simulado 04 (Completo IV • 45Q)</option>
                     <option value="simulado05.xlsx">Simulado 05 (Completo V • 45Q)</option>
                 </select>
+
+                <!-- Badge do Aluno Identificado (Exibido apenas no Simulado 02) -->
+                <div id="badgeAlunoAtivo" class="hidden bg-ufcteal-700/90 border border-ufcteal-400/40 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 text-white font-semibold">
+                    <i class="fa-solid fa-user-check text-ufcteal-300"></i>
+                    <span id="labelAlunoAtivo" class="max-w-[160px] truncate">Aluno</span>
+                </div>
 
                 <!-- Cronômetro -->
                 <div class="bg-ufcnavy-900/70 px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 border border-white/10 shrink-0">
@@ -223,14 +295,20 @@
             </div>
 
             <!-- Navegação Inferior -->
-            <div class="flex items-center justify-between pt-2">
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
                 <button id="btnPrev" type="button" class="bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-40 text-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition-colors">
                     <i class="fa-solid fa-chevron-left text-xs"></i>
                     <span>Anterior</span>
                 </button>
-                <button id="btnConfirmar" type="button" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-colors">
-                    Confirmar Resposta
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="btnConfirmar" type="button" class="bg-ufcteal-600 hover:bg-ufcteal-700 text-white font-bold px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-colors">
+                        Confirmar Resposta
+                    </button>
+                    <button id="btnFinalizarBottom" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-sm transition-colors flex items-center space-x-1.5">
+                        <i class="fa-solid fa-flag-checkered text-xs"></i>
+                        <span>Finalizar</span>
+                    </button>
+                </div>
                 <button id="btnNext" type="button" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 disabled:opacity-40 text-white font-semibold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center space-x-2 transition-colors">
                     <span>Próxima</span>
                     <i class="fa-solid fa-chevron-right text-xs"></i>
@@ -238,33 +316,70 @@
             </div>
         </div>
 
-        <!-- Tela de Resultados -->
+        <!-- Tela de Resultados & Ranking -->
         <div id="resultsContainer" class="hidden bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 text-center space-y-6">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-ufcteal-50 text-ufcteal-600 rounded-full">
                 <i class="fa-solid fa-trophy text-2xl"></i>
             </div>
             <div class="space-y-1">
                 <h2 class="text-2xl font-extrabold text-slate-900">Simulado Concluído!</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Confira abaixo a apuração do seu desempenho por componente.</p>
+                <p id="resSubtituloAluno" class="text-xs sm:text-sm text-slate-500">Confira abaixo a apuração do seu desempenho por componente.</p>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota Global</span>
-                    <span id="resNota" class="text-xl font-extrabold text-ufcnavy-700">0.0 / 10</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Nota ENADE (0–100)</span>
+                    <span id="resNota" class="text-xl font-extrabold text-ufcnavy-700">0.0</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                     <span class="text-[10px] font-bold text-slate-400 uppercase block">Acertos Totais</span>
                     <span id="resAcertos" class="text-xl font-extrabold text-emerald-600">0</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Formação Geral</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Formação Geral (25%)</span>
                     <span id="resFg" class="text-xl font-extrabold text-blue-600">0%</span>
                 </div>
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Comp. Específico</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block">Comp. Específico (75%)</span>
                     <span id="resCe" class="text-xl font-extrabold text-purple-600">0%</span>
                 </div>
             </div>
+
+            <!-- Bloco Exclusivo do Ranking Oficial (Simulado 02) -->
+            <div id="blocoRankingSimulado02" class="hidden text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-ufcnavy-900 flex items-center gap-2">
+                            <i class="fa-solid fa-ranking-star text-ufcteal-600"></i>
+                            <span>Ranking Oficial da Turma — Simulado 02</span>
+                        </h3>
+                        <p id="statusEnvioRanking" class="text-[11px] text-slate-500 mt-0.5">Sincronizando resultado...</p>
+                    </div>
+                    <button id="btnAtualizarRanking" type="button" class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Atualizar Ranking</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-ufcnavy-700 text-white">
+                                <th class="py-2 px-3 rounded-tl-lg">Pos.</th>
+                                <th class="py-2 px-3">Estudante</th>
+                                <th class="py-2 px-3 text-center">FG / CE</th>
+                                <th class="py-2 px-3 text-center">Nota ENADE</th>
+                                <th class="py-2 px-3 text-center rounded-tr-lg">Tempo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaRankingBody" class="divide-y divide-slate-200 bg-white">
+                            <tr>
+                                <td colspan="5" class="py-4 text-center text-slate-500">Carregando classificação...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <p class="text-xs text-slate-600 italic max-w-lg mx-auto">
                 "Cada questão revisada hoje consolida a sua formação como engenheiro(a) de produção e fortalece o conceito do nosso curso no ENADE 2026."
             </p>
@@ -306,7 +421,6 @@
     <!-- Modal de Revisão Teórica & Mapas Mentais (ENADE 2026 - GEPRO) -->
     <div id="studyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200">
-            <!-- Header do Modal -->
             <div class="bg-ufcnavy-700 text-white px-5 py-4 flex items-center justify-between">
                 <div class="flex items-center space-x-2.5">
                     <i class="fa-solid fa-diagram-project text-ufcteal-500 text-lg"></i>
@@ -320,16 +434,13 @@
                 </button>
             </div>
 
-            <!-- Barra de Seleção de Tópico -->
             <div class="bg-slate-50 border-b border-slate-200 px-5 py-3 flex flex-wrap items-center justify-between gap-2">
                 <label for="selectStudyTopic" class="text-xs font-bold text-slate-700">Selecione a Área / Disciplina:</label>
                 <select id="selectStudyTopic" class="flex-1 max-w-md bg-white border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ufcteal-500"></select>
             </div>
 
-            <!-- Conteúdo do Resumo e Mapa Mental -->
             <div id="studyModalBody" class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs sm:text-sm text-slate-800"></div>
 
-            <!-- Rodapé do Modal -->
             <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between text-[11px] text-slate-500">
                 <span>Baseado nas Portarias MEC 154, 163 e 276/2026 • Acervo Minha Biblioteca UFC</span>
                 <button id="btnCloseStudyBottom" type="button" class="bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-semibold px-4 py-1.5 rounded-lg text-xs">
@@ -347,13 +458,21 @@
         </div>
     </footer>
 
-    <!-- BASE DE MAPAS MENTAIS E LÓGICA DA APLICAÇÃO -->
+    <!-- BASE DE MAPAS MENTAIS, CONTROLE DO SIMULADO 02 E LÓGICA DA APLICAÇÃO -->
     <script>
-        // Acervo Curado de Mapas Mentais e Resumos por Área (ENADE 2026 - GEPRO)
+        // =========================================================================
+        // CONFIGURAÇÃO DO SIMULADO 02 (ACESSO RESTRITO + RANKING GOOGLE SHEETS)
+        // =========================================================================
+        const CONFIG_SIMULADO02 = {
+            arquivo: 'simulado02.xlsx',
+            codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
+            rankingApiUrl: ''          // Cole aqui a URL do Web App do Google Apps Script após publicar
+        };
+
         const BASE_MAPAS_MENTAIS = {
             "pcp": {
                 titulo: "Planejamento e Controle da Produção (PCP) & Operações",
-                keywords: ["pcp", "planejamento", "produção", "mrp", "kanban", "jit", "just-in-time", "estoque", "capacidade", "sequenciamento", "teoria das restrições", "gargalo", "lean"],
+                keywords: ["pcp", "planejamento", "produção", "mrp", "kanban", "jit", "just-in-time", "estoque", "capacidade", "sequenciamento", "teoria das restrições", "gargalo", "lean", "balanceamento"],
                 resumo: "O PCP coordena a alocação de recursos produtivos para atender à demanda nos horizontes de longo (S&OP), médio (MPS) e curto prazo (MRP e sequenciamento). O modelo tradicional empurrado (MRP II) programa ordens a partir da previsão de demanda, enquanto a produção puxada (Just-in-Time / Kanban) autoriza a fabricação somente mediante consumo real do posto subsequente, limitando o estoque em processo (WIP).",
                 mapaMental: [
                     { ramo: "Sistemas de Produção", itens: ["Empurrada (MRP II): baseada em previsão e explosão de materiais (BOM)", "Puxada (JIT/Kanban): disparada pelo consumo real, controla WIP", "Híbrida (CONWIP): limita estoque global mantendo fluxo contínuo"] },
@@ -377,7 +496,7 @@
             },
             "po": {
                 titulo: "Pesquisa Operacional & Modelos de Decisão",
-                keywords: ["pesquisa operacional", "programação linear", "simplex", "otimização", "filas", "simulação", "sensibilidade", "dual", "rede", "transporte"],
+                keywords: ["pesquisa operacional", "programação linear", "simplex", "otimização", "filas", "simulação", "sensibilidade", "dual", "rede", "transporte", "monte carlo"],
                 resumo: "A Pesquisa Operacional estrutura problemas complexos de alocação de recursos escassos por meio de modelos matemáticos compostos por variáveis de decisão, função objetivo (maximização ou minimização) e conjunto de restrições técnicas e de não negatividade.",
                 mapaMental: [
                     { ramo: "Programação Linear (PL)", itens: ["Hipóteses: proporcionalidade, aditividade, divisibilidade e certeza", "Solução ótima sempre ocorre em um ponto extremo (vértice) da região viável", "Folga zero indica restrição ativa (recurso escasso)"] },
@@ -424,7 +543,7 @@
             },
             "organizacional_produto": {
                 titulo: "Engenharia Organizacional, Projetos & Desenvolvimento de Produto",
-                keywords: ["organizacional", "projetos", "estratégica", "inovação", "conhecimento", "produto", "valor", "pdp", "qfd", "scrum", "pmbok"],
+                keywords: ["organizacional", "projetos", "estratégica", "inovação", "conhecimento", "produto", "valor", "pdp", "qfd", "scrum", "pmbok", "indústria 4.0", "sistemas de informação"],
                 resumo: "A Engenharia Organizacional articula estratégia competitiva, gestão de projetos (preditivos e ágeis), sistemas de informação e gestão do conhecimento. Já a Engenharia do Produto estrutura o Processo de Desenvolvimento de Produtos (PDP) desde o planejamento conceitual (QFD, Engenharia de Valor) até o lançamento.",
                 mapaMental: [
                     { ramo: "Estratégia e Projetos", itens: ["Balanced Scorecard (BSC): perspectivas Financeira, Clientes, Processos e Aprendizado", "PMBOK vs. Ágil (Scrum): escopo fixo vs. entregas iterativas incrementais", "Caminho Crítico (CPM/PERT): sequência de atividades com folga zero"] },
@@ -464,19 +583,26 @@
         let timerInterval = null;
         let arquivoAtual = '';
         let listenersInitialized = false;
+        let isModoRestritoSimulado02 = false;
+        let alunoIdentificado = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             let provaParam = urlParams.get('prova') || urlParams.get('arquivo') || 'simulado01.xlsx';
+            const acessoParam = (urlParams.get('acesso') || '').trim().toUpperCase();
 
             if (!provaParam.endsWith('.xlsx') && !provaParam.endsWith('.xls')) {
                 provaParam = `simulado${provaParam.padStart(2, '0')}.xlsx`;
             }
 
             arquivoAtual = provaParam;
+            isModoRestritoSimulado02 = (arquivoAtual.toLowerCase() === CONFIG_SIMULADO02.arquivo.toLowerCase());
+
             const selectEl = document.getElementById('selectSimuladoUrl');
-            if (selectEl) {
-                // Garante que a opção exista no select
+            if (isModoRestritoSimulado02) {
+                // Oculta o seletor de troca de prova durante o Simulado 02 oficial
+                if (selectEl) selectEl.classList.add('hidden');
+            } else if (selectEl) {
                 if (![...selectEl.options].some(o => o.value === provaParam)) {
                     const opt = document.createElement('option');
                     opt.value = provaParam;
@@ -488,10 +614,45 @@
 
             populateStudyTopicsDropdown();
             setupEventListenersOnce();
-            carregarExcelRemote(arquivoAtual);
+
+            if (isModoRestritoSimulado02) {
+                prepararAcessoSimulado02(acessoParam);
+            } else {
+                carregarExcelRemote(arquivoAtual, true);
+            }
         });
 
-        async function carregarExcelRemote(filename) {
+        function prepararAcessoSimulado02(acessoParamUrl) {
+            document.getElementById('loadingScreen')?.classList.add('hidden');
+            document.getElementById('quizContainer')?.classList.add('hidden');
+
+            const modal = document.getElementById('modalAcessoSimulado02');
+            const campoCodigoWrapper = document.getElementById('campoCodigoAcessoWrapper');
+            const inputCodigo = document.getElementById('inputCodigoAcesso');
+
+            // Se o link do professor já contém ?prova=simulado02.xlsx&acesso=GEPRO2026, libera automaticamente o código
+            if (acessoParamUrl === CONFIG_SIMULADO02.codigoAcesso.toUpperCase()) {
+                if (inputCodigo) inputCodigo.value = CONFIG_SIMULADO02.codigoAcesso;
+                if (campoCodigoWrapper) campoCodigoWrapper.classList.add('hidden');
+            } else {
+                if (campoCodigoWrapper) campoCodigoWrapper.classList.remove('hidden');
+            }
+
+            // Recupera dados se o aluno já preencheu nesta sessão
+            try {
+                const saved = sessionStorage.getItem('gepro_aluno_sim02');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.nome) document.getElementById('inputAlunoNome').value = parsed.nome;
+                    if (parsed.matricula) document.getElementById('inputAlunoMatricula').value = parsed.matricula;
+                    if (parsed.turma) document.getElementById('inputAlunoTurma').value = parsed.turma;
+                }
+            } catch (e) {}
+
+            modal?.classList.remove('hidden');
+        }
+
+        async function carregarExcelRemote(filename, autoStartTimer = true) {
             const loadingScreen = document.getElementById('loadingScreen');
             const loadingText = document.getElementById('loadingText');
             if (loadingText) loadingText.textContent = `Carregando ${filename}...`;
@@ -501,7 +662,7 @@
                 const response = await fetch(filename);
                 if (!response.ok) throw new Error(`Não foi possível abrir ${filename}`);
                 const buffer = await response.arrayBuffer();
-                processarWorkbookBuffer(buffer);
+                processarWorkbookBuffer(buffer, autoStartTimer);
             } catch (err) {
                 console.error(err);
                 if (loadingScreen) {
@@ -517,7 +678,7 @@
             }
         }
 
-        function processarWorkbookBuffer(arrayBuffer) {
+        function processarWorkbookBuffer(arrayBuffer, autoStartTimer = true) {
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
@@ -556,9 +717,9 @@
                 let comandoRaw = String(row[colMap.comando] || '').trim();
                 let textoLimpo = textoRaw
                     .replace(/Cenário inédito de avaliação/gi, 'Estudo de caso')
-                    .replace(/\n/g, '<br>');
+                    .replace(/
+/g, '<br>');
 
-                // Extrai exclusivamente a letra A-E do gabarito
                 const gabRaw = String(row[colMap.gab] || 'A').trim().toUpperCase();
                 const gabMatch = gabRaw.match(/[A-E]/);
                 const gabClean = gabMatch ? gabMatch[0] : 'A';
@@ -591,7 +752,9 @@
             document.getElementById('quizContainer')?.classList.remove('hidden');
             document.getElementById('loadingScreen')?.classList.add('hidden');
 
-            initTimer();
+            if (autoStartTimer) {
+                initTimer();
+            }
             renderQuestion(currentIndex);
             renderGridButtons();
             setupPrintMode();
@@ -625,7 +788,8 @@
 
         function parseOpcoesString(str) {
             let ops = {};
-            let lines = str.split('\n');
+            let lines = str.split('
+');
             let curr = null;
 
             lines.forEach(line => {
@@ -664,6 +828,13 @@
                 const secs = String(timerSeconds % 60).padStart(2, '0');
                 if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
             }, 1000);
+        }
+
+        function formatSecondsToClock(totalSec) {
+            const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+            const secs = String(totalSec % 60).padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
         }
 
         function renderQuestion(index) {
@@ -884,13 +1055,56 @@
             if (listenersInitialized) return;
             listenersInitialized = true;
 
-            // Troca de simulado a qualquer momento sem perder estado da página
+            // Formulário de Identificação e Código de Acesso do Simulado 02
+            document.getElementById('formIdentificacaoAluno')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const erroEl = document.getElementById('erroIdentificacao');
+                const codigoDigitado = (document.getElementById('inputCodigoAcesso')?.value || '').trim().toUpperCase();
+                const nome = (document.getElementById('inputAlunoNome')?.value || '').trim();
+                const matricula = (document.getElementById('inputAlunoMatricula')?.value || '').trim();
+                const turma = (document.getElementById('inputAlunoTurma')?.value || '').trim() || '2026';
+
+                if (codigoDigitado !== CONFIG_SIMULADO02.codigoAcesso.toUpperCase()) {
+                    erroEl.textContent = 'Código de acesso inválido. Solicite o link ou código oficial ao professor.';
+                    erroEl.classList.remove('hidden');
+                    return;
+                }
+                if (nome.split(/\s+/).length < 2) {
+                    erroEl.textContent = 'Por favor, informe seu nome e sobrenome completos.';
+                    erroEl.classList.remove('hidden');
+                    return;
+                }
+                if (matricula.length < 4) {
+                    erroEl.textContent = 'Informe um número de matrícula válido.';
+                    erroEl.classList.remove('hidden');
+                    return;
+                }
+
+                erroEl.classList.add('hidden');
+                alunoIdentificado = { nome, matricula, turma };
+
+                try {
+                    sessionStorage.setItem('gepro_aluno_sim02', JSON.stringify(alunoIdentificado));
+                } catch (err) {}
+
+                const badgeAluno = document.getElementById('badgeAlunoAtivo');
+                const labelAluno = document.getElementById('labelAlunoAtivo');
+                if (badgeAluno && labelAluno) {
+                    labelAluno.textContent = `${nome.split(' ')[0]} • ${matricula}`;
+                    badgeAluno.classList.remove('hidden');
+                }
+
+                document.getElementById('modalAcessoSimulado02')?.classList.add('hidden');
+                carregarExcelRemote(CONFIG_SIMULADO02.arquivo, true);
+            });
+
+            // Troca de simulado livre
             document.getElementById('selectSimuladoUrl')?.addEventListener('change', (e) => {
                 const novoArquivo = e.target.value;
                 arquivoAtual = novoArquivo;
                 const newUrl = `${window.location.pathname}?prova=${novoArquivo}`;
                 window.history.replaceState(null, '', newUrl);
-                carregarExcelRemote(novoArquivo);
+                carregarExcelRemote(novoArquivo, true);
             });
 
             document.getElementById('btnPrev')?.addEventListener('click', () => {
@@ -914,20 +1128,16 @@
                 document.getElementById('iconToggleMec')?.classList.toggle('rotate-180');
             });
 
-            // Botões dos Mapas Mentais
             document.getElementById('btnOpenStudyAll')?.addEventListener('click', () => {
-                const currentQ = questaoData[currentIndex];
-                openStudyModal(findTopicKeyForQuestion(currentQ));
+                openStudyModal(findTopicKeyForQuestion(questaoData[currentIndex]));
             });
 
             document.getElementById('btnTopicMindmap')?.addEventListener('click', () => {
-                const currentQ = questaoData[currentIndex];
-                openStudyModal(findTopicKeyForQuestion(currentQ));
+                openStudyModal(findTopicKeyForQuestion(questaoData[currentIndex]));
             });
 
             document.getElementById('btnFeedbackMindmap')?.addEventListener('click', () => {
-                const currentQ = questaoData[currentIndex];
-                openStudyModal(findTopicKeyForQuestion(currentQ));
+                openStudyModal(findTopicKeyForQuestion(questaoData[currentIndex]));
             });
 
             document.getElementById('selectStudyTopic')?.addEventListener('change', (e) => {
@@ -942,7 +1152,6 @@
                 document.getElementById('studyModal')?.classList.add('hidden');
             });
 
-            // Grade de Questões
             document.getElementById('btnOpenGrid')?.addEventListener('click', () => {
                 document.getElementById('gridModal')?.classList.remove('hidden');
             });
@@ -951,7 +1160,12 @@
                 document.getElementById('gridModal')?.classList.add('hidden');
             });
 
-            document.getElementById('btnFinalizarSimulado')?.addEventListener('click', finishSimulado);
+            document.getElementById('btnFinalizarSimulado')?.addEventListener('click', confirmarFinalizacao);
+            document.getElementById('btnFinalizarBottom')?.addEventListener('click', confirmarFinalizacao);
+
+            document.getElementById('btnAtualizarRanking')?.addEventListener('click', () => {
+                carregarRankingSimulado02();
+            });
 
             document.getElementById('btnRevisarProvas')?.addEventListener('click', () => {
                 document.getElementById('resultsContainer')?.classList.add('hidden');
@@ -959,6 +1173,16 @@
                 currentIndex = 0;
                 renderQuestion(currentIndex);
             });
+        }
+
+        function confirmarFinalizacao() {
+            const respondidas = Object.keys(userAnswers).length;
+            const total = questaoData.length;
+            if (respondidas < total) {
+                const ok = confirm(`Você marcou ${respondidas} de ${total} questões. Deseja finalizar e apurar sua nota agora?`);
+                if (!ok) return;
+            }
+            finishSimulado();
         }
 
         function renderGridButtons() {
@@ -997,13 +1221,14 @@
             });
         }
 
-        function finishSimulado() {
+        async function finishSimulado() {
             clearInterval(timerInterval);
             document.getElementById('gridModal')?.classList.add('hidden');
             document.getElementById('quizContainer')?.classList.add('hidden');
 
             let totalAcertos = 0, fgAcertos = 0, fgTotal = 0, ceAcertos = 0, ceTotal = 0;
             questaoData.forEach((q, idx) => {
+                q.answered = true; // Libera visualização do gabarito na revisão pós-prova
                 const isCorrect = userAnswers[idx] === q.gab;
                 if (q.cat.toLowerCase().includes('formação geral')) {
                     fgTotal++;
@@ -1015,16 +1240,152 @@
                 if (isCorrect) totalAcertos++;
             });
 
-            document.getElementById('resNota').textContent = `${((totalAcertos / questaoData.length) * 10).toFixed(1)} / 10`;
+            // Cálculo Ponderado Oficial ENADE (25% FG + 75% CE, escala 0 a 100)
+            const pctFg = fgTotal > 0 ? (fgAcertos / fgTotal) : 0;
+            const pctCe = ceTotal > 0 ? (ceAcertos / ceTotal) : 0;
+            const notaEnade100 = (fgTotal > 0 && ceTotal > 0)
+                ? ((pctFg * 25) + (pctCe * 75))
+                : ((totalAcertos / questaoData.length) * 100);
+
+            const tempoFormatado = formatSecondsToClock(timerSeconds);
+
+            document.getElementById('resNota').textContent = notaEnade100.toFixed(1);
             document.getElementById('resAcertos').textContent = `${totalAcertos} / ${questaoData.length}`;
-            document.getElementById('resFg').textContent = `${fgTotal > 0 ? ((fgAcertos / fgTotal) * 100).toFixed(0) : 0}%`;
-            document.getElementById('resCe').textContent = `${ceTotal > 0 ? ((ceAcertos / ceTotal) * 100).toFixed(0) : 0}%`;
+            document.getElementById('resFg').textContent = `${(pctFg * 100).toFixed(0)}% (${fgAcertos}/${fgTotal})`;
+            document.getElementById('resCe').textContent = `${(pctCe * 100).toFixed(0)}% (${ceAcertos}/${ceTotal})`;
+
+            const blocoRanking = document.getElementById('blocoRankingSimulado02');
+            if (isModoRestritoSimulado02 && alunoIdentificado) {
+                document.getElementById('resSubtituloAluno').textContent =
+                    `Estudante: ${alunoIdentificado.nome} (Matrícula: ${alunoIdentificado.matricula}) • Tempo: ${tempoFormatado}`;
+                blocoRanking?.classList.remove('hidden');
+
+                const registro = {
+                    simulado: 'simulado02',
+                    nome: alunoIdentificado.nome,
+                    matricula: alunoIdentificado.matricula,
+                    turma: alunoIdentificado.turma,
+                    acertosFG: fgAcertos,
+                    totalFG: fgTotal,
+                    acertosCE: ceAcertos,
+                    totalCE: ceTotal,
+                    acertosTotal: totalAcertos,
+                    notaEnade: Number(notaEnade100.toFixed(2)),
+                    tempoSegundos: timerSeconds,
+                    tempoFormatado: tempoFormatado,
+                    dataHora: new Date().toLocaleString('pt-BR')
+                };
+
+                await registrarResultadoRanking(registro);
+            } else {
+                blocoRanking?.classList.add('hidden');
+            }
+
             document.getElementById('resultsContainer')?.classList.remove('hidden');
+        }
+
+        async function registrarResultadoRanking(registro) {
+            const statusEl = document.getElementById('statusEnvioRanking');
+
+            // 1. Salva cópia local no navegador como fallback
+            try {
+                const localList = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
+                const idxExist = localList.findIndex(item => item.matricula === registro.matricula);
+                if (idxExist >= 0) {
+                    localList[idxExist] = registro;
+                } else {
+                    localList.push(registro);
+                }
+                localStorage.setItem('gepro_ranking_sim02', JSON.stringify(localList));
+            } catch (e) {}
+
+            // 2. Envia para o Google Sheets via Apps Script (se configurado)
+            if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
+                try {
+                    if (statusEl) statusEl.textContent = 'Enviando pontuação para a planilha oficial...';
+                    await fetch(CONFIG_SIMULADO02.rankingApiUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(registro)
+                    });
+                    if (statusEl) statusEl.textContent = 'Resultado registrado com sucesso no Ranking Oficial!';
+                } catch (err) {
+                    console.error(err);
+                    if (statusEl) statusEl.textContent = 'Aviso: falha de rede ao sincronizar. Exibindo registro local.';
+                }
+            } else {
+                if (statusEl) {
+                    statusEl.textContent = 'Modo Local ativo (configure rankingApiUrl no simulado.html para sincronizar toda a turma no Google Sheets).';
+                }
+            }
+
+            await carregarRankingSimulado02();
+        }
+
+        async function carregarRankingSimulado02() {
+            const tbody = document.getElementById('tabelaRankingBody');
+            if (!tbody) return;
+
+            let lista = [];
+
+            if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
+                try {
+                    const resp = await fetch(`${CONFIG_SIMULADO02.rankingApiUrl}?simulado=simulado02`);
+                    if (resp.ok) {
+                        const json = await resp.json();
+                        if (Array.isArray(json.ranking)) {
+                            lista = json.ranking;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Falha ao ler ranking remoto, usando local:', err);
+                }
+            }
+
+            if (lista.length === 0) {
+                try {
+                    lista = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
+                } catch (e) {}
+            }
+
+            // Ordena: Maior Nota ENADE primeiro; desempate pelo menor tempo
+            lista.sort((a, b) => {
+                if (Number(b.notaEnade) !== Number(a.notaEnade)) {
+                    return Number(b.notaEnade) - Number(a.notaEnade);
+                }
+                return Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999);
+            });
+
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-500">Nenhum resultado registrado ainda.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = lista.slice(0, 20).map((item, idx) => {
+                const pos = idx + 1;
+                const isMe = alunoIdentificado && String(item.matricula) === String(alunoIdentificado.matricula);
+                const badgePos = pos === 1 ? '🥇 1º' : pos === 2 ? '🥈 2º' : pos === 3 ? '🥉 3º' : `${pos}º`;
+                const rowClass = isMe ? 'bg-ufcteal-50 font-bold text-ufcnavy-900' : 'text-slate-700';
+
+                return `
+                    <tr class="${rowClass}">
+                        <td class="py-2.5 px-3 font-extrabold">${badgePos}</td>
+                        <td class="py-2.5 px-3">${item.nome} ${isMe ? '<span class="text-[10px] bg-ufcteal-600 text-white px-1.5 py-0.5 rounded ml-1">Você</span>' : ''}</td>
+                        <td class="py-2.5 px-3 text-center">${item.acertosFG ?? '-'}/${item.totalFG ?? 15} • ${item.acertosCE ?? '-'}/${item.totalCE ?? 30}</td>
+                        <td class="py-2.5 px-3 text-center font-extrabold text-ufcnavy-700">${Number(item.notaEnade).toFixed(1)}</td>
+                        <td class="py-2.5 px-3 text-center font-mono">${item.tempoFormatado || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function setupPrintMode() {
             const printContainer = document.getElementById('printExamContainer');
             if (!printContainer) return;
+            const nomePrint = alunoIdentificado ? alunoIdentificado.nome : '____________________________________________________';
+            const matPrint = alunoIdentificado ? alunoIdentificado.matricula : '____________________';
+
             let printHTML = `
                 <div class="print-header mb-6 pb-4 border-b-2 border-slate-900 text-slate-900">
                     <div class="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
@@ -1035,8 +1396,8 @@
                         <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">ENADE 2026</span>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-xs font-medium">
-                        <div><b>NOME:</b> ____________________________________________________</div>
-                        <div><b>MATRÍCULA:</b> ____________________</div>
+                        <div><b>NOME:</b> ${nomePrint}</div>
+                        <div><b>MATRÍCULA:</b> ${matPrint}</div>
                     </div>
                 </div><div class="space-y-6">`;
 
@@ -1064,6 +1425,7 @@
             printHTML += `</div>`;
             printContainer.innerHTML = printHTML;
         }
+
         function abrirZoomFigura(src) {
             if (!src) return;
             const modal = document.getElementById('modalZoomFigura');
