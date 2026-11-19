@@ -399,6 +399,15 @@
                 </div>
             </div>
 
+            <!-- Aviso de Liberação do Caderno Comentado após 4 horas (Simulado 02) -->
+            <div id="avisoLiberacaoGabarito4h" class="hidden bg-amber-50 border border-amber-200 text-amber-950 rounded-xl p-3.5 text-xs text-left flex items-start space-x-2.5">
+                <i class="fa-solid fa-clock text-amber-600 mt-0.5 text-sm"></i>
+                <div>
+                    <span class="font-bold block">Caderno Resolvido e Gabarito Oficial (Liberação Programada)</span>
+                    <p id="textoLiberacaoGabarito4h" class="text-amber-900/90 mt-0.5 leading-relaxed"></p>
+                </div>
+            </div>
+
             <!-- Bloco Exclusivo do Ranking Oficial & Dashboard da Turma (Simulado 02) -->
             <div id="blocoRankingSimulado02" class="hidden text-left space-y-4">
                 <!-- Mini-Dashboard Consolidado da Turma -->
@@ -759,6 +768,69 @@
         let deadlineTimestamp = null;
         let aviso5MinExibido = false;
         let encerradoPorPrazo = false;
+        let isModoTesteDocente = false;
+        let revisaoLiberadaSim02 = false;
+        let intervaloEsperaLiberacao4h = null;
+        const PRAZO_LIBERACAO_GABARITO_MS = 4 * 60 * 60 * 1000; // 4 horas em milissegundos
+
+        function podeVisualizarGabarito() {
+            if (!isModoRestritoSimulado02) return true;
+            return Boolean(revisaoLiberadaSim02);
+        }
+
+        function formatarHorarioLiberacao4h(enviadoEmMs) {
+            const liberadoAt = new Date(enviadoEmMs + PRAZO_LIBERACAO_GABARITO_MS);
+            return liberadoAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function atualizarEstadoLiberacaoGabarito(enviadoEmMs) {
+            const btnRev = document.getElementById('btnRevisarProvas');
+            const aviso4h = document.getElementById('avisoLiberacaoGabarito4h');
+            const texto4h = document.getElementById('textoLiberacaoGabarito4h');
+
+            if (isModoTesteDocente) {
+                revisaoLiberadaSim02 = true;
+                questaoData.forEach(q => { q.answered = true; });
+                updateGridButtons();
+                if (btnRev) {
+                    btnRev.textContent = 'Revisar Gabarito e Caderno Comentado (Modo Teste)';
+                    btnRev.classList.remove('hidden');
+                }
+                aviso4h?.classList.add('hidden');
+                return;
+            }
+
+            const ts = Number(enviadoEmMs || 0);
+            const liberado = ts > 0 && (Date.now() - ts >= PRAZO_LIBERACAO_GABARITO_MS);
+            revisaoLiberadaSim02 = liberado;
+
+            if (liberado) {
+                if (intervaloEsperaLiberacao4h) {
+                    clearInterval(intervaloEsperaLiberacao4h);
+                    intervaloEsperaLiberacao4h = null;
+                }
+                questaoData.forEach(q => { q.answered = true; });
+                updateGridButtons();
+                if (btnRev) {
+                    btnRev.textContent = 'Revisar Gabarito e Caderno Comentado';
+                    btnRev.classList.remove('hidden');
+                }
+                aviso4h?.classList.add('hidden');
+            } else {
+                btnRev?.classList.add('hidden');
+                if (aviso4h && texto4h && ts > 0) {
+                    texto4h.textContent = `Para segurança da aplicação, o caderno resolvido com gabarito e justificativas será liberado automaticamente 4 horas após o seu envio (às ${formatarHorarioLiberacao4h(ts)}). Reabra este link e informe sua matrícula após esse horário.`;
+                    aviso4h.classList.remove('hidden');
+                    if (!intervaloEsperaLiberacao4h) {
+                        intervaloEsperaLiberacao4h = setInterval(() => {
+                            if (Date.now() - ts >= PRAZO_LIBERACAO_GABARITO_MS) {
+                                atualizarEstadoLiberacaoGabarito(ts);
+                            }
+                        }, 15000);
+                    }
+                }
+            }
+        }
 
         function tentarImprimir() {
             if (isModoRestritoSimulado02) {
@@ -1108,6 +1180,7 @@
             const fimParam = (urlParams.get('fim') || '').trim();
             const verRankingDireto = urlParams.get('ranking') === '1';
             const modoTesteDocente = urlParams.get('teste') === '1';
+            isModoTesteDocente = modoTesteDocente;
 
             if (!provaParam.endsWith('.xlsx') && !provaParam.endsWith('.xls')) {
                 provaParam = `simulado${provaParam.padStart(2, '0')}.xlsx`;
@@ -1752,7 +1825,7 @@
                         ? 'bg-ufcteal-600 text-white font-bold'
                         : 'bg-slate-100 text-slate-600 font-semibold';
 
-                    if (q.answered && !isModoRestritoSimulado02) {
+                    if (q.answered && podeVisualizarGabarito()) {
                         if (letra === q.gab) {
                             borderStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950';
                             circleStyle = 'bg-emerald-600 text-white font-bold';
@@ -1776,7 +1849,7 @@
             }
 
             const cardFeedback = document.getElementById('cardFeedback');
-            if (q.answered && !isModoRestritoSimulado02) {
+            if (q.answered && podeVisualizarGabarito()) {
                 showFeedback(q, selectedOpt);
             } else {
                 cardFeedback.classList.add('hidden');
@@ -1834,7 +1907,7 @@
         }
 
         function showFeedback(q, selectedOpt) {
-            if (isModoRestritoSimulado02) return;
+            if (!podeVisualizarGabarito()) return;
             const cardFeedback = document.getElementById('cardFeedback');
 
             if (isQuestionDiscursiva(q)) {
@@ -1975,9 +2048,10 @@
                 }
 
                 try {
-                    const jaEnviado = localStorage.getItem(`gepro_sim02_enviado_${matricula}`);
+                    const jaEnviado = !isModoTesteDocente ? localStorage.getItem(`gepro_sim02_enviado_${matricula}`) : null;
                     if (jaEnviado) {
                         const regSalvo = JSON.parse(jaEnviado);
+                        const enviadoEmMs = Number(regSalvo.enviadoEmMs || 0);
                         simuladoFinalizado = true;
                         alunoIdentificado = {
                             nome,
@@ -1988,7 +2062,6 @@
                         };
                         document.getElementById('modalAcessoSimulado02')?.classList.add('hidden');
                         document.getElementById('quizContainer')?.classList.add('hidden');
-                        document.getElementById('btnRevisarProvas')?.classList.add('hidden');
                         document.getElementById('resNota').textContent = Number(regSalvo.notaEnade || 0).toFixed(1);
                         document.getElementById('resAcertos').textContent = `${regSalvo.acertosTotal ?? '-'} / ${regSalvo.totalObjetivas ?? 45}`;
                         document.getElementById('resFg').textContent = `${regSalvo.acertosFG ?? '-'}/${regSalvo.totalFG ?? 15}`;
@@ -1997,6 +2070,7 @@
                             `Participação de ${alunoIdentificado.apelido} já registrada e bloqueada para alterações (Duração: ${regSalvo.tempoFormatado || '-'}). Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo)!`;
                         document.getElementById('blocoRankingSimulado02')?.classList.add('hidden');
                         document.getElementById('resultsContainer')?.classList.remove('hidden');
+                        atualizarEstadoLiberacaoGabarito(enviadoEmMs);
                         return;
                     }
                 } catch (err) {}
@@ -2142,8 +2216,29 @@
                 carregarRankingSimulado02();
             });
 
-            document.getElementById('btnRevisarProvas')?.addEventListener('click', () => {
-                if (isModoRestritoSimulado02) return;
+            document.getElementById('btnRevisarProvas')?.addEventListener('click', async () => {
+                if (!podeVisualizarGabarito()) return;
+
+                if (questaoData.length === 0) {
+                    await carregarExcelRemote(CONFIG_SIMULADO02.arquivo, false);
+                    try {
+                        const raw = localStorage.getItem(`gepro_sim02_enviado_${alunoIdentificado?.matricula}`);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            userAnswers = parsed.respostasMarcadas || {};
+                        }
+                    } catch (e) {}
+                    simuladoFinalizado = true;
+                    questaoData.forEach(q => { q.answered = true; });
+                    updateGridButtons();
+                }
+
+                if (isModoRestritoSimulado02) {
+                    document.getElementById('btnToggleMec')?.classList.remove('hidden');
+                    document.getElementById('btnTopicMindmap')?.classList.remove('hidden');
+                    document.getElementById('btnOpenStudyAll')?.classList.remove('hidden');
+                }
+
                 document.getElementById('resultsContainer')?.classList.add('hidden');
                 document.getElementById('quizContainer')?.classList.remove('hidden');
                 currentIndex = 0;
@@ -2319,7 +2414,7 @@
                     if (isDisc) {
                         bgClass = "bg-indigo-600 text-white font-bold";
                     } else {
-                        bgClass = (q.answered && !isModoRestritoSimulado02)
+                        bgClass = (q.answered && podeVisualizarGabarito())
                             ? (userAns === q.gab ? "bg-emerald-500 text-white font-bold" : "bg-rose-500 text-white font-bold")
                             : "bg-ufcnavy-700 text-white font-bold";
                     }
@@ -2423,11 +2518,13 @@
 
             const blocoRanking = document.getElementById('blocoRankingSimulado02');
             if (isModoRestritoSimulado02 && alunoIdentificado) {
-                document.getElementById('btnRevisarProvas')?.classList.add('hidden');
+                const enviadoEmMs = Date.now();
+                atualizarEstadoLiberacaoGabarito(enviadoEmMs);
                 const horaInicio = alunoIdentificado.horaInicio || horaFim;
                 const prefixoPrazo = encerradoPorPrazo ? 'Tempo limite atingido (envio automático) • ' : '';
-                document.getElementById('resSubtituloAluno').textContent =
-                    `${prefixoPrazo}Participação de ${alunoIdentificado.apelido} registrada! Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}. Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo)!`;
+                document.getElementById('resSubtituloAluno').textContent = isModoTesteDocente
+                    ? `Validação docente de ${alunoIdentificado.apelido} concluída (Duração: ${tempoFormatado}). O caderno resolvido já está liberado abaixo para conferência.`
+                    : `${prefixoPrazo}Participação de ${alunoIdentificado.apelido} registrada! Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}. Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo)!`;
                 blocoRanking?.classList.add('hidden');
 
                 const statusDiscursiva = temDiscursiva
@@ -2471,19 +2568,23 @@
                     })
                 };
 
-                try {
-                    localStorage.setItem(`gepro_sim02_enviado_${alunoIdentificado.matricula}`, JSON.stringify({
-                        idParticipante: registro.idParticipante,
-                        apelido: registro.apelido,
-                        acertosFG: registro.acertosFG,
-                        totalFG: registro.totalFG,
-                        acertosCE: registro.acertosCE,
-                        totalCE: registro.totalCE,
-                        acertosTotal: registro.acertosTotal,
-                        notaEnade: registro.notaEnade,
-                        tempoFormatado: registro.tempoFormatado
-                    }));
-                } catch (e) {}
+                if (!isModoTesteDocente) {
+                    try {
+                        localStorage.setItem(`gepro_sim02_enviado_${alunoIdentificado.matricula}`, JSON.stringify({
+                            idParticipante: registro.idParticipante,
+                            apelido: registro.apelido,
+                            acertosFG: registro.acertosFG,
+                            totalFG: registro.totalFG,
+                            acertosCE: registro.acertosCE,
+                            totalCE: registro.totalCE,
+                            acertosTotal: registro.acertosTotal,
+                            notaEnade: registro.notaEnade,
+                            tempoFormatado: registro.tempoFormatado,
+                            enviadoEmMs: enviadoEmMs,
+                            respostasMarcadas: userAnswers
+                        }));
+                    } catch (e) {}
+                }
 
                 await registrarResultadoRanking(registro);
             } else {
