@@ -646,7 +646,7 @@
         const CONFIG_SIMULADO02 = {
             arquivo: 'simulado02.xlsx',
             codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
-            dataOficial: '2026-11-19', // Data única oficial (AAAA-MM-DD) — definida internamente (não editável via URL)
+            dataOficial: '2026-11-20', // Data única oficial (AAAA-MM-DD) — definida internamente (não editável via URL)
             horarioInicioPadrao: '13:00', // Horário oficial de início (13h00)
             horarioTerminoPadrao: '17:00', // Horário oficial de término (17h00)
             rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
@@ -1308,9 +1308,15 @@
 
             if (acessoParamUrl === CONFIG_SIMULADO02.codigoAcesso.toUpperCase()) {
                 if (inputCodigo) inputCodigo.value = CONFIG_SIMULADO02.codigoAcesso;
-                if (campoCodigoWrapper) campoCodigoWrapper.classList.add('hidden');
+                if (campoCodigoWrapper) {
+                    campoCodigoWrapper.classList.add('hidden');
+                    campoCodigoWrapper.style.display = 'none';
+                }
             } else {
-                if (campoCodigoWrapper) campoCodigoWrapper.classList.remove('hidden');
+                if (campoCodigoWrapper) {
+                    campoCodigoWrapper.classList.remove('hidden');
+                    campoCodigoWrapper.style.display = '';
+                }
             }
 
             const avisoEl = document.getElementById('avisoJanelaHorario');
@@ -2080,13 +2086,15 @@
             document.getElementById('formIdentificacaoAluno')?.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const erroEl = document.getElementById('erroIdentificacao');
+                const urlAcessoAtual = (new URLSearchParams(window.location.search).get('acesso') || '').trim().toUpperCase();
                 const codigoDigitado = (document.getElementById('inputCodigoAcesso')?.value || '').trim().toUpperCase();
+                const codigoEsperado = CONFIG_SIMULADO02.codigoAcesso.toUpperCase();
                 const nome = (document.getElementById('inputAlunoNome')?.value || '').trim();
                 const apelidoDigitado = (document.getElementById('inputAlunoApelido')?.value || '').trim();
                 const matricula = (document.getElementById('inputAlunoMatricula')?.value || '').trim();
                 const turma = (document.getElementById('inputAlunoTurma')?.value || '').trim() || '2026';
 
-                if (codigoDigitado !== CONFIG_SIMULADO02.codigoAcesso.toUpperCase()) {
+                if (codigoDigitado !== codigoEsperado && urlAcessoAtual !== codigoEsperado) {
                     erroEl.textContent = 'Código de acesso inválido. Solicite o link ou código oficial ao professor.';
                     erroEl.classList.remove('hidden');
                     return;
