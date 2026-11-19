@@ -23,8 +23,6 @@ Os simulados livres oferecem **correção comentada imediata**, **Matriz de Refe
   [https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado03.xlsx](https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado03.xlsx)
 * 📙 **Simulado 04 — Prova Completa IV (45 Questões + Discursiva):**
   [https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado04.xlsx](https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado04.xlsx)
-* 📕 **Simulado 05 — Prova Completa V (45 Questões + Discursiva):**
-  [https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx](https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx)
 
 ---
 
@@ -57,27 +55,26 @@ O **Simulado 02 (45 Questões Objetivas + 1 Discursiva — D1 + Questionário de
 O portal funciona em arquitetura aberta (*client-side* em HTML5, Tailwind CSS e SheetJS), integrada ao **Google Apps Script + Google Sheets** para coleta dos resultados oficiais do Simulado 02:
 
 * `index.html` — Página inicial do portal com seleção dos cadernos de simulados livres e materiais de apoio.
-* `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando automaticamente entre **Modo Treino Livre** (Simulados 01, 03, 04 e 05) e **Modo Oficial Restrito** (Simulado 02, configurado para `20/11/2026`, das `13h00` às `17h00`).
+* `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando automaticamente entre **Modo Treino Livre** (Simulados 01, 03 e 04) e **Modo Oficial Restrito** (Simulado 02, configurado para `20/11/2026`, das `13h00` às `17h00`).
 * `simulado01.xlsx` — **Simulado 01 (Formação Geral):** Temas transversais contemporâneos (Sustentabilidade, ESG, Economia Circular, Direitos Humanos e LGPD).
 * `simulado02.xlsx` — **Simulado 02 (Prova Oficial • 45 Objetivas + 1 Discursiva):** Caderno fechado no padrão INEP (15 FG + 30 CE objetivas + D1 discursiva autoavaliada) para aplicação supervisionada.
 * `simulado03.xlsx` — **Simulado 03 (Aprofundamento):** Banco complementar de questões aplicadas.
-* `simulado04.xlsx` — **Simulado 04 (Completo IV • 45Q + Discursiva):** Caderno inédito (15 FG + 30 CE) com foco em PCP, Operações, Logística, Engenharia Organizacional, Simulação e Sustentabilidade.
-* `simulado05.xlsx` — **Simulado 05 (Completo V • 45Q + Discursiva):** Caderno inédito (15 FG + 30 CE) cobrindo todas as subáreas ABEPRO (Lean, CEP, Pesquisa Operacional, Engenharia Econômica e Ergonomia).
+* `simulado04.xlsx` — **Simulado 04 (Completo IV • 45Q + Discursiva):** Caderno inédito (15 FG + 30 CE) cobrindo todas as subáreas ABEPRO (Lean, CEP, Pesquisa Operacional, Engenharia Econômica e Ergonomia).
 
 ---
 
-## 📖 Como Adicionar um Novo Simulado Livre (`simulado06.xlsx`...)
+## 📖 Como Adicionar um Novo Simulado Livre (`simulado05.xlsx`...)
 
 Não é necessário criar novos arquivos `.html`. O sistema lê automaticamente qualquer nova planilha enviada ao repositório:
 
 ### Passo 1: Enviar a planilha Excel para o GitHub
 1. No repositório, clique em **Add file** > **Upload files**.
-2. Envie o arquivo `.xlsx` seguindo o cabeçalho padrão (exemplo: `simulado06.xlsx`).
+2. Envie o arquivo `.xlsx` seguindo o cabeçalho padrão (exemplo: `simulado05.xlsx`).
 3. Clique em **Commit changes**.
 
 ### Passo 2: Vincular no `index.html` e no `simulado.html`
-1. No **`index.html`**, adicione um cartão apontando para `simulado.html?prova=simulado06.xlsx`.
-2. No **`simulado.html`**, inclua `<option value="simulado06.xlsx">Simulado 06</option>` dentro do menu `<select id="selectSimuladoUrl">`.
+1. No **`index.html`**, adicione um cartão apontando para `simulado.html?prova=simulado05.xlsx`.
+2. No **`simulado.html`**, inclua `<option value="simulado05.xlsx">Simulado 05</option>` dentro do menu `<select id="selectSimuladoUrl">`.
 
 ---
 
