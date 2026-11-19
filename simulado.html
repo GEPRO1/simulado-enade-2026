@@ -183,10 +183,10 @@
                     <span class="hidden md:inline">Mapas Mentais</span>
                 </button>
 
-                <!-- Botão Imprimir (desabilitado no Simulado 02 Oficial) -->
-                <button id="btnImprimirSimulado" type="button" onclick="tentarImprimir()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
+                <!-- Botão Imprimir / Salvar PDF do Caderno -->
+                <button id="btnImprimirSimulado" type="button" onclick="tentarImprimir()" title="Imprimir ou Salvar Caderno em PDF" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors font-medium">
                     <i class="fa-solid fa-print"></i>
-                    <span class="hidden lg:inline">Imprimir</span>
+                    <span class="hidden lg:inline">Imprimir / PDF</span>
                 </button>
 
                 <!-- Botão Grade de Questões -->
@@ -498,9 +498,13 @@
             <p class="text-xs text-slate-600 italic max-w-lg mx-auto">
                 "Cada questão revisada hoje consolida a sua formação como engenheiro(a) de produção e fortalece o conceito do nosso curso no ENADE 2026."
             </p>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-2">
                 <button id="btnRevisarProvas" type="button" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm">
                     Revisar Gabarito e Mapas Mentais
+                </button>
+                <button id="btnImprimirCadernoResultado" type="button" onclick="tentarImprimir()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm transition-colors">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Imprimir / Salvar PDF do Caderno</span>
                 </button>
                 <a href="index.html" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm">
                     Voltar ao Portal
@@ -778,13 +782,35 @@
             return Boolean(revisaoLiberadaSim02);
         }
 
+        function podeImprimirCaderno() {
+            if (!isModoRestritoSimulado02) return true;
+            if (isModoTesteDocente) return true;
+            return Boolean(revisaoLiberadaSim02);
+        }
+
         function formatarHorarioLiberacao4h(enviadoEmMs) {
             const liberadoAt = new Date(enviadoEmMs + PRAZO_LIBERACAO_GABARITO_MS);
             return liberadoAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
+        function desativarBloqueioImpressaoSim02() {
+            const styleBloqueio = document.getElementById('styleBloqueioImpressaoSim02');
+            if (styleBloqueio) styleBloqueio.remove();
+            const noticeEl = document.getElementById('printBlockedNotice');
+            if (noticeEl) {
+                noticeEl.textContent = '';
+                noticeEl.classList.add('hidden');
+            }
+            const quizEl = document.getElementById('quizContainer');
+            if (quizEl) quizEl.classList.remove('select-none');
+            document.getElementById('btnImprimirSimulado')?.classList.remove('hidden');
+            document.getElementById('btnImprimirCadernoResultado')?.classList.remove('hidden');
+            setupPrintMode();
+        }
+
         function atualizarEstadoLiberacaoGabarito(enviadoEmMs) {
             const btnRev = document.getElementById('btnRevisarProvas');
+            const btnPrintRes = document.getElementById('btnImprimirCadernoResultado');
             const aviso4h = document.getElementById('avisoLiberacaoGabarito4h');
             const texto4h = document.getElementById('textoLiberacaoGabarito4h');
 
@@ -792,10 +818,12 @@
                 revisaoLiberadaSim02 = true;
                 questaoData.forEach(q => { q.answered = true; });
                 updateGridButtons();
+                desativarBloqueioImpressaoSim02();
                 if (btnRev) {
                     btnRev.textContent = 'Revisar Gabarito e Caderno Comentado (Modo Teste)';
                     btnRev.classList.remove('hidden');
                 }
+                btnPrintRes?.classList.remove('hidden');
                 aviso4h?.classList.add('hidden');
                 return;
             }
@@ -811,15 +839,18 @@
                 }
                 questaoData.forEach(q => { q.answered = true; });
                 updateGridButtons();
+                desativarBloqueioImpressaoSim02();
                 if (btnRev) {
                     btnRev.textContent = 'Revisar Gabarito e Caderno Comentado';
                     btnRev.classList.remove('hidden');
                 }
+                btnPrintRes?.classList.remove('hidden');
                 aviso4h?.classList.add('hidden');
             } else {
                 btnRev?.classList.add('hidden');
+                btnPrintRes?.classList.add('hidden');
                 if (aviso4h && texto4h && ts > 0) {
-                    texto4h.textContent = `Para segurança da aplicação, o caderno resolvido com gabarito e justificativas será liberado automaticamente 4 horas após o seu envio (às ${formatarHorarioLiberacao4h(ts)}). Reabra este link e informe sua matrícula após esse horário.`;
+                    texto4h.textContent = `Para segurança da aplicação, o caderno resolvido com gabarito, justificativas e botão de impressão em PDF será liberado automaticamente 4 horas após o seu envio (às ${formatarHorarioLiberacao4h(ts)}). Reabra este link e informe sua matrícula após esse horário.`;
                     aviso4h.classList.remove('hidden');
                     if (!intervaloEsperaLiberacao4h) {
                         intervaloEsperaLiberacao4h = setInterval(() => {
@@ -832,25 +863,41 @@
             }
         }
 
-        function tentarImprimir() {
-            if (isModoRestritoSimulado02) {
-                alert('A impressão e a exportação em PDF estão desabilitadas para o Simulado Oficial 02.');
+        async function tentarImprimir() {
+            if (!podeImprimirCaderno()) {
+                alert('A impressão e a exportação em PDF ficam bloqueadas durante a aplicação oficial e serão liberadas automaticamente 4 horas após o envio.');
                 return;
             }
-            window.print();
+            if (questaoData.length === 0 && isModoRestritoSimulado02) {
+                await carregarExcelRemote(CONFIG_SIMULADO02.arquivo, false);
+                try {
+                    const raw = localStorage.getItem(`gepro_sim02_enviado_${alunoIdentificado?.matricula}`);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        userAnswers = parsed.respostasMarcadas || {};
+                    }
+                } catch (e) {}
+                simuladoFinalizado = true;
+                questaoData.forEach(q => { q.answered = true; });
+            }
+            setupPrintMode();
+            setTimeout(() => window.print(), 150);
         }
 
         function ativarProtecaoProvaOficial() {
             if (!isModoRestritoSimulado02) return;
+            if (podeImprimirCaderno()) {
+                desativarBloqueioImpressaoSim02();
+                return;
+            }
 
-            // Remove o container de impressão do DOM para não haver caderno completo oculto
+            // Mantém o container vazio enquanto a prova oficial estiver em andamento
             const printContainer = document.getElementById('printExamContainer');
             if (printContainer) {
                 printContainer.innerHTML = '';
-                printContainer.remove();
             }
 
-            // Injeta regra @media print bloqueando qualquer tentativa via menu do navegador
+            // Injeta regra @media print bloqueando qualquer tentativa via menu do navegador durante a prova
             if (!document.getElementById('styleBloqueioImpressaoSim02')) {
                 const styleEl = document.createElement('style');
                 styleEl.id = 'styleBloqueioImpressaoSim02';
@@ -878,24 +925,26 @@
 
             const noticeEl = document.getElementById('printBlockedNotice');
             if (noticeEl) {
-                noticeEl.textContent = 'Impressão e exportação em PDF desabilitadas para o Simulado Oficial 02 — Engenharia de Produção (UFC Russas).';
+                noticeEl.textContent = 'Impressão e exportação em PDF desabilitadas durante a aplicação do Simulado Oficial 02 (liberadas 4h após o envio).';
             }
 
-            // Bloqueia atalho Ctrl+P / Cmd+P
+            // Bloqueia atalho Ctrl+P / Cmd+P enquanto a prova não estiver liberada
             window.addEventListener('keydown', (e) => {
+                if (podeImprimirCaderno()) return;
                 if ((e.ctrlKey || e.metaKey) && String(e.key || '').toLowerCase() === 'p') {
                     e.preventDefault();
                     e.stopPropagation();
-                    alert('A impressão e o salvamento em PDF estão desabilitados neste simulado.');
+                    alert('A impressão e o salvamento em PDF ficam desabilitados durante a prova e são liberados 4 horas após o envio.');
                 }
             }, true);
 
-            // Impede seleção/cópia rápida dos enunciados e alternativas (mantendo edição livre na discursiva Q16)
+            // Impede seleção/cópia rápida dos enunciados e alternativas durante a prova (mantendo edição livre na discursiva D1)
             const quizEl = document.getElementById('quizContainer');
             if (quizEl) {
                 quizEl.classList.add('select-none');
                 ['copy', 'cut', 'contextmenu'].forEach((evtName) => {
                     quizEl.addEventListener(evtName, (e) => {
+                        if (podeImprimirCaderno()) return;
                         const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
                         if (tag === 'TEXTAREA' || tag === 'INPUT') return;
                         e.preventDefault();
@@ -1192,7 +1241,10 @@
             const selectEl = document.getElementById('selectSimuladoUrl');
             if (isModoRestritoSimulado02) {
                 if (selectEl) selectEl.classList.add('hidden');
-                document.getElementById('btnImprimirSimulado')?.classList.add('hidden');
+                if (!isModoTesteDocente) {
+                    document.getElementById('btnImprimirSimulado')?.classList.add('hidden');
+                    document.getElementById('btnImprimirCadernoResultado')?.classList.add('hidden');
+                }
                 document.getElementById('btnOpenStudyAll')?.classList.add('hidden');
                 document.getElementById('btnTopicMindmap')?.classList.add('hidden');
                 document.getElementById('btnToggleMec')?.classList.add('hidden');
@@ -2748,19 +2800,23 @@
         function setupPrintMode() {
             const printContainer = document.getElementById('printExamContainer');
             if (!printContainer) return;
-            if (isModoRestritoSimulado02) {
+            if (!podeImprimirCaderno()) {
                 printContainer.innerHTML = '';
                 return;
             }
             const nomePrint = alunoIdentificado ? alunoIdentificado.nome : '____________________________________________________';
             const matPrint = alunoIdentificado ? alunoIdentificado.matricula : '____________________';
+            const incluirGabaritoComentado = podeVisualizarGabarito() && (simuladoFinalizado || isModoTesteDocente);
+            const tituloCaderno = incluirGabaritoComentado
+                ? 'ENGENHARIA DE PRODUÇÃO — CADERNO DE PROVA E GABARITO COMENTADO (GEPRO)'
+                : 'ENGENHARIA DE PRODUÇÃO — CADERNO DE SIMULADO (GEPRO)';
 
             let printHTML = `
                 <div class="print-header mb-6 pb-4 border-b-2 border-slate-900 text-slate-900">
                     <div class="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
                         <div>
                             <h1 class="text-base font-bold uppercase">UNIVERSIDADE FEDERAL DO CEARÁ — CAMPUS RUSSAS</h1>
-                            <h2 class="text-xs font-semibold text-slate-700">ENGENHARIA DE PRODUÇÃO — CADERNO DE SIMULADO (GEPRO)</h2>
+                            <h2 class="text-xs font-semibold text-slate-700">${tituloCaderno}</h2>
                         </div>
                         <span class="text-xs font-bold border border-slate-900 px-2 py-1 rounded">ENADE 2026</span>
                     </div>
@@ -2773,20 +2829,44 @@
             questaoData.forEach((q, idx) => {
                 const numOficial = formatNumeroQuestao(q, idx);
                 const isDisc = isQuestionDiscursiva(q);
+                const userAns = userAnswers[idx];
                 let optionsHTML = '';
+
                 if (isDisc) {
+                    const avDisc = (incluirGabaritoComentado && temAlgumaRespostaDiscursiva(userAns))
+                        ? avaliarDiscursivaD1(userAns)
+                        : null;
                     optionsHTML = `<div class="mt-3 space-y-2 border border-slate-300 rounded p-3">
-                        <div class="text-[10px] font-bold uppercase text-slate-500">Espaço para Resposta Discursiva (Itens a e b):</div>
-                        ${Array.from({ length: 10 }).map(() => '<div class="border-b border-slate-400 h-5"></div>').join('')}
+                        <div class="text-[10px] font-bold uppercase text-slate-600">Folha de Resposta Discursiva (Itens A e B):</div>
+                        ${avDisc
+                            ? `<div class="text-xs whitespace-pre-line text-slate-900 bg-slate-50 p-2 rounded border border-slate-300">${avDisc.resumoFormatado}</div>`
+                            : Array.from({ length: 8 }).map(() => '<div class="border-b border-slate-400 h-5"></div>').join('')
+                        }
                     </div>`;
                 } else if (q.opcoes) {
                     Object.keys(q.opcoes).forEach(letra => {
-                        optionsHTML += `<div class="flex items-start space-x-2 my-1 text-xs"><span class="font-bold border border-slate-400 rounded w-5 h-5 flex items-center justify-center shrink-0">(${letra})</span><span>${q.opcoes[letra]}</span></div>`;
+                        const isGab = incluirGabaritoComentado && letra === q.gab;
+                        const isMarked = incluirGabaritoComentado && userAns === letra;
+                        const badgeExtra = isGab
+                            ? 'bg-slate-900 text-white border-slate-900'
+                            : 'border-slate-400';
+                        const tagStatus = isGab
+                            ? ' <strong class="ml-1">[GABARITO]</strong>'
+                            : (isMarked ? ' <strong class="ml-1">[SUA MARCAÇÃO]</strong>' : '');
+                        optionsHTML += `<div class="flex items-start space-x-2 my-1 text-xs ${isGab ? 'font-semibold' : ''}"><span class="font-bold border ${badgeExtra} rounded w-5 h-5 flex items-center justify-center shrink-0">(${letra})</span><span>${q.opcoes[letra]}${tagStatus}</span></div>`;
                     });
                 }
 
                 const isSame = q.texto && q.comando && q.texto.trim() === q.comando.trim();
                 const showTexto = q.texto && q.texto.trim() !== '' && !isSame;
+
+                const blocoJustificativaPrint = incluirGabaritoComentado ? `
+                    <div class="mt-2.5 p-2.5 bg-slate-50 border border-slate-300 rounded text-[11px] space-y-1">
+                        <div><b>${isDisc ? 'Padrão de Resposta Oficial:' : `Gabarito Oficial: ${q.gab}`}</b>${!isDisc && userAns ? ` • Sua resposta: <b>${userAns}</b> (${userAns === q.gab ? 'Acerto' : 'Erro'})` : ''}</div>
+                        <div class="text-slate-800 leading-snug">${(q.justificativa || '').replace(/
+/g, '<br>')}</div>
+                        ${q.fonte ? `<div class="text-slate-600 italic pt-0.5"><b>Referência:</b> ${q.fonte}</div>` : ''}
+                    </div>` : '';
 
                 printHTML += `
                     <div class="page-break-avoid border-b border-slate-200 pb-4 mb-4">
@@ -2796,6 +2876,7 @@
                         ${q.afirmativas && q.afirmativas !== "N/A" ? `<div class="my-2 p-2 bg-slate-50 border-l-2 border-slate-400 text-xs">${q.afirmativas}</div>` : ''}
                         <div class="text-xs font-semibold text-slate-900 mb-2">${q.comando}</div>
                         <div class="space-y-1">${optionsHTML}</div>
+                        ${blocoJustificativaPrint}
                     </div>`;
             });
             printHTML += `</div>`;
