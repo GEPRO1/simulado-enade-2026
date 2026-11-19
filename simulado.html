@@ -156,7 +156,6 @@
                     <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
                     <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
                     <option value="simulado04.xlsx">Simulado 04 (Completo IV • 45Q)</option>
-                    <option value="simulado05.xlsx">Simulado 05 (Completo V • 45Q)</option>
                 </select>
 
                 <!-- Badge do Aluno Identificado (Exibido apenas no Simulado 02) -->
@@ -647,8 +646,9 @@
         const CONFIG_SIMULADO02 = {
             arquivo: 'simulado02.xlsx',
             codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
-            horarioInicioPadrao: '13:00', // Horário padrão oficial de início (13h00)
-            horarioTerminoPadrao: '17:00', // Horário padrão oficial de término (17h00)
+            dataOficial: '2026-11-19', // Data única oficial (AAAA-MM-DD) — definida internamente (não editável via URL)
+            horarioInicioPadrao: '13:00', // Horário oficial de início (13h00)
+            horarioTerminoPadrao: '17:00', // Horário oficial de término (17h00)
             rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
         };
 
@@ -1225,8 +1225,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             let provaParam = urlParams.get('prova') || urlParams.get('arquivo') || 'simulado01.xlsx';
             const acessoParam = (urlParams.get('acesso') || '').trim().toUpperCase();
-            const inicioParam = (urlParams.get('inicio') || '').trim();
-            const fimParam = (urlParams.get('fim') || '').trim();
             const verRankingDireto = urlParams.get('ranking') === '1';
             const modoTesteDocente = urlParams.get('teste') === '1';
             isModoTesteDocente = modoTesteDocente;
@@ -1268,7 +1266,7 @@
                 if (verRankingDireto) {
                     abrirPainelPublicoRanking();
                 } else {
-                    prepararAcessoSimulado02(acessoParam, inicioParam, fimParam, modoTesteDocente);
+                    prepararAcessoSimulado02(acessoParam, modoTesteDocente);
                 }
             } else {
                 carregarExcelRemote(arquivoAtual, true);
@@ -1287,14 +1285,20 @@
             carregarRankingSimulado02();
         }
 
-        function construirHorarioHoje(hhmm, refDate) {
+        function construirDataHoraOficial(dataStr, hhmm, refDate) {
             const [hh, mm] = String(hhmm || '13:00').split(':').map(Number);
+            const hora = isNaN(hh) ? 13 : hh;
+            const minuto = isNaN(mm) ? 0 : mm;
+            if (dataStr && /^\d{4}-\d{2}-\d{2}$/.test(dataStr.trim())) {
+                const [yyyy, mes, dd] = dataStr.trim().split('-').map(Number);
+                return new Date(yyyy, mes - 1, dd, hora, minuto, 0, 0);
+            }
             const d = new Date(refDate.getTime());
-            d.setHours(isNaN(hh) ? 13 : hh, isNaN(mm) ? 0 : mm, 0, 0);
+            d.setHours(hora, minuto, 0, 0);
             return d;
         }
 
-        function prepararAcessoSimulado02(acessoParamUrl, inicioParam, fimParam, modoTesteDocente = false) {
+        function prepararAcessoSimulado02(acessoParamUrl, modoTesteDocente = false) {
             document.getElementById('loadingScreen')?.classList.add('hidden');
             document.getElementById('quizContainer')?.classList.add('hidden');
 
@@ -1317,14 +1321,10 @@
             if (modoTesteDocente) {
                 deadlineTimestamp = null;
                 avisoEl?.classList.remove('hidden');
-                textoAviso.textContent = 'Modo de validação docente ativo (janela padrão 13:00 às 17:00 ignorada nesta sessão).';
+                textoAviso.textContent = 'Modo de validação docente ativo (trava de data e horário ignorada nesta sessão).';
             } else {
-                const dtInicio = inicioParam
-                    ? new Date(inicioParam)
-                    : construirHorarioHoje(CONFIG_SIMULADO02.horarioInicioPadrao, agora);
-                const dtFim = fimParam
-                    ? new Date(fimParam)
-                    : construirHorarioHoje(CONFIG_SIMULADO02.horarioTerminoPadrao, agora);
+                const dtInicio = construirDataHoraOficial(CONFIG_SIMULADO02.dataOficial, CONFIG_SIMULADO02.horarioInicioPadrao, agora);
+                const dtFim = construirDataHoraOficial(CONFIG_SIMULADO02.dataOficial, CONFIG_SIMULADO02.horarioTerminoPadrao, agora);
 
                 const hasValidInicio = dtInicio && !isNaN(dtInicio.getTime());
                 const hasValidFim = dtFim && !isNaN(dtFim.getTime());
@@ -1333,6 +1333,9 @@
                     deadlineTimestamp = dtFim.getTime();
                 }
 
+                const dataCurta = hasValidInicio
+                    ? dtInicio.toLocaleDateString('pt-BR')
+                    : agora.toLocaleDateString('pt-BR');
                 const horaIniCurta = hasValidInicio
                     ? dtInicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
                     : CONFIG_SIMULADO02.horarioInicioPadrao;
@@ -1344,7 +1347,7 @@
                     const inst = new Date();
                     if (hasValidFim && inst > dtFim) {
                         avisoEl?.classList.remove('hidden');
-                        textoAviso.textContent = `Horário encerrado (aplicação oficial das ${horaIniCurta} às ${horaFimCurta}). O pódio dos 3 primeiros colocados (maior nota e menor tempo) será divulgado pelo professor.`;
+                        textoAviso.textContent = `Horário encerrado (aplicação oficial em ${dataCurta}, das ${horaIniCurta} às ${horaFimCurta}). O pódio dos 3 primeiros colocados (maior nota e menor tempo) será divulgado pelo professor.`;
                         if (btnIniciar) {
                             btnIniciar.disabled = true;
                             btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1353,7 +1356,7 @@
                     }
                     if (hasValidInicio && inst < dtInicio) {
                         avisoEl?.classList.remove('hidden');
-                        textoAviso.textContent = `Horário oficial de aplicação: ${horaIniCurta} às ${horaFimCurta}. O caderno será liberado automaticamente às ${horaIniCurta}.`;
+                        textoAviso.textContent = `Aplicação oficial agendada para ${dataCurta}, das ${horaIniCurta} às ${horaFimCurta}. O caderno será liberado automaticamente às ${horaIniCurta}.`;
                         if (btnIniciar) {
                             btnIniciar.disabled = true;
                             btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1361,7 +1364,7 @@
                         return 'aguardando';
                     }
                     avisoEl?.classList.remove('hidden');
-                    textoAviso.textContent = `Horário oficial de aplicação: ${horaIniCurta} às ${horaFimCurta}. Ao atingir ${horaFimCurta}, suas respostas marcadas serão enviadas automaticamente.`;
+                    textoAviso.textContent = `Aplicação oficial em andamento (${dataCurta}, das ${horaIniCurta} às ${horaFimCurta}). Ao atingir ${horaFimCurta}, suas respostas marcadas serão enviadas automaticamente.`;
                     if (btnIniciar) {
                         btnIniciar.disabled = false;
                         btnIniciar.classList.remove('opacity-50', 'cursor-not-allowed');
