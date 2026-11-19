@@ -2863,8 +2863,7 @@
                 const blocoJustificativaPrint = incluirGabaritoComentado ? `
                     <div class="mt-2.5 p-2.5 bg-slate-50 border border-slate-300 rounded text-[11px] space-y-1">
                         <div><b>${isDisc ? 'Padrão de Resposta Oficial:' : `Gabarito Oficial: ${q.gab}`}</b>${!isDisc && userAns ? ` • Sua resposta: <b>${userAns}</b> (${userAns === q.gab ? 'Acerto' : 'Erro'})` : ''}</div>
-                        <div class="text-slate-800 leading-snug">${(q.justificativa || '').replace(/
-/g, '<br>')}</div>
+                        <div class="text-slate-800 leading-snug">${(q.justificativa || '').replace(/\n/g, '<br>')}</div>
                         ${q.fonte ? `<div class="text-slate-600 italic pt-0.5"><b>Referência:</b> ${q.fonte}</div>` : ''}
                     </div>` : '';
 
