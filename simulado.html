@@ -652,7 +652,9 @@
                 rankingLocalKey: 'gepro_ranking_sim02',
                 dataOficial: '2026-11-20',
                 horarioInicioPadrao: '13:00',
-                horarioTerminoPadrao: '17:00'
+                horarioTerminoPadrao: '17:00',
+                horarioLiberacaoGabarito: '17:00',
+                modoRanking: 'premiacao' // 'imediato' (padrão) ou 'premiacao'
             },
             'simulado05.xlsx': {
                 codigoSimulado: 'simulado05',
@@ -662,7 +664,9 @@
                 rankingLocalKey: 'gepro_ranking_sim05',
                 dataOficial: '2026-11-27',
                 horarioInicioPadrao: '13:00',
-                horarioTerminoPadrao: '17:00'
+                horarioTerminoPadrao: '17:00',
+                horarioLiberacaoGabarito: '17:00', // Trava fixa de sigilo: gabarito e PDF liberados às 17h00
+                modoRanking: 'imediato' // Padrão: resultado entra no ranking.html imediatamente ao encerrar
             }
         };
 
@@ -674,9 +678,11 @@
             storagePrefix: 'gepro_sim05',
             rankingLocalKey: 'gepro_ranking_sim05',
             codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026
-            dataOficial: '2026-11-27', // Data única oficial (AAAA-MM-DD) — definida internamente (não editável via URL)
+            dataOficial: '2026-11-27', // Data única oficial (AAAA-MM-DD)
             horarioInicioPadrao: '13:00', // Horário oficial de início (13h00)
             horarioTerminoPadrao: '17:00', // Horário oficial de término (17h00)
+            horarioLiberacaoGabarito: '17:00', // Horário fixo para destravar gabarito comentado e PDF
+            modoRanking: 'imediato', // 'imediato' (padrão) ou 'premiacao'
             rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
         };
 
@@ -803,22 +809,26 @@
         let isModoTesteDocente = false;
         let revisaoLiberadaSim02 = false;
         let intervaloEsperaLiberacao4h = null;
-        const PRAZO_LIBERACAO_GABARITO_MS = 4 * 60 * 60 * 1000; // 4 horas em milissegundos
+        function getTimestampLiberacaoGabarito() {
+            const dataIso = CONFIG_SIMULADO02.dataOficial || '2026-11-27';
+            const horaLib = CONFIG_SIMULADO02.horarioLiberacaoGabarito || '17:00';
+            return new Date(`${dataIso}T${horaLib}:00-03:00`).getTime();
+        }
+
+        function isGabaritoLiberadoPorSigilo() {
+            if (!isModoRestritoSimulado02 || isModoTesteDocente) return true;
+            return Date.now() >= getTimestampLiberacaoGabarito();
+        }
 
         function podeVisualizarGabarito() {
             if (!isModoRestritoSimulado02) return true;
-            return Boolean(revisaoLiberadaSim02);
+            return isGabaritoLiberadoPorSigilo() || Boolean(revisaoLiberadaSim02);
         }
 
         function podeImprimirCaderno() {
             if (!isModoRestritoSimulado02) return true;
             if (isModoTesteDocente) return true;
-            return Boolean(revisaoLiberadaSim02);
-        }
-
-        function formatarHorarioLiberacao4h(enviadoEmMs) {
-            const liberadoAt = new Date(enviadoEmMs + PRAZO_LIBERACAO_GABARITO_MS);
-            return liberadoAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            return isGabaritoLiberadoPorSigilo() || Boolean(revisaoLiberadaSim02);
         }
 
         function desativarBloqueioImpressaoSim02() {
@@ -836,28 +846,13 @@
             setupPrintMode();
         }
 
-        function atualizarEstadoLiberacaoGabarito(enviadoEmMs) {
+        function atualizarEstadoLiberacaoGabarito() {
             const btnRev = document.getElementById('btnRevisarProvas');
             const btnPrintRes = document.getElementById('btnImprimirCadernoResultado');
             const aviso4h = document.getElementById('avisoLiberacaoGabarito4h');
             const texto4h = document.getElementById('textoLiberacaoGabarito4h');
 
-            if (isModoTesteDocente) {
-                revisaoLiberadaSim02 = true;
-                questaoData.forEach(q => { q.answered = true; });
-                updateGridButtons();
-                desativarBloqueioImpressaoSim02();
-                if (btnRev) {
-                    btnRev.textContent = 'Revisar Gabarito e Caderno Comentado (Modo Teste)';
-                    btnRev.classList.remove('hidden');
-                }
-                btnPrintRes?.classList.remove('hidden');
-                aviso4h?.classList.add('hidden');
-                return;
-            }
-
-            const ts = Number(enviadoEmMs || 0);
-            const liberado = ts > 0 && (Date.now() - ts >= PRAZO_LIBERACAO_GABARITO_MS);
+            const liberado = isGabaritoLiberadoPorSigilo();
             revisaoLiberadaSim02 = liberado;
 
             if (liberado) {
@@ -869,7 +864,9 @@
                 updateGridButtons();
                 desativarBloqueioImpressaoSim02();
                 if (btnRev) {
-                    btnRev.textContent = 'Revisar Gabarito e Caderno Comentado';
+                    btnRev.textContent = isModoTesteDocente
+                        ? 'Revisar Gabarito e Caderno Comentado (Modo Teste)'
+                        : 'Revisar Gabarito e Caderno Comentado';
                     btnRev.classList.remove('hidden');
                 }
                 btnPrintRes?.classList.remove('hidden');
@@ -877,13 +874,18 @@
             } else {
                 btnRev?.classList.add('hidden');
                 btnPrintRes?.classList.add('hidden');
-                if (aviso4h && texto4h && ts > 0) {
-                    texto4h.textContent = `Para segurança da aplicação, o caderno resolvido com gabarito, justificativas e botão de impressão em PDF será liberado automaticamente 4 horas após o seu envio (às ${formatarHorarioLiberacao4h(ts)}). Reabra este link e informe sua matrícula após esse horário.`;
+                const horaLib = CONFIG_SIMULADO02.horarioLiberacaoGabarito || '17:00';
+                const dataBr = (CONFIG_SIMULADO02.dataOficial || '2026-11-27').split('-').reverse().join('/');
+                if (aviso4h && texto4h) {
+                    const linkRankingHtml = CONFIG_SIMULADO02.modoRanking === 'imediato'
+                        ? `Você já pode acompanhar sua posição no placar ao vivo em <a href="ranking.html?simulado=${CONFIG_SIMULADO02.codigoSimulado}" class="underline font-bold text-ufcnavy-700">Ranking Oficial</a>. `
+                        : `A classificação oficial será divulgada em <a href="ranking.html?simulado=${CONFIG_SIMULADO02.codigoSimulado}" class="underline font-bold text-ufcnavy-700">Ranking Oficial</a> após o encerramento. `;
+                    texto4h.innerHTML = `<strong>Período de sigilo ativo:</strong> ${linkRankingHtml}Para impedir o compartilhamento antecipado de respostas, o gabarito, os comentários e a impressão em PDF serão destravados automaticamente às <strong>${horaLib} de ${dataBr}</strong>.`;
                     aviso4h.classList.remove('hidden');
                     if (!intervaloEsperaLiberacao4h) {
                         intervaloEsperaLiberacao4h = setInterval(() => {
-                            if (Date.now() - ts >= PRAZO_LIBERACAO_GABARITO_MS) {
-                                atualizarEstadoLiberacaoGabarito(ts);
+                            if (isGabaritoLiberadoPorSigilo()) {
+                                atualizarEstadoLiberacaoGabarito();
                             }
                         }, 15000);
                     }
@@ -893,7 +895,8 @@
 
         async function tentarImprimir() {
             if (!podeImprimirCaderno()) {
-                alert('A impressão e a exportação em PDF ficam bloqueadas durante a aplicação oficial e serão liberadas automaticamente 4 horas após o envio.');
+                const horaLib = CONFIG_SIMULADO02.horarioLiberacaoGabarito || '17:00';
+                alert(`A impressão e a exportação em PDF ficam bloqueadas durante o período de sigilo e serão liberadas automaticamente às ${horaLib}.`);
                 return;
             }
             if (questaoData.length === 0 && isModoRestritoSimulado02) {
@@ -1281,6 +1284,8 @@
                 CONFIG_SIMULADO02.dataOficial = perfilOficial.dataOficial;
                 CONFIG_SIMULADO02.horarioInicioPadrao = perfilOficial.horarioInicioPadrao;
                 CONFIG_SIMULADO02.horarioTerminoPadrao = perfilOficial.horarioTerminoPadrao;
+                CONFIG_SIMULADO02.horarioLiberacaoGabarito = perfilOficial.horarioLiberacaoGabarito || '17:00';
+                CONFIG_SIMULADO02.modoRanking = perfilOficial.modoRanking || 'imediato';
                 const elTitModal = document.getElementById('tituloModalSimuladoOficial');
                 if (elTitModal) elTitModal.textContent = perfilOficial.titulo;
                 const elTitDash = document.getElementById('tituloDashboardTurmaOficial');
@@ -2249,11 +2254,14 @@
                         document.getElementById('resAcertos').textContent = `${regSalvo.acertosTotal ?? '-'} / ${regSalvo.totalObjetivas ?? 45}`;
                         document.getElementById('resFg').textContent = `${regSalvo.acertosFG ?? '-'}/${regSalvo.totalFG ?? 15}`;
                         document.getElementById('resCe').textContent = `${regSalvo.acertosCE ?? '-'}/${regSalvo.totalCE ?? 30}`;
+                        const msgRankingSub1 = CONFIG_SIMULADO02.modoRanking === 'imediato'
+                            ? 'Sua nota já foi enviada ao Ranking Imediato! O gabarito comentado será destravado às 17h00.'
+                            : 'Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo) às 17h00!';
                         document.getElementById('resSubtituloAluno').textContent =
-                            `Participação de ${alunoIdentificado.apelido} já registrada e bloqueada para alterações (Duração: ${regSalvo.tempoFormatado || '-'}). Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo)!`;
+                            `Participação de ${alunoIdentificado.apelido} já registrada e bloqueada para alterações (Duração: ${regSalvo.tempoFormatado || '-'}). ${msgRankingSub1}`;
                         document.getElementById('blocoRankingSimulado02')?.classList.add('hidden');
                         document.getElementById('resultsContainer')?.classList.remove('hidden');
-                        atualizarEstadoLiberacaoGabarito(enviadoEmMs);
+                        atualizarEstadoLiberacaoGabarito();
                         return;
                     }
                 } catch (err) {}
@@ -2702,12 +2710,12 @@
             const blocoRanking = document.getElementById('blocoRankingSimulado02');
             if (isModoRestritoSimulado02 && alunoIdentificado) {
                 const enviadoEmMs = Date.now();
-                atualizarEstadoLiberacaoGabarito(enviadoEmMs);
+                atualizarEstadoLiberacaoGabarito();
                 const horaInicio = alunoIdentificado.horaInicio || horaFim;
                 const prefixoPrazo = encerradoPorPrazo ? 'Tempo limite atingido (envio automático) • ' : '';
                 document.getElementById('resSubtituloAluno').textContent = isModoTesteDocente
                     ? `Validação docente de ${alunoIdentificado.apelido} concluída (Duração: ${tempoFormatado}). O caderno resolvido já está liberado abaixo para conferência.`
-                    : `${prefixoPrazo}Participação de ${alunoIdentificado.apelido} registrada! Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}. Aguarde a divulgação oficial dos 3 primeiros colocados (maior nota e menor tempo)!`;
+                    : `${prefixoPrazo}Participação de ${alunoIdentificado.apelido} registrada! Início: ${horaInicio} • Término: ${horaFim} • Duração: ${tempoFormatado}. ${CONFIG_SIMULADO02.modoRanking === 'imediato' ? 'Sua pontuação já entrou no Ranking Imediato! O gabarito comentado será liberado às 17h00.' : 'Aguarde a divulgação oficial dos 3 primeiros colocados às 17h00!'}`;
                 blocoRanking?.classList.add('hidden');
 
                 const statusDiscursiva = temDiscursiva

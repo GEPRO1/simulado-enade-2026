@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#003366">
+    <title>Ranking Oficial — Simulados ENADE 2026 | Engenharia de Produção — UFC Russas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ufcnavy: { 50: '#f0f5fa', 100: '#dce7f3', 500: '#004b93', 700: '#003366', 900: '#001e3d' },
+                        ufcteal: { 50: '#f0fdfa', 500: '#00a896', 600: '#008080', 700: '#006666' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-slate-100 text-slate-800 antialiased">
+
+    <header class="bg-ufcnavy-700 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Portal</span>
+                </a>
+                <div>
+                    <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026 • GEPRO</span>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight mt-0.5">Ranking & Desempenho da Turma</h1>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <select id="selectSimuladoRanking" class="bg-white text-slate-900 text-xs font-bold px-3 py-2 rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-ufcteal-500">
+                    <option value="simulado05">Simulado 05 (27/11/2026)</option>
+                    <option value="simulado02">Simulado 02 (20/11/2026)</option>
+                </select>
+                <button id="btnAtualizar" type="button" class="bg-ufcteal-600 hover:bg-ufcteal-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span class="hidden sm:inline">Atualizar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-7 space-y-6">
+        <div id="bannerModoRanking" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-trophy text-lg"></i>
+                </div>
+                <div>
+                    <h2 id="tituloRankingAtivo" class="text-sm font-extrabold text-ufcnavy-900">Ranking Imediato — Simulado 05</h2>
+                    <p id="subtituloRankingAtivo" class="text-xs text-slate-500">Atualizado em tempo real conforme os alunos encerram a prova. O gabarito comentado permanece em sigilo até às 17h00.</p>
+                </div>
+            </div>
+            <span id="badgeModoRanking" class="text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full self-start sm:self-center shrink-0">
+                Modo Imediato Ativo
+            </span>
+        </div>
+
+        <!-- KPIs Consolidados -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Participantes</p>
+                <p id="kpiParticipantes" class="text-2xl font-extrabold text-ufcnavy-900 mt-1">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Média Geral ENADE</p>
+                <p id="kpiMedia" class="text-2xl font-extrabold text-ufcteal-700 mt-1">0,0</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Maior Nota</p>
+                <p id="kpiMaiorNota" class="text-2xl font-extrabold text-amber-600 mt-1">0,0</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-[11px] font-bold text-slate-400 uppercase">Tempo Médio</p>
+                <p id="kpiTempoMedio" class="text-2xl font-extrabold text-slate-700 mt-1">--:--</p>
+            </div>
+        </div>
+
+        <!-- Aviso de Sigilo (quando modo === 'premiacao' antes da hora de liberação) -->
+        <div id="avisoPremiacaoOculta" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center space-y-2">
+            <i class="fa-solid fa-lock text-amber-600 text-2xl"></i>
+            <h3 class="text-sm font-extrabold text-amber-900">Placar em Sigilo — Modo Premiação</h3>
+            <p id="textoPremiacaoOculta" class="text-xs text-amber-800 max-w-lg mx-auto">A classificação oficial será revelada após o encerramento da janela de aplicação.</p>
+        </div>
+
+        <!-- Tabela de Classificação -->
+        <div id="cardTabelaRanking" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase">
+                            <th class="py-3 px-4 w-16">Pos.</th>
+                            <th class="py-3 px-4">Participante</th>
+                            <th class="py-3 px-4 text-center">FG</th>
+                            <th class="py-3 px-4 text-center">CE</th>
+                            <th class="py-3 px-4 text-center">Nota ENADE</th>
+                            <th class="py-3 px-4 text-right">Tempo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyRanking" class="divide-y divide-slate-100 text-xs">
+                        <tr><td colspan="6" class="py-6 text-center text-slate-400">Carregando classificação...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 text-xs text-slate-500 text-center">
+        Universidade Federal do Ceará — Campus de Russas • GEPRO
+    </footer>
+
+    <script>
+        const CONFIG_RANKING_PORTAL = {
+            apiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec',
+            simulados: {
+                simulado05: {
+                    titulo: 'Simulado 05 — ENADE 2026',
+                    modo: 'imediato', // 'imediato' (padrão) ou 'premiacao'
+                    liberacao: '2026-11-27T17:00:00-03:00',
+                    localKey: 'gepro_ranking_sim05'
+                },
+                simulado02: {
+                    titulo: 'Simulado 02 — ENADE 2026',
+                    modo: 'premiacao',
+                    liberacao: '2026-11-20T17:00:00-03:00',
+                    localKey: 'gepro_ranking_sim02'
+                }
+            }
+        };
+
+        function formatSegundos(s) {
+            const total = Number(s || 0);
+            if (!total) return '--:--';
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const sec = total % 60;
+            return h > 0 ? `${h}h${String(m).padStart(2, '0')}m` : `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        async function carregarRanking() {
+            const select = document.getElementById('selectSimuladoRanking');
+            const cod = select.value;
+            const cfg = CONFIG_RANKING_PORTAL.simulados[cod];
+            const tbody = document.getElementById('tbodyRanking');
+
+            document.getElementById('tituloRankingAtivo').textContent = `${cfg.modo === 'premiacao' ? 'Ranking Oficial (Premiação)' : 'Ranking Imediato'} — ${cfg.titulo}`;
+            document.getElementById('badgeModoRanking').textContent = cfg.modo === 'premiacao' ? 'Modo Premiação' : 'Modo Imediato Ativo';
+            document.getElementById('subtituloRankingAtivo').textContent = cfg.modo === 'premiacao'
+                ? 'Classificação oficial com pódio de premiação (critério: maior Nota ENADE e menor tempo de prova).'
+                : 'Atualizado em tempo real conforme os alunos encerram a prova. O gabarito comentado permanece em sigilo até às 17h00.';
+
+            const bloqueadoPremiacao = cfg.modo === 'premiacao' && Date.now() < new Date(cfg.liberacao).getTime();
+            document.getElementById('avisoPremiacaoOculta').classList.toggle('hidden', !bloqueadoPremiacao);
+            document.getElementById('cardTabelaRanking').classList.toggle('hidden', bloqueadoPremiacao);
+            if (bloqueadoPremiacao) return;
+
+            tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Atualizando dados...</td></tr>';
+            let lista = [];
+
+            try {
+                const resp = await fetch(`${CONFIG_RANKING_PORTAL.apiUrl}?simulado=${encodeURIComponent(cod)}`);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    if (Array.isArray(json.ranking)) lista = json.ranking;
+                }
+            } catch (e) {}
+
+            if (lista.length === 0) {
+                try { lista = JSON.parse(localStorage.getItem(cfg.localKey) || '[]'); } catch (e) {}
+            }
+
+            lista.sort((a, b) => (Number(b.notaEnade) - Number(a.notaEnade)) || (Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999)));
+
+            document.getElementById('kpiParticipantes').textContent = lista.length;
+            if (lista.length > 0) {
+                const soma = lista.reduce((acc, x) => acc + Number(x.notaEnade || 0), 0);
+                const somaTempo = lista.reduce((acc, x) => acc + Number(x.tempoSegundos || 0), 0);
+                document.getElementById('kpiMedia').textContent = (soma / lista.length).toFixed(1).replace('.', ',');
+                document.getElementById('kpiMaiorNota').textContent = Number(lista[0].notaEnade || 0).toFixed(1).replace('.', ',');
+                document.getElementById('kpiTempoMedio').textContent = formatSegundos(Math.round(somaTempo / lista.length));
+            } else {
+                document.getElementById('kpiMedia').textContent = '0,0';
+                document.getElementById('kpiMaiorNota').textContent = '0,0';
+                document.getElementById('kpiTempoMedio').textContent = '--:--';
+                tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-500">Nenhuma entrega registrada ainda para este simulado.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = lista.map((item, idx) => {
+                const medalhas = ['🥇', '🥈', '🥉'];
+                const posLabel = idx < 3 ? `<span class="text-base">${medalhas[idx]}</span>` : `<span class="font-bold text-slate-500">${idx + 1}º</span>`;
+                return `
+                    <tr class="${idx < 3 ? 'bg-amber-50/40' : 'hover:bg-slate-50'}">
+                        <td class="py-3 px-4">${posLabel}</td>
+                        <td class="py-3 px-4 font-bold text-slate-900">${item.apelido || item.idParticipante || 'Estudante'}</td>
+                        <td class="py-3 px-4 text-center text-slate-600">${item.acertosFG ?? '-'}/${item.totalFG ?? 15}</td>
+                        <td class="py-3 px-4 text-center text-slate-600">${item.acertosCE ?? '-'}/${item.totalCE ?? 30}</td>
+                        <td class="py-3 px-4 text-center font-extrabold text-ufcnavy-900">${Number(item.notaEnade || 0).toFixed(1).replace('.', ',')}</td>
+                        <td class="py-3 px-4 text-right font-mono text-slate-600">${item.tempoFormatado || formatSegundos(item.tempoSegundos)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        const paramSim = new URLSearchParams(window.location.search).get('simulado');
+        if (paramSim && CONFIG_RANKING_PORTAL.simulados[paramSim]) {
+            document.getElementById('selectSimuladoRanking').value = paramSim;
+        }
+        document.getElementById('selectSimuladoRanking').addEventListener('change', carregarRanking);
+        document.getElementById('btnAtualizar').addEventListener('click', carregarRanking);
+        carregarRanking();
+    </script>
+</body>
+</html>
