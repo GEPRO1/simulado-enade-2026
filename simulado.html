@@ -56,7 +56,7 @@
                 </div>
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-ufcteal-300 block">Acesso Exclusivo • Ranking & Dashboard</span>
-                    <h2 class="text-base font-extrabold leading-tight">Simulado 02 — ENADE 2026</h2>
+                    <h2 id="tituloModalSimuladoOficial" class="text-base font-extrabold leading-tight">Simulado Oficial — ENADE 2026</h2>
                 </div>
             </div>
 
@@ -156,7 +156,6 @@
                     <option value="simulado01.xlsx">Simulado 01 (Formação Geral)</option>
                     <option value="simulado03.xlsx">Simulado 03 (Complementar)</option>
                     <option value="simulado04.xlsx">Simulado 04 (Completo IV • 45Q)</option>
-                    <option value="simulado05.xlsx">Simulado 05 (Completo V • 45Q)</option>
                 </select>
 
                 <!-- Badge do Aluno Identificado (Exibido apenas no Simulado 02) -->
@@ -415,7 +414,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <h3 class="text-sm font-extrabold text-ufcnavy-900 flex items-center gap-2">
                             <i class="fa-solid fa-chart-pie text-ufcnavy-700"></i>
-                            <span>Dashboard Analítico da Turma — Simulado 02</span>
+                            <span id="tituloDashboardTurmaOficial">Dashboard Analítico da Turma — Simulado Oficial</span>
                         </h3>
                         <span class="text-[10px] font-bold uppercase tracking-wider bg-white text-ufcnavy-700 border border-ufcnavy-200 px-2.5 py-0.5 rounded-full">
                             Sincronizado com Google Sheets
@@ -644,10 +643,38 @@
         // =========================================================================
         // CONFIGURAÇÃO DO SIMULADO 02 (ACESSO RESTRITO + RANKING GOOGLE SHEETS)
         // =========================================================================
+        const PROVAS_OFICIAIS_RESTRITAS = {
+            'simulado02.xlsx': {
+                codigoSimulado: 'simulado02',
+                titulo: 'Simulado 02 — ENADE 2026',
+                tituloDashboard: 'Dashboard Analítico da Turma — Simulado 02',
+                storagePrefix: 'gepro_sim02',
+                rankingLocalKey: CONFIG_SIMULADO02.rankingLocalKey,
+                dataOficial: '2026-11-20',
+                horarioInicioPadrao: '13:00',
+                horarioTerminoPadrao: '17:00'
+            },
+            'simulado05.xlsx': {
+                codigoSimulado: 'simulado05',
+                titulo: 'Simulado 05 — ENADE 2026',
+                tituloDashboard: 'Dashboard Analítico da Turma — Simulado 05',
+                storagePrefix: 'gepro_sim05',
+                rankingLocalKey: 'gepro_ranking_sim05',
+                dataOficial: '2026-11-27',
+                horarioInicioPadrao: '13:00',
+                horarioTerminoPadrao: '17:00'
+            }
+        };
+
         const CONFIG_SIMULADO02 = {
-            arquivo: 'simulado02.xlsx',
-            codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026
-            dataOficial: '2026-11-20', // Data única oficial (AAAA-MM-DD) — definida internamente (não editável via URL)
+            arquivo: 'simulado05.xlsx',
+            codigoSimulado: 'simulado05',
+            titulo: 'Simulado 05 — ENADE 2026',
+            tituloDashboard: 'Dashboard Analítico da Turma — Simulado 05',
+            storagePrefix: 'gepro_sim05',
+            rankingLocalKey: 'gepro_ranking_sim05',
+            codigoAcesso: 'GEPRO2026', // Chave usada no link: simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026
+            dataOficial: '2026-11-27', // Data única oficial (AAAA-MM-DD) — definida internamente (não editável via URL)
             horarioInicioPadrao: '13:00', // Horário oficial de início (13h00)
             horarioTerminoPadrao: '17:00', // Horário oficial de término (17h00)
             rankingApiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec'
@@ -872,7 +899,7 @@
             if (questaoData.length === 0 && isModoRestritoSimulado02) {
                 await carregarExcelRemote(CONFIG_SIMULADO02.arquivo, false);
                 try {
-                    const raw = localStorage.getItem(`gepro_sim02_enviado_${alunoIdentificado?.matricula}`);
+                    const raw = localStorage.getItem(`${CONFIG_SIMULADO02.storagePrefix}_enviado_${alunoIdentificado?.matricula}`);
                     if (raw) {
                         const parsed = JSON.parse(raw);
                         userAnswers = parsed.respostasMarcadas || {};
@@ -1235,7 +1262,23 @@
             }
 
             arquivoAtual = provaParam;
-            isModoRestritoSimulado02 = (arquivoAtual.toLowerCase() === CONFIG_SIMULADO02.arquivo.toLowerCase());
+            const perfilOficial = PROVAS_OFICIAIS_RESTRITAS[arquivoAtual.toLowerCase()];
+            if (perfilOficial) {
+                CONFIG_SIMULADO02.arquivo = arquivoAtual.toLowerCase();
+                CONFIG_SIMULADO02.codigoSimulado = perfilOficial.codigoSimulado;
+                CONFIG_SIMULADO02.titulo = perfilOficial.titulo;
+                CONFIG_SIMULADO02.tituloDashboard = perfilOficial.tituloDashboard;
+                CONFIG_SIMULADO02.storagePrefix = perfilOficial.storagePrefix;
+                CONFIG_SIMULADO02.rankingLocalKey = perfilOficial.rankingLocalKey;
+                CONFIG_SIMULADO02.dataOficial = perfilOficial.dataOficial;
+                CONFIG_SIMULADO02.horarioInicioPadrao = perfilOficial.horarioInicioPadrao;
+                CONFIG_SIMULADO02.horarioTerminoPadrao = perfilOficial.horarioTerminoPadrao;
+                const elTitModal = document.getElementById('tituloModalSimuladoOficial');
+                if (elTitModal) elTitModal.textContent = perfilOficial.titulo;
+                const elTitDash = document.getElementById('tituloDashboardTurmaOficial');
+                if (elTitDash) elTitDash.textContent = perfilOficial.tituloDashboard;
+            }
+            isModoRestritoSimulado02 = Boolean(perfilOficial);
 
             const selectEl = document.getElementById('selectSimuladoUrl');
             if (isModoRestritoSimulado02) {
@@ -1391,7 +1434,7 @@
             }
 
             try {
-                const saved = sessionStorage.getItem('gepro_aluno_sim02');
+                const saved = sessionStorage.getItem(`${CONFIG_SIMULADO02.storagePrefix}_aluno`);
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed.nome) document.getElementById('inputAlunoNome').value = parsed.nome;
@@ -2112,7 +2155,7 @@
                 }
 
                 try {
-                    const jaEnviado = !isModoTesteDocente ? localStorage.getItem(`gepro_sim02_enviado_${matricula}`) : null;
+                    const jaEnviado = !isModoTesteDocente ? localStorage.getItem(`${CONFIG_SIMULADO02.storagePrefix}_enviado_${matricula}`) : null;
                     if (jaEnviado) {
                         const regSalvo = JSON.parse(jaEnviado);
                         const enviadoEmMs = Number(regSalvo.enviadoEmMs || 0);
@@ -2154,7 +2197,7 @@
                 };
 
                 try {
-                    sessionStorage.setItem('gepro_aluno_sim02', JSON.stringify(alunoIdentificado));
+                    sessionStorage.setItem(`${CONFIG_SIMULADO02.storagePrefix}_aluno`, JSON.stringify(alunoIdentificado));
                 } catch (err) {}
 
                 const badgeAluno = document.getElementById('badgeAlunoAtivo');
@@ -2286,7 +2329,7 @@
                 if (questaoData.length === 0) {
                     await carregarExcelRemote(CONFIG_SIMULADO02.arquivo, false);
                     try {
-                        const raw = localStorage.getItem(`gepro_sim02_enviado_${alunoIdentificado?.matricula}`);
+                        const raw = localStorage.getItem(`${CONFIG_SIMULADO02.storagePrefix}_enviado_${alunoIdentificado?.matricula}`);
                         if (raw) {
                             const parsed = JSON.parse(raw);
                             userAnswers = parsed.respostasMarcadas || {};
@@ -2598,7 +2641,7 @@
                     : 'N/A';
 
                 const registro = {
-                    simulado: 'simulado02',
+                    simulado: CONFIG_SIMULADO02.codigoSimulado,
                     idParticipante: alunoIdentificado.idParticipante || gerarIdParticipanteLocal(alunoIdentificado.matricula),
                     nome: alunoIdentificado.nome,
                     apelido: alunoIdentificado.apelido,
@@ -2634,7 +2677,7 @@
 
                 if (!isModoTesteDocente) {
                     try {
-                        localStorage.setItem(`gepro_sim02_enviado_${alunoIdentificado.matricula}`, JSON.stringify({
+                        localStorage.setItem(`${CONFIG_SIMULADO02.storagePrefix}_enviado_${alunoIdentificado.matricula}`, JSON.stringify({
                             idParticipante: registro.idParticipante,
                             apelido: registro.apelido,
                             acertosFG: registro.acertosFG,
@@ -2663,7 +2706,7 @@
 
             // 1. Cópia local anonimizada para fallback offline
             try {
-                const localList = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
+                const localList = JSON.parse(localStorage.getItem(CONFIG_SIMULADO02.rankingLocalKey) || '[]');
                 const registroPublico = {
                     idParticipante: registro.idParticipante,
                     apelido: registro.apelido,
@@ -2684,7 +2727,7 @@
                 } else {
                     localList.push(registroPublico);
                 }
-                localStorage.setItem('gepro_ranking_sim02', JSON.stringify(localList));
+                localStorage.setItem(CONFIG_SIMULADO02.rankingLocalKey, JSON.stringify(localList));
             } catch (e) {}
 
             // 2. Envia para o Google Sheets via Apps Script
@@ -2716,7 +2759,7 @@
 
             if (CONFIG_SIMULADO02.rankingApiUrl && CONFIG_SIMULADO02.rankingApiUrl.startsWith('http')) {
                 try {
-                    const resp = await fetch(`${CONFIG_SIMULADO02.rankingApiUrl}?simulado=simulado02`);
+                    const resp = await fetch(`${CONFIG_SIMULADO02.rankingApiUrl}?simulado=${encodeURIComponent(CONFIG_SIMULADO02.codigoSimulado)}`);
                     if (resp.ok) {
                         const json = await resp.json();
                         if (Array.isArray(json.ranking)) {
@@ -2733,7 +2776,7 @@
 
             if (lista.length === 0) {
                 try {
-                    lista = JSON.parse(localStorage.getItem('gepro_ranking_sim02') || '[]');
+                    lista = JSON.parse(localStorage.getItem(CONFIG_SIMULADO02.rankingLocalKey) || '[]');
                 } catch (e) {}
             }
 
