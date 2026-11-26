@@ -8,14 +8,18 @@ Ecossistema digital desenvolvido pelo **GEPRO (Laboratório de Gestão da Produ�
 
 O **Simulado 05 (45 Questões Objetivas + Discursiva D1 + Questionário de Percepção P01–P09)** opera em **modo oficial restrito** com **janela travada internamente para o dia 27/11/2026, das 13h00 às 17h00**, **Ranking Oculto Exclusivo por Prova** e **Trava de Sigilo até às 17h00**.
 
-### 🔗 Links Oficiais de Aplicação (27/11/2026)
+### 🔗 Links Oficiais de Aplicação e Acompanhamento (27/11/2026)
 
 * 🎓 **Link Oficial para os Estudantes (Prova Cronometrada • `13h00` às `17h00` • Código `GEPRO2026`):**
   `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026`
 * 🏆 **Link Exclusivo do Ranking da Prova (Placar Oculto por Prova — Modo Imediato + Bônus de Dedicação):**
   `https://gepro1.github.io/simulado-enade-2026/ranking.html?prova=simulado05&chave=GEPRO2026`
+  *(Use este link tanto para os alunos acompanharem suas posições quanto para a coordenação/docentes projetarem o placar ao vivo por apelido, sem expor matrículas.)*
+* 📊 **Acompanhamento Completo da Coordenação (Dados Brutos):**
+  Para visualizar **Nome Completo**, **Matrícula**, **Horário de Início/Término** e **respostas individuais por questão**, utilize diretamente a **Planilha Google oficial** vinculada ao formulário.
 * 🧪 **Link de Teste Docente (ignora a trava de data/horário para validação prévia):**
   `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026&teste=1`
+  *(Lembre-se de apagar eventuais linhas de teste na Planilha Google antes das 13h00 do dia da prova.)*
 
 ### 🔒 Regras de Segurança, Sigilo e Valorização Implementadas
 
@@ -23,7 +27,7 @@ O **Simulado 05 (45 Questões Objetivas + Discursiva D1 + Questionário de Perce
    * O caderno abre automaticamente às **13h00**, exibe contador regressivo (`Encerra às 17:00`), emite alerta aos **16h55** (5 minutos finais) e executa o **envio automático às 17h00**.
    * Exige identificação completa (**Nome Completo**, **Apelido público**, **Matrícula** e **Turma**) + código de acesso **`GEPRO2026`**.
 2. **Período de Sigilo do Gabarito (Destravado às `17h00`):**
-   * Ao finalizar a prova antes das 17h00, o aluno recebe a confirmação de envio, sua **Nota Geral ENADE** e o link exclusivo do ranking da prova — **sem visualizar o gabarito, os comentários ou o botão de impressão/PDF**.
+   * Ao finalizar a prova antes das 17h00, o aluno recebe a confirmação de envio, sua **Nota Geral ENADE** e o botão direto para o **Ranking da Prova** — **sem visualizar o gabarito, os comentários ou o botão de impressão/PDF**.
    * Às **17h00 em ponto**, o sistema destrava automaticamente o caderno comentado e a exportação em PDF para revisão individual, eliminando o risco de compartilhamento de respostas durante a aplicação.
 3. **Ranking Oculto por Prova (`ranking.html`):**
    * Não aparece exposto abertamente na página inicial do portal; cada avaliação possui sua própria URL protegida (`?prova=simulado05&chave=GEPRO2026`).

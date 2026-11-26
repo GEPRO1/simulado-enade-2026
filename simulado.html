@@ -1346,6 +1346,9 @@
         });
 
         function abrirPainelPublicoRanking() {
+            const urlDestino = `ranking.html?prova=${encodeURIComponent(CONFIG_SIMULADO02.codigoSimulado)}&chave=${encodeURIComponent(CONFIG_SIMULADO02.codigoAcesso)}`;
+            window.location.replace(urlDestino);
+            return;
             document.getElementById('loadingScreen')?.classList.add('hidden');
             document.getElementById('modalAcessoSimulado02')?.classList.add('hidden');
             document.getElementById('quizContainer')?.classList.add('hidden');
