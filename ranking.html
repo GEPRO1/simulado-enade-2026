@@ -211,9 +211,10 @@
             if (simItem) {
                 return simItem === codigoEsperado.toLowerCase();
             }
-            const dataStr = String(item.horaFim || item.horaInicio || item.data || '').trim();
+            // Registos antigos do Simulado 02 (20/11/2026) não trazem campo 'simulado' no JSON:
+            // Se estamos a consultar o Simulado 05, exige etiqueta explícita 'simulado05'
             if (codigoEsperado.toLowerCase() === 'simulado05') {
-                if (dataStr.includes('20/11/2026') || dataStr.includes('2026-11-20')) return false;
+                return false;
             }
             return true;
         }
