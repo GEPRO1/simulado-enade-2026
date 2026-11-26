@@ -70,7 +70,8 @@ Os simulados livres oferecem **correção comentada imediata**, **Matriz de Refe
 
 ## 🛠️ Arquitetura da Plataforma
 
-* `index.html` — Página inicial limpa do portal (sem exposição pública dos rankings das provas oficiais).
+* `index.html` — Página inicial do portal com acesso aos simulados livres, Oficina Discursiva e download do **E-book Volume 2 (Conhecimentos Específicos)**.
+* `Ebook_Volume2_ENADE2026_Conhecimentos_Especificos_GEPRO.docx` — Guia Estratégico de Revisão Memorex (8 Eixos do Componente Específico) revisado e padronizado.
 * `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando entre **Modo Treino Livre** e **Modo Oficial Restrito** com trava de sigilo às 17h00.
 * `ranking.html` — Página separada de classificação protegida por código da prova e chave de acesso, com cálculo automático do **Bônus de Dedicação (Opção A)** e alternância entre modo `imediato` e `premiacao`.
 * `discursivas.html` — **Oficina Plus de Questões Discursivas:** 5 estudos de caso inéditos da área específica com folha oficial de 30 linhas e espelho INEP.
