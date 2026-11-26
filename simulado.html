@@ -498,6 +498,10 @@
                 "Cada questão revisada hoje consolida a sua formação como engenheiro(a) de produção e fortalece o conceito do nosso curso no ENADE 2026."
             </p>
             <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-2">
+                <a id="btnVerRankingProvaResultado" href="#" target="_blank" rel="noopener noreferrer" class="hidden w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-6 py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm transition-colors">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Ver Ranking da Prova</span>
+                </a>
                 <button id="btnRevisarProvas" type="button" class="w-full sm:w-auto bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white font-bold px-6 py-3 rounded-xl text-xs sm:text-sm">
                     Revisar Gabarito e Mapas Mentais
                 </button>
@@ -856,6 +860,11 @@
             revisaoLiberadaSim02 = liberado;
 
             if (liberado) {
+                const btnRankResLib = document.getElementById('btnVerRankingProvaResultado');
+                if (btnRankResLib && isModoRestritoSimulado02) {
+                    btnRankResLib.href = `ranking.html?prova=${encodeURIComponent(CONFIG_SIMULADO02.codigoSimulado)}&chave=${encodeURIComponent(CONFIG_SIMULADO02.codigoAcesso)}`;
+                    btnRankResLib.classList.remove('hidden');
+                }
                 if (intervaloEsperaLiberacao4h) {
                     clearInterval(intervaloEsperaLiberacao4h);
                     intervaloEsperaLiberacao4h = null;
@@ -876,10 +885,16 @@
                 btnPrintRes?.classList.add('hidden');
                 const horaLib = CONFIG_SIMULADO02.horarioLiberacaoGabarito || '17:00';
                 const dataBr = (CONFIG_SIMULADO02.dataOficial || '2026-11-27').split('-').reverse().join('/');
+                const urlRankingOculto = `ranking.html?prova=${encodeURIComponent(CONFIG_SIMULADO02.codigoSimulado)}&chave=${encodeURIComponent(CONFIG_SIMULADO02.codigoAcesso)}`;
+                const btnRankRes = document.getElementById('btnVerRankingProvaResultado');
+                if (btnRankRes && isModoRestritoSimulado02) {
+                    btnRankRes.href = urlRankingOculto;
+                    btnRankRes.classList.remove('hidden');
+                }
                 if (aviso4h && texto4h) {
                     const linkRankingHtml = CONFIG_SIMULADO02.modoRanking === 'imediato'
-                        ? `Você já pode acompanhar sua posição no placar ao vivo em <a href="ranking.html?simulado=${CONFIG_SIMULADO02.codigoSimulado}" class="underline font-bold text-ufcnavy-700">Ranking Oficial</a>. `
-                        : `A classificação oficial será divulgada em <a href="ranking.html?simulado=${CONFIG_SIMULADO02.codigoSimulado}" class="underline font-bold text-ufcnavy-700">Ranking Oficial</a> após o encerramento. `;
+                        ? `Você já pode acompanhar sua posição (com bônus de dedicação) no placar exclusivo desta prova clicando no botão <strong>Ver Ranking da Prova</strong> abaixo (ou <a href="${urlRankingOculto}" target="_blank" rel="noopener noreferrer" class="underline font-bold text-ufcnavy-700">abrindo aqui</a>). `
+                        : `A classificação oficial desta prova será divulgada em <a href="${urlRankingOculto}" target="_blank" rel="noopener noreferrer" class="underline font-bold text-ufcnavy-700">Ranking da Prova</a> após o encerramento. `;
                     texto4h.innerHTML = `<strong>Período de sigilo ativo:</strong> ${linkRankingHtml}Para impedir o compartilhamento antecipado de respostas, o gabarito, os comentários e a impressão em PDF serão destravados automaticamente às <strong>${horaLib} de ${dataBr}</strong>.`;
                     aviso4h.classList.remove('hidden');
                     if (!intervaloEsperaLiberacao4h) {
@@ -1410,10 +1425,11 @@
                     const inst = new Date();
                     if (hasValidFim && inst > dtFim) {
                         avisoEl?.classList.remove('hidden');
-                        textoAviso.textContent = `Horário encerrado (aplicação oficial em ${dataCurta}, das ${horaIniCurta} às ${horaFimCurta}). O pódio dos 3 primeiros colocados (maior nota e menor tempo) será divulgado pelo professor.`;
+                        textoAviso.textContent = `Aplicação oficial encerrada (${dataCurta}, das ${horaIniCurta} às ${horaFimCurta}). Se você realizou a prova neste dispositivo, preencha sua matrícula abaixo para consultar seu resultado individual e o gabarito comentado.`;
                         if (btnIniciar) {
-                            btnIniciar.disabled = true;
-                            btnIniciar.classList.add('opacity-50', 'cursor-not-allowed');
+                            btnIniciar.disabled = false;
+                            btnIniciar.classList.remove('opacity-50', 'cursor-not-allowed');
+                            btnIniciar.innerHTML = '<i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i><span>Consultar Meu Resultado / Gabarito</span>';
                         }
                         return 'encerrado';
                     }
@@ -2266,6 +2282,12 @@
                     }
                 } catch (err) {}
 
+                if (!isModoTesteDocente && deadlineTimestamp && Date.now() > deadlineTimestamp) {
+                    erroEl.textContent = 'O prazo oficial desta prova já foi encerrado às 17h00 e não há entrega registrada para esta matrícula neste navegador.';
+                    erroEl.classList.remove('hidden');
+                    return;
+                }
+
                 const idParticipante = gerarIdParticipanteLocal(matricula);
                 const apelido = apelidoDigitado || (`Estudante_${idParticipante.slice(-4)}`);
                 const horaInicio = new Date().toLocaleString('pt-BR');
@@ -2741,6 +2763,8 @@
                     notaCeObj: Number(notaCeObj100.toFixed(2)),
                     notaDiscursiva: Number(notaDiscursiva10.toFixed(2)),
                     notaCeTotal: Number(notaCeTotal100.toFixed(2)),
+                    questoesRespondidas: detalhesQuestoes.filter(d => d.marcada && d.marcada !== '-').length + (temDiscursiva && respostasDiscursivas[0].respondida ? 1 : 0),
+                    totalQuestoesProva: totalObjQuestoes + (temDiscursiva ? 1 : 0),
                     acertosTotal: totalObjAcertos,
                     totalObjetivas: totalObjQuestoes,
                     notaEnade: Number(notaEnade100.toFixed(2)),
@@ -2800,6 +2824,8 @@
                     acertosCE: registro.acertosCE,
                     totalCE: registro.totalCE,
                     notaDiscursiva: registro.notaDiscursiva,
+                    questoesRespondidas: registro.questoesRespondidas,
+                    totalQuestoesProva: registro.totalQuestoesProva,
                     acertosTotal: registro.acertosTotal,
                     notaEnade: registro.notaEnade,
                     tempoSegundos: registro.tempoSegundos,

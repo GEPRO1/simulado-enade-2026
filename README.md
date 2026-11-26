@@ -4,12 +4,44 @@ Ecossistema digital desenvolvido pelo **GEPRO (Laboratório de Gestão da Produ�
 
 ---
 
+## 📋 Guia Operacional da Coordenação — Simulado 05 Oficial (27/11/2026)
+
+O **Simulado 05 (45 Questões Objetivas + Discursiva D1 + Questionário de Percepção P01–P09)** opera em **modo oficial restrito** com **janela travada internamente para o dia 27/11/2026, das 13h00 às 17h00**, **Ranking Oculto Exclusivo por Prova** e **Trava de Sigilo até às 17h00**.
+
+### 🔗 Links Oficiais de Aplicação (27/11/2026)
+
+* 🎓 **Link Oficial para os Estudantes (Prova Cronometrada • `13h00` às `17h00` • Código `GEPRO2026`):**
+  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026`
+* 🏆 **Link Exclusivo do Ranking da Prova (Placar Oculto por Prova — Modo Imediato + Bônus de Dedicação):**
+  `https://gepro1.github.io/simulado-enade-2026/ranking.html?prova=simulado05&chave=GEPRO2026`
+* 🧪 **Link de Teste Docente (ignora a trava de data/horário para validação prévia):**
+  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026&teste=1`
+
+### 🔒 Regras de Segurança, Sigilo e Valorização Implementadas
+
+1. **Trava de Janela (`27/11/2026`, `13h00` às `17h00`):**
+   * O caderno abre automaticamente às **13h00**, exibe contador regressivo (`Encerra às 17:00`), emite alerta aos **16h55** (5 minutos finais) e executa o **envio automático às 17h00**.
+   * Exige identificação completa (**Nome Completo**, **Apelido público**, **Matrícula** e **Turma**) + código de acesso **`GEPRO2026`**.
+2. **Período de Sigilo do Gabarito (Destravado às `17h00`):**
+   * Ao finalizar a prova antes das 17h00, o aluno recebe a confirmação de envio, sua **Nota Geral ENADE** e o link exclusivo do ranking da prova — **sem visualizar o gabarito, os comentários ou o botão de impressão/PDF**.
+   * Às **17h00 em ponto**, o sistema destrava automaticamente o caderno comentado e a exportação em PDF para revisão individual, eliminando o risco de compartilhamento de respostas durante a aplicação.
+3. **Ranking Oculto por Prova (`ranking.html`):**
+   * Não aparece exposto abertamente na página inicial do portal; cada avaliação possui sua própria URL protegida (`?prova=simulado05&chave=GEPRO2026`).
+   * **Chave de Modo no Código (`modoRanking` / `modo`):**
+     * `'imediato'` *(padrão ativo no Simulado 05)*: o aluno visualiza sua classificação assim que encerra a prova.
+     * `'premiacao'`: mantém a tabela de classificação oculta até às 17h00, exibindo o pódio apenas no encerramento oficial.
+4. **Critério de Valorização por Dedicação & Completude (Opção A):**
+   * Além da **Nota Oficial ENADE (0 a 100 pontos — 25% FG + 75% CE [85% Obj + 15% Disc])**, o ranking atribui um **Bônus de Dedicação de até +5,0 pontos**:
+     * **Até +3,0 pontos por Completude:** proporcionais ao total de questões efetivamente respondidas (`3,0 × respondidas / 46`).
+     * **+2,0 pontos por Ritmo Consciente (anti-chute):** concedidos a quem responde pelo menos 50% da prova mantendo tempo médio **$\ge 45$ segundos por questão**, valorizando estudantes comprometidos e evitando entregas apressadas.
+
+---
+
 ## 🚀 Links Principais do Ecossistema ENADE 2026
 
 * 🌐 **Portal Principal de Simulados (Página Inicial):** [gepro1.github.io/simulado-enade-2026](https://gepro1.github.io/simulado-enade-2026/)
 * 🧭 **Aplicativo Guia & Trilha de Estudos (ENADE Compass):** [enade-compass-2026.lovable.app](https://enade-compass-2026.lovable.app/)
 * ✍️ **Oficina Plus de Questões Discursivas (Estudos de Caso):** [gepro1.github.io/simulado-enade-2026/discursivas.html](https://gepro1.github.io/simulado-enade-2026/discursivas.html)
-* 📄 **Cartilha Oficial ENADE 2026 (PDF):** [Acessar Cartilha em PDF](./ebook_1enade2026.pdf)
 * 💻 **Repositório de Código-Fonte (GitHub):** [github.com/GEPRO1/simulado-enade-2026](https://github.com/GEPRO1/simulado-enade-2026)
 
 ---
@@ -25,55 +57,21 @@ Os simulados livres oferecem **correção comentada imediata**, **Matriz de Refe
 * 📙 **Simulado 04 — Prova Completa IV (45 Questões + Discursiva):**
   [https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado04.xlsx](https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado04.xlsx)
 
----
-
-## 🏆 Links Exclusivos — Simulado 05 Oficial (27/11/2026 • 13h00 às 17h00 • Ranking Top 3)
-
-O **Simulado 05 (45 Questões Objetivas + Discursiva + Questionário de Percepção P01–P09)** opera em **modo oficial restrito** com **data e janela travadas internamente no código para o dia 27/11/2026, das 13h00 às 17h00**, e **correção automática integral no padrão ENADE**:
-
-* **Cálculo oficial ponderado ENADE (0 a 100 pontos):** **25%** Formação Geral (15 objetivas) + **75%** Componente Específico, subdividido em **85% Objetiva** (30 questões = 63,75% da nota final) e **15% Discursiva** (11,25% da nota final);
-* **Trava interna de data e horário (`27/11/2026`, `13h00` às `17h00`):** o caderno é liberado automaticamente às **13h00**, exibe contador `Encerra às 17:00`, emite aviso aos **16h55** (5 minutos finais) e realiza o **envio automático às 17h00**;
-* **Identificação & Código de Acesso (`GEPRO2026`):** exige Nome Completo, Apelido para o placar, Matrícula e Turma;
-* **Segurança & Liberação após 4 horas:** durante a aplicação e nas 4 horas seguintes ao envio, ficam ocultos o gabarito comentado, Mapas Mentais, Matriz MEC, botão de impressão/`Ctrl+P` (exportação PDF), seleção/cópia dos enunciados e o ranking geral da turma. Decorridas **4 horas do envio**, o estudante pode reabrir o link e informar sua matrícula para revisar o caderno comentado e salvar em PDF;
-* **Registro & Pódio Top 3:** grava horário de início, horário de término, duração, respostas por questão, resposta discursiva e percepção diretamente na planilha oficial no Google Sheets.
-
-### 🔗 Links de Aplicação e Projeção (Simulado 05 — 27/11/2026)
-
-* 🎓 **Link Oficial para os Estudantes (`27/11/2026`, `13h00` às `17h00` • Código `GEPRO2026` já embutido):**
-  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026`
-* 📊 **Painel de Projeção ao Vivo — Ranking Top 3 (por Apelido) & Dashboard da Turma (Uso Docente):**
-  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&ranking=1`
-* 🧪 **Link de Teste Docente (ignora a trava de data/horário para validação prévia):**
-  `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado05.xlsx&acesso=GEPRO2026&teste=1`
-
 ### 🔗 Links Históricos — Simulado 02 Oficial (20/11/2026)
 
 * 🎓 **Link Oficial dos Estudantes:** `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&acesso=GEPRO2026`
-* 📊 **Ranking Top 3 & Dashboard (Simulado 02):** `https://gepro1.github.io/simulado-enade-2026/simulado.html?prova=simulado02.xlsx&ranking=1`
+* 🏆 **Ranking Exclusivo (Simulado 02):** `https://gepro1.github.io/simulado-enade-2026/ranking.html?prova=simulado02&chave=GEPRO2026`
 
 ---
 
 ## 🛠️ Arquitetura da Plataforma
 
-O portal funciona em arquitetura aberta (*client-side* em HTML5, Tailwind CSS e SheetJS), integrada ao **Google Apps Script + Google Sheets** para coleta dos resultados oficiais:
-
-* `index.html` — Página inicial do portal com seleção dos cadernos de simulados livres, acesso à Oficina Discursiva e status das provas oficiais restritas.
-* `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando automaticamente entre **Modo Treino Livre** (Simulados 01, 03 e 04) e **Modo Oficial Restrito** (Simulados 02 e 05).
-* `discursivas.html` — **Oficina Plus de Questões Discursivas:** 5 estudos de caso inéditos da área específica com folha oficial de 30 linhas, envio de foto manuscrita, protocolo de banca avaliadora e folha de impressão A4.
-* `simulado01.xlsx` — **Simulado 01 (Formação Geral):** Temas transversais contemporâneos.
-* `simulado02.xlsx` — **Simulado 02 (Prova Oficial I • 20/11/2026):** Caderno fechado no padrão INEP.
-* `simulado03.xlsx` — **Simulado 03 (Aprofundamento):** Banco complementar de questões aplicadas.
-* `simulado04.xlsx` — **Simulado 04 (Completo IV • 45Q + Discursiva):** Caderno inédito cobrindo todas as subáreas ABEPRO.
-* `simulado05.xlsx` — **Simulado 05 (Prova Oficial II • 27/11/2026):** Caderno inédito fechado (15 FG + 30 CE) com 17 gráficos e diagramas técnicos.
+* `index.html` — Página inicial limpa do portal (sem exposição pública dos rankings das provas oficiais).
+* `simulado.html` — Motor único que lê qualquer planilha `.xlsx` padronizada, alternando entre **Modo Treino Livre** e **Modo Oficial Restrito** com trava de sigilo às 17h00.
+* `ranking.html` — Página separada de classificação protegida por código da prova e chave de acesso, com cálculo automático do **Bônus de Dedicação (Opção A)** e alternância entre modo `imediato` e `premiacao`.
+* `discursivas.html` — **Oficina Plus de Questões Discursivas:** 5 estudos de caso inéditos da área específica com folha oficial de 30 linhas e espelho INEP.
+* `simulado01.xlsx` a `simulado05.xlsx` + `assets/figuras/` — Bancos de questões e figuras técnicas referenciadas.
 
 ---
 
 **Realização:** GEPRO — Laboratório de Gestão da Produção | Universidade Federal do Ceará (Campus de Russas).
-
-
-## 📐 Padrão Estrutural dos Simulados Completos (ENADE 2026)
-
-1. **Questões Objetivas (Q01 a Q45):** 15 de Formação Geral (25%) + 30 de Componente Específico (75%).
-2. **Questão Discursiva (D1 — sempre por último):** Posicionada automaticamente ao final do caderno (item 46).
-3. **Questionário de Percepção da Prova (P01 a P09 — padrão obrigatório):** Exibido após a conclusão das questões (sem pontuação, dentro do tempo total da prova), tanto na plataforma interativa quanto na versão de impressão/PDF.
-4. **Figuras e Gráficos (`assets/figuras/`):** Todas as imagens referenciadas na coluna `Imagem / Figura` das planilhas devem estar publicadas na pasta `assets/figuras/` na raiz do repositório GitHub.

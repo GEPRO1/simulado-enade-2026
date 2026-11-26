@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#003366">
-    <title>Ranking Oficial — Simulados ENADE 2026 | Engenharia de Produção — UFC Russas</title>
+    <title>Ranking Exclusivo da Prova — ENADE 2026 | UFC Russas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -32,91 +33,133 @@
                     <span>Portal</span>
                 </a>
                 <div>
-                    <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">ENADE 2026 • GEPRO</span>
-                    <h1 class="text-sm sm:text-base font-extrabold tracking-tight mt-0.5">Ranking & Desempenho da Turma</h1>
+                    <span class="bg-ufcteal-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Acesso Restrito por Prova • ENADE 2026</span>
+                    <h1 id="headerTituloProva" class="text-sm sm:text-base font-extrabold tracking-tight mt-0.5">Ranking da Avaliação</h1>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2">
-                <select id="selectSimuladoRanking" class="bg-white text-slate-900 text-xs font-bold px-3 py-2 rounded-xl border-0 shadow-sm focus:ring-2 focus:ring-ufcteal-500">
-                    <option value="simulado05">Simulado 05 (27/11/2026)</option>
-                    <option value="simulado02">Simulado 02 (20/11/2026)</option>
-                </select>
-                <button id="btnAtualizar" type="button" class="bg-ufcteal-600 hover:bg-ufcteal-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
-                    <i class="fa-solid fa-rotate"></i>
-                    <span class="hidden sm:inline">Atualizar</span>
-                </button>
-            </div>
+            <button id="btnAtualizar" type="button" class="hidden bg-ufcteal-600 hover:bg-ufcteal-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Atualizar Placar</span>
+            </button>
         </div>
     </header>
 
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-7 space-y-6">
-        <div id="bannerModoRanking" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+        <!-- Tela de Bloqueio / Acesso por Código da Prova -->
+        <div id="gateAcessoRanking" class="max-w-md mx-auto bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-trophy text-lg"></i>
+                <div class="w-10 h-10 rounded-xl bg-ufcnavy-50 text-ufcnavy-700 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-key text-base"></i>
                 </div>
                 <div>
-                    <h2 id="tituloRankingAtivo" class="text-sm font-extrabold text-ufcnavy-900">Ranking Imediato — Simulado 05</h2>
-                    <p id="subtituloRankingAtivo" class="text-xs text-slate-500">Atualizado em tempo real conforme os alunos encerram a prova. O gabarito comentado permanece em sigilo até às 17h00.</p>
+                    <h2 class="text-sm font-extrabold text-ufcnavy-900">Acesso Restrito ao Placar da Prova</h2>
+                    <p class="text-xs text-slate-500">Informe a prova e a chave de acesso fornecida pelo professor.</p>
                 </div>
             </div>
-            <span id="badgeModoRanking" class="text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full self-start sm:self-center shrink-0">
-                Modo Imediato Ativo
-            </span>
+
+            <form id="formAcessoRanking" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Código da Prova</label>
+                    <input id="inputProvaCodigo" type="text" placeholder="Ex.: simulado05" required
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-ufcteal-500 focus:border-ufcteal-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Chave de Acesso</label>
+                    <input id="inputChaveRanking" type="password" placeholder="Chave da avaliação" required
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-ufcteal-500 focus:border-ufcteal-500">
+                </div>
+                <p id="erroGateRanking" class="hidden text-xs font-semibold text-rose-600"></p>
+                <button type="submit" class="w-full bg-ufcnavy-700 hover:bg-ufcnavy-900 text-white text-xs font-extrabold py-2.5 rounded-xl transition-colors">
+                    Acessar Ranking da Prova
+                </button>
+            </form>
         </div>
 
-        <!-- KPIs Consolidados -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Participantes</p>
-                <p id="kpiParticipantes" class="text-2xl font-extrabold text-ufcnavy-900 mt-1">0</p>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Média Geral ENADE</p>
-                <p id="kpiMedia" class="text-2xl font-extrabold text-ufcteal-700 mt-1">0,0</p>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Maior Nota</p>
-                <p id="kpiMaiorNota" class="text-2xl font-extrabold text-amber-600 mt-1">0,0</p>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <p class="text-[11px] font-bold text-slate-400 uppercase">Tempo Médio</p>
-                <p id="kpiTempoMedio" class="text-2xl font-extrabold text-slate-700 mt-1">--:--</p>
-            </div>
-        </div>
+        <!-- Conteúdo Protegido do Ranking -->
+        <div id="conteudoRankingProtegido" class="hidden space-y-6">
 
-        <!-- Aviso de Sigilo (quando modo === 'premiacao' antes da hora de liberação) -->
-        <div id="avisoPremiacaoOculta" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center space-y-2">
-            <i class="fa-solid fa-lock text-amber-600 text-2xl"></i>
-            <h3 class="text-sm font-extrabold text-amber-900">Placar em Sigilo — Modo Premiação</h3>
-            <p id="textoPremiacaoOculta" class="text-xs text-amber-800 max-w-lg mx-auto">A classificação oficial será revelada após o encerramento da janela de aplicação.</p>
-        </div>
+            <!-- Banner Explicativo do Modo & Bônus de Dedicação (Opção A) -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-trophy text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 id="tituloRankingAtivo" class="text-sm font-extrabold text-ufcnavy-900">Ranking Imediato</h2>
+                            <p id="subtituloRankingAtivo" class="text-xs text-slate-500">Atualizado em tempo real conforme os alunos encerram a prova. Gabarito comentado em sigilo até às 17h00.</p>
+                        </div>
+                    </div>
+                    <span id="badgeModoRanking" class="text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full self-start sm:self-center shrink-0">
+                        Modo Imediato Ativo
+                    </span>
+                </div>
 
-        <!-- Tabela de Classificação -->
-        <div id="cardTabelaRanking" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase">
-                            <th class="py-3 px-4 w-16">Pos.</th>
-                            <th class="py-3 px-4">Participante</th>
-                            <th class="py-3 px-4 text-center">FG</th>
-                            <th class="py-3 px-4 text-center">CE</th>
-                            <th class="py-3 px-4 text-center">Nota ENADE</th>
-                            <th class="py-3 px-4 text-right">Tempo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyRanking" class="divide-y divide-slate-100 text-xs">
-                        <tr><td colspan="6" class="py-6 text-center text-slate-400">Carregando classificação...</td></tr>
-                    </tbody>
-                </table>
+                <!-- Regra da Opção A: Bônus de Dedicação & Completude -->
+                <div class="bg-ufcnavy-50/70 border border-ufcnavy-100 rounded-xl p-3 text-[11px] text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <strong class="text-ufcnavy-900"><i class="fa-solid fa-award text-amber-500 mr-1"></i>Critério de Valorização (Opção A):</strong>
+                        Pontuação Final = <strong>Nota ENADE (0–100)</strong> + <strong>Bônus de Dedicação (até +5,0 pts)</strong>:
+                        até <strong>+3,0 pts</strong> proporcionais às questões respondidas (completude) + <strong>+2,0 pts</strong> por ritmo consciente (média &ge; 45s/questão, evitando chutes rápidos).
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase">Participantes</p>
+                    <p id="kpiParticipantes" class="text-2xl font-extrabold text-ufcnavy-900 mt-1">0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase">Média Nota ENADE</p>
+                    <p id="kpiMedia" class="text-2xl font-extrabold text-ufcteal-700 mt-1">0,0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase">Maior Pontuação Final</p>
+                    <p id="kpiMaiorNota" class="text-2xl font-extrabold text-amber-600 mt-1">0,0</p>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase">Tempo Médio</p>
+                    <p id="kpiTempoMedio" class="text-2xl font-extrabold text-slate-700 mt-1">--:--</p>
+                </div>
+            </div>
+
+            <!-- Aviso de Sigilo (quando modo === 'premiacao' antes da hora de liberação) -->
+            <div id="avisoPremiacaoOculta" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center space-y-2">
+                <i class="fa-solid fa-lock text-amber-600 text-2xl"></i>
+                <h3 class="text-sm font-extrabold text-amber-900">Placar em Sigilo — Modo Premiação</h3>
+                <p class="text-xs text-amber-800 max-w-lg mx-auto">A classificação oficial será revelada automaticamente às 17h00, após o encerramento da aplicação.</p>
+            </div>
+
+            <!-- Tabela de Classificação -->
+            <div id="cardTabelaRanking" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold text-slate-500 uppercase">
+                                <th class="py-3 px-4 w-14">Pos.</th>
+                                <th class="py-3 px-4">Participante</th>
+                                <th class="py-3 px-4 text-center">Respondidas</th>
+                                <th class="py-3 px-4 text-center">Nota ENADE</th>
+                                <th class="py-3 px-4 text-center">Bônus Dedicação</th>
+                                <th class="py-3 px-4 text-center">Pontuação Final</th>
+                                <th class="py-3 px-4 text-right">Tempo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyRanking" class="divide-y divide-slate-100 text-xs">
+                            <tr><td colspan="7" class="py-6 text-center text-slate-400">Carregando classificação...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
 
     <footer class="bg-white border-t border-slate-200 py-4 text-xs text-slate-500 text-center">
-        Universidade Federal do Ceará — Campus de Russas • GEPRO
+        Universidade Federal do Ceará — Campus de Russas • GEPRO (Laboratório de Gestão da Produção)
     </footer>
 
     <script>
@@ -124,39 +167,126 @@
             apiUrl: 'https://script.google.com/macros/s/AKfycbyLVWfi-wkpBDKDKP5Jw4YjpGV7aXwuDOtGgmGbB2uc8ctOAAVDZKj2a-vjTCMOjJK69g/exec',
             simulados: {
                 simulado05: {
-                    titulo: 'Simulado 05 — ENADE 2026',
+                    titulo: 'Simulado 05 — ENADE 2026 (27/11/2026)',
+                    chaveAcesso: 'GEPRO2026',
                     modo: 'imediato', // 'imediato' (padrão) ou 'premiacao'
                     liberacao: '2026-11-27T17:00:00-03:00',
+                    totalQuestoesPadrao: 46, // 45 objetivas + 1 discursiva
                     localKey: 'gepro_ranking_sim05'
                 },
                 simulado02: {
-                    titulo: 'Simulado 02 — ENADE 2026',
+                    titulo: 'Simulado 02 — ENADE 2026 (20/11/2026)',
+                    chaveAcesso: 'GEPRO2026',
                     modo: 'premiacao',
                     liberacao: '2026-11-20T17:00:00-03:00',
+                    totalQuestoesPadrao: 46,
                     localKey: 'gepro_ranking_sim02'
                 }
             }
         };
 
+        let provaAtivaCodigo = '';
+
         function formatSegundos(s) {
             const total = Number(s || 0);
-            if (!total) return '--:--';
+            if (!total || isNaN(total)) return '--:--';
             const h = Math.floor(total / 3600);
             const m = Math.floor((total % 3600) / 60);
             const sec = total % 60;
             return h > 0 ? `${h}h${String(m).padStart(2, '0')}m` : `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
         }
 
-        async function carregarRanking() {
-            const select = document.getElementById('selectSimuladoRanking');
-            const cod = select.value;
+        function formatarTempoLimpo(rawTempo, tempoSegundos) {
+            if (rawTempo && typeof rawTempo === 'string') {
+                const s = rawTempo.trim();
+                const matchHora = s.match(/\b(\d{2}:\d{2}:\d{2})\b/);
+                if (matchHora) return matchHora[1];
+                if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) return s;
+            }
+            return formatSegundos(tempoSegundos);
+        }
+
+        function pertenceAoSimuladoAtual(item, codigoEsperado) {
+            const simItem = String(item.simulado || item.codigoSimulado || item.prova || '').trim().toLowerCase();
+            if (simItem) {
+                return simItem === codigoEsperado.toLowerCase();
+            }
+            const dataStr = String(item.horaFim || item.horaInicio || item.data || '').trim();
+            if (codigoEsperado.toLowerCase() === 'simulado05') {
+                if (dataStr.includes('20/11/2026') || dataStr.includes('2026-11-20')) return false;
+            }
+            return true;
+        }
+
+        // Cálculo da Opção A: Bônus de Dedicação & Completude (até +5,0 pts)
+        function calcularMetricasOpcaoA(item, totalPadrao) {
+            const notaBase = Number(item.notaEnade || 0);
+            const totalQ = Number(item.totalQuestoesProva || totalPadrao || 46);
+            // Estima respondidas pelo campo explícito ou, em registros legados, assume completude proporcional
+            let respondidas = Number(item.questoesRespondidas);
+            if (isNaN(respondidas) || respondidas <= 0) {
+                respondidas = item.acertosTotal != null ? totalQ : 0;
+            }
+            respondidas = Math.min(respondidas, totalQ);
+
+            const taxaCompletude = totalQ > 0 ? (respondidas / totalQ) : 0;
+            const bonusCompletude = Number((3.0 * taxaCompletude).toFixed(2));
+
+            const tempoSeg = Number(item.tempoSegundos || 0);
+            const tempoMedioPorQuestao = respondidas > 0 ? (tempoSeg / respondidas) : 0;
+            // Exige média >= 45s por questão respondida e pelo menos 50% da prova feita para ganhar o bônus anti-chute
+            const bonusRitmo = (tempoMedioPorQuestao >= 45 && taxaCompletude >= 0.5) ? 2.0 : 0.0;
+
+            const bonusTotal = Number((bonusCompletude + bonusRitmo).toFixed(2));
+            const pontuacaoFinal = Number((notaBase + bonusTotal).toFixed(2));
+
+            return {
+                notaBase,
+                respondidas,
+                totalQ,
+                bonusCompletude,
+                bonusRitmo,
+                bonusTotal,
+                pontuacaoFinal
+            };
+        }
+
+        function validarEAbrirRanking(provaRaw, chaveRaw) {
+            const cod = (provaRaw || '').trim().toLowerCase();
+            const chave = (chaveRaw || '').trim().toUpperCase();
             const cfg = CONFIG_RANKING_PORTAL.simulados[cod];
+            const erroEl = document.getElementById('erroGateRanking');
+
+            if (!cfg) {
+                erroEl.textContent = 'Código de prova não encontrado. Verifique o link fornecido pelo professor.';
+                erroEl.classList.remove('hidden');
+                return false;
+            }
+            if (chave !== cfg.chaveAcesso.toUpperCase()) {
+                erroEl.textContent = 'Chave de acesso inválida para esta avaliação.';
+                erroEl.classList.remove('hidden');
+                return false;
+            }
+
+            erroEl.classList.add('hidden');
+            provaAtivaCodigo = cod;
+            document.getElementById('gateAcessoRanking').classList.add('hidden');
+            document.getElementById('conteudoRankingProtegido').classList.remove('hidden');
+            document.getElementById('btnAtualizar').classList.remove('hidden');
+            document.getElementById('headerTituloProva').textContent = `Ranking — ${cfg.titulo}`;
+            carregarRanking();
+            return true;
+        }
+
+        async function carregarRanking() {
+            const cfg = CONFIG_RANKING_PORTAL.simulados[provaAtivaCodigo];
+            if (!cfg) return;
             const tbody = document.getElementById('tbodyRanking');
 
             document.getElementById('tituloRankingAtivo').textContent = `${cfg.modo === 'premiacao' ? 'Ranking Oficial (Premiação)' : 'Ranking Imediato'} — ${cfg.titulo}`;
             document.getElementById('badgeModoRanking').textContent = cfg.modo === 'premiacao' ? 'Modo Premiação' : 'Modo Imediato Ativo';
             document.getElementById('subtituloRankingAtivo').textContent = cfg.modo === 'premiacao'
-                ? 'Classificação oficial com pódio de premiação (critério: maior Nota ENADE e menor tempo de prova).'
+                ? 'Classificação oficial com pódio de premiação (critério: Pontuação Final com Bônus de Dedicação).'
                 : 'Atualizado em tempo real conforme os alunos encerram a prova. O gabarito comentado permanece em sigilo até às 17h00.';
 
             const bloqueadoPremiacao = cfg.modo === 'premiacao' && Date.now() < new Date(cfg.liberacao).getTime();
@@ -164,11 +294,11 @@
             document.getElementById('cardTabelaRanking').classList.toggle('hidden', bloqueadoPremiacao);
             if (bloqueadoPremiacao) return;
 
-            tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Atualizando dados...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">Atualizando dados da prova...</td></tr>';
             let lista = [];
 
             try {
-                const resp = await fetch(`${CONFIG_RANKING_PORTAL.apiUrl}?simulado=${encodeURIComponent(cod)}`);
+                const resp = await fetch(`${CONFIG_RANKING_PORTAL.apiUrl}?simulado=${encodeURIComponent(provaAtivaCodigo)}`);
                 if (resp.ok) {
                     const json = await resp.json();
                     if (Array.isArray(json.ranking)) lista = json.ranking;
@@ -179,46 +309,75 @@
                 try { lista = JSON.parse(localStorage.getItem(cfg.localKey) || '[]'); } catch (e) {}
             }
 
-            lista.sort((a, b) => (Number(b.notaEnade) - Number(a.notaEnade)) || (Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999)));
+            // Garante isolamento estrito da prova: não exibe registros de simulados anteriores (ex.: Simulado 02)
+            lista = lista.filter(item => pertenceAoSimuladoAtual(item, provaAtivaCodigo));
 
-            document.getElementById('kpiParticipantes').textContent = lista.length;
-            if (lista.length > 0) {
-                const soma = lista.reduce((acc, x) => acc + Number(x.notaEnade || 0), 0);
-                const somaTempo = lista.reduce((acc, x) => acc + Number(x.tempoSegundos || 0), 0);
-                document.getElementById('kpiMedia').textContent = (soma / lista.length).toFixed(1).replace('.', ',');
-                document.getElementById('kpiMaiorNota').textContent = Number(lista[0].notaEnade || 0).toFixed(1).replace('.', ',');
-                document.getElementById('kpiTempoMedio').textContent = formatSegundos(Math.round(somaTempo / lista.length));
+            const enriquecida = lista.map(item => ({
+                ...item,
+                metricas: calcularMetricasOpcaoA(item, cfg.totalQuestoesPadrao)
+            }));
+
+            // Ordenação: 1º Pontuação Final (Nota ENADE + Bônus Dedicação), 2º Maior nº de respondidas, 3º Menor tempo
+            enriquecida.sort((a, b) =>
+                (b.metricas.pontuacaoFinal - a.metricas.pontuacaoFinal) ||
+                (b.metricas.respondidas - a.metricas.respondidas) ||
+                (Number(a.tempoSegundos || 999999) - Number(b.tempoSegundos || 999999))
+            );
+
+            document.getElementById('kpiParticipantes').textContent = enriquecida.length;
+            if (enriquecida.length > 0) {
+                const somaEnade = enriquecida.reduce((acc, x) => acc + x.metricas.notaBase, 0);
+                const somaTempo = enriquecida.reduce((acc, x) => acc + Number(x.tempoSegundos || 0), 0);
+                document.getElementById('kpiMedia').textContent = (somaEnade / enriquecida.length).toFixed(1).replace('.', ',');
+                document.getElementById('kpiMaiorNota').textContent = enriquecida[0].metricas.pontuacaoFinal.toFixed(1).replace('.', ',');
+                document.getElementById('kpiTempoMedio').textContent = formatSegundos(Math.round(somaTempo / enriquecida.length));
             } else {
                 document.getElementById('kpiMedia').textContent = '0,0';
                 document.getElementById('kpiMaiorNota').textContent = '0,0';
                 document.getElementById('kpiTempoMedio').textContent = '--:--';
-                tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-500">Nenhuma entrega registrada ainda para este simulado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-500">Nenhuma entrega registrada ainda para esta avaliação.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = lista.map((item, idx) => {
+            tbody.innerHTML = enriquecida.map((item, idx) => {
+                const m = item.metricas;
                 const medalhas = ['🥇', '🥈', '🥉'];
                 const posLabel = idx < 3 ? `<span class="text-base">${medalhas[idx]}</span>` : `<span class="font-bold text-slate-500">${idx + 1}º</span>`;
+                const badgeRitmo = m.bonusRitmo > 0
+                    ? '<span class="ml-1 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-bold" title="Bônus de ritmo consciente (+2,0)">+Ritmo</span>'
+                    : '';
                 return `
                     <tr class="${idx < 3 ? 'bg-amber-50/40' : 'hover:bg-slate-50'}">
                         <td class="py-3 px-4">${posLabel}</td>
                         <td class="py-3 px-4 font-bold text-slate-900">${item.apelido || item.idParticipante || 'Estudante'}</td>
-                        <td class="py-3 px-4 text-center text-slate-600">${item.acertosFG ?? '-'}/${item.totalFG ?? 15}</td>
-                        <td class="py-3 px-4 text-center text-slate-600">${item.acertosCE ?? '-'}/${item.totalCE ?? 30}</td>
-                        <td class="py-3 px-4 text-center font-extrabold text-ufcnavy-900">${Number(item.notaEnade || 0).toFixed(1).replace('.', ',')}</td>
-                        <td class="py-3 px-4 text-right font-mono text-slate-600">${item.tempoFormatado || formatSegundos(item.tempoSegundos)}</td>
+                        <td class="py-3 px-4 text-center text-slate-700 font-semibold">${m.respondidas}/${m.totalQ}</td>
+                        <td class="py-3 px-4 text-center text-slate-600 font-semibold">${m.notaBase.toFixed(1).replace('.', ',')}</td>
+                        <td class="py-3 px-4 text-center text-ufcteal-700 font-bold">+${m.bonusTotal.toFixed(1).replace('.', ',')}${badgeRitmo}</td>
+                        <td class="py-3 px-4 text-center font-extrabold text-ufcnavy-900 text-sm">${m.pontuacaoFinal.toFixed(1).replace('.', ',')}</td>
+                        <td class="py-3 px-4 text-right font-mono text-slate-600">${formatarTempoLimpo(item.tempoFormatado, item.tempoSegundos)}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        const paramSim = new URLSearchParams(window.location.search).get('simulado');
-        if (paramSim && CONFIG_RANKING_PORTAL.simulados[paramSim]) {
-            document.getElementById('selectSimuladoRanking').value = paramSim;
-        }
-        document.getElementById('selectSimuladoRanking').addEventListener('change', carregarRanking);
+        document.getElementById('formAcessoRanking').addEventListener('submit', (e) => {
+            e.preventDefault();
+            validarEAbrirRanking(
+                document.getElementById('inputProvaCodigo').value,
+                document.getElementById('inputChaveRanking').value
+            );
+        });
+
         document.getElementById('btnAtualizar').addEventListener('click', carregarRanking);
-        carregarRanking();
+
+        // Auto-desbloqueio se vier via link exclusivo da prova (?prova=simulado05&chave=GEPRO2026)
+        const params = new URLSearchParams(window.location.search);
+        const paramProva = params.get('prova') || params.get('simulado') || '';
+        const paramChave = params.get('chave') || params.get('acesso') || '';
+        if (paramProva) document.getElementById('inputProvaCodigo').value = paramProva;
+        if (paramProva && paramChave) {
+            validarEAbrirRanking(paramProva, paramChave);
+        }
     </script>
 </body>
 </html>
