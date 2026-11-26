@@ -69,3 +69,11 @@ O portal funciona em arquitetura aberta (*client-side* em HTML5, Tailwind CSS e 
 ---
 
 **Realização:** GEPRO — Laboratório de Gestão da Produção | Universidade Federal do Ceará (Campus de Russas).
+
+
+## 📐 Padrão Estrutural dos Simulados Completos (ENADE 2026)
+
+1. **Questões Objetivas (Q01 a Q45):** 15 de Formação Geral (25%) + 30 de Componente Específico (75%).
+2. **Questão Discursiva (D1 — sempre por último):** Posicionada automaticamente ao final do caderno (item 46).
+3. **Questionário de Percepção da Prova (P01 a P09 — padrão obrigatório):** Exibido após a conclusão das questões (sem pontuação, dentro do tempo total da prova), tanto na plataforma interativa quanto na versão de impressão/PDF.
+4. **Figuras e Gráficos (`assets/figuras/`):** Todas as imagens referenciadas na coluna `Imagem / Figura` das planilhas devem estar publicadas na pasta `assets/figuras/` na raiz do repositório GitHub.

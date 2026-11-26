@@ -1712,10 +1712,23 @@
             const figContainer = document.getElementById('containerFigura');
             const imgElem = document.getElementById('imgQuestao');
             if (figContainer && imgElem) {
-                if (q.imagem && q.imagem !== 'N/A' && q.imagem.trim() !== '') {
-                    imgElem.src = q.imagem;
+                const rawImg = (q.imagem || '').trim().replace(/^\.\//, '');
+                if (rawImg && rawImg.toUpperCase() !== 'N/A') {
+                    imgElem.onerror = function() {
+                        const fileNameOnly = rawImg.split('/').pop();
+                        if (!this.dataset.triedFallback && fileNameOnly) {
+                            this.dataset.triedFallback = '1';
+                            this.src = 'assets/figuras/' + fileNameOnly;
+                        } else {
+                            this.onerror = null;
+                            figContainer.classList.add('hidden');
+                        }
+                    };
+                    delete imgElem.dataset.triedFallback;
+                    imgElem.src = rawImg;
                     figContainer.classList.remove('hidden');
                 } else {
+                    imgElem.onerror = null;
                     imgElem.src = '';
                     figContainer.classList.add('hidden');
                 }
@@ -2996,6 +3009,27 @@
                         ${blocoJustificativaPrint}
                     </div>`;
             });
+            // Inclui o Questionário de Percepção da Prova (P01 a P09) ao final do caderno (após a questão discursiva)
+            printHTML += `
+                <div class="page-break-avoid border-t-2 border-slate-900 pt-4 mt-6">
+                    <div class="text-xs font-bold uppercase text-slate-900 mb-1">QUESTIONÁRIO DE PERCEPÇÃO DA PROVA (PADRÃO ENADE • P01 A P09 • SEM PONTUAÇÃO)</div>
+                    <p class="text-[11px] text-slate-700 mb-3">As questões a seguir visam levantar sua opinião sobre a qualidade e a adequação da prova que você acabou de realizar.</p>
+                    <div class="space-y-3">
+                        ${QUESTIONARIO_PERCEPCAO_ENADE.map(item => `
+                            <div class="page-break-avoid border-b border-slate-200 pb-2">
+                                <div class="text-xs font-semibold text-slate-900 mb-1"><b>${item.id}.</b> ${item.pergunta}</div>
+                                <div class="grid grid-cols-1 gap-0.5 text-xs">
+                                    ${Object.entries(item.opcoes).map(([letra, txt]) => `
+                                        <div class="flex items-start space-x-2">
+                                            <span class="font-bold border border-slate-400 rounded w-4 h-4 flex items-center justify-center text-[10px] shrink-0">(${letra})</span>
+                                            <span>${txt}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
             printHTML += `</div>`;
             printContainer.innerHTML = printHTML;
         }
