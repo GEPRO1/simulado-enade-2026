@@ -1147,9 +1147,17 @@
             };
             if (!ans || !temAlgumaRespostaDiscursiva(ans)) return emptyResult;
 
-            const dados = (typeof ans === 'string')
-                ? { memorial: ans, cts: { ct1: [], ct2: [], ct3: [], ct4: [] } }
-                : ans;
+            if (typeof ans === 'string') {
+                const txt = ans.trim();
+                return {
+                    notaTotal: 0,
+                    c1: 0, c2: 0, c3: 0, c4: 0, c5: 0,
+                    respondida: txt.length > 0,
+                    correcaoDocentePendente: true,
+                    resumoFormatado: txt || '(Entregue em branco)'
+                };
+            }
+            const dados = ans;
 
             // Critério 1 (1,5 pt): Tempo disponível mensal = 12.000 min (ou 200 h)
             const vTempoDisp = parseNumeroBr(dados.tempoDisp);
@@ -1545,6 +1553,11 @@
                 });
             }
 
+            // Garante que questões objetivas venham primeiro e questões discursivas fiquem sempre por último
+            const objetivasList = questaoData.filter(item => !isQuestionDiscursiva(item));
+            const discursivasList = questaoData.filter(item => isQuestionDiscursiva(item));
+            questaoData = [...objetivasList, ...discursivasList];
+
             userAnswers = {};
             percepcaoAnswers = {};
             currentIndex = 0;
@@ -1572,7 +1585,7 @@
                 if (name.includes('gabarito')) colMap.gab = colIdx;
                 else if (name.includes('justificativa') || name.includes('distrator')) colMap.justificativa = colIdx;
                 else if (name.includes('fundamentação') || name.includes('abnt') || name.includes('referência')) colMap.fonte = colIdx;
-                else if (name.includes('opções') || name.includes('resposta')) colMap.opcoes = colIdx;
+                else if (name.includes('alternativa') || name.includes('opções') || name.includes('resposta')) colMap.opcoes = colIdx;
                 else if (name.includes('afirmativa') || name.includes('asserções')) colMap.afirmativas = colIdx;
                 else if (name.includes('comando')) colMap.comando = colIdx;
                 else if (name.includes('texto')) colMap.texto = colIdx;
@@ -1583,7 +1596,7 @@
                 else if (name.includes('tipo')) colMap.tipo = colIdx;
                 else if (name.includes('dificuldade')) colMap.dif = colIdx;
                 else if (name.includes('disciplina') || name.includes('área')) colMap.disc = colIdx;
-                else if (name.includes('categoria')) colMap.cat = colIdx;
+                else if (name.includes('componente') || name.includes('categoria')) colMap.cat = colIdx;
                 else if (name.includes('nº') || name.includes('num') || name === 'questão' || name.startsWith('nº')) colMap.num = colIdx;
             });
             return colMap;
@@ -1721,6 +1734,55 @@
             const selectedOpt = userAnswers[index];
 
             if (isDisc) {
+                const textoCompletoDisc = `${q.comando || ''} ${q.texto || ''} ${q.conteudo || ''}`.toLowerCase();
+                const isBalanceamentoD1 = textoCompletoDisc.includes('balanceamento') || textoCompletoDisc.includes('centros de trabalho') || textoCompletoDisc.includes('tempo de ciclo');
+                if (!isBalanceamentoD1) {
+                    const textoSalvo = typeof selectedOpt === 'string'
+                        ? selectedOpt
+                        : (selectedOpt && typeof selectedOpt === 'object' ? (selectedOpt.memorial || '') : '');
+                    const wrapGen = document.createElement('div');
+                    wrapGen.className = 'space-y-3';
+                    wrapGen.innerHTML = `
+                        <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3.5 text-xs text-indigo-950 flex items-start space-x-2.5">
+                            <i class="fa-solid fa-pen-nib text-indigo-600 mt-0.5 text-sm"></i>
+                            <div>
+                                <span class="font-bold block">Questão Discursiva — Folha de Resposta Oficial (15% do Componente Específico)</span>
+                                <p class="text-indigo-900/90 mt-0.5 leading-relaxed">
+                                    Redija sua resposta fundamentada nos conceitos da Engenharia de Produção, apresentando cálculos, justificativas técnicas e conclusões solicitadas nos itens do enunciado.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label for="textareaDiscursivaGenerica" class="text-xs font-bold text-slate-700">
+                                    Sua Resposta Discursiva:
+                                </label>
+                                <span id="contadorCharsDiscGen" class="text-[11px] font-mono text-slate-500">${textoSalvo.length} caracteres</span>
+                            </div>
+                            <textarea id="textareaDiscursivaGenerica" rows="9"
+                                placeholder="Escreva aqui o desenvolvimento completo da sua resposta discursiva..."
+                                ${simuladoFinalizado ? 'disabled' : ''}
+                                class="select-text w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3.5 text-xs sm:text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"></textarea>
+                        </div>
+                    `;
+                    opcoesContainer.appendChild(wrapGen);
+                    const taGen = document.getElementById('textareaDiscursivaGenerica');
+                    const cntGen = document.getElementById('contadorCharsDiscGen');
+                    if (taGen) {
+                        taGen.value = textoSalvo;
+                        taGen.addEventListener('input', () => {
+                            if (simuladoFinalizado) return;
+                            const val = taGen.value;
+                            if (cntGen) cntGen.textContent = `${val.length} caracteres`;
+                            if (val.trim().length > 0) {
+                                userAnswers[index] = val;
+                            } else {
+                                delete userAnswers[index];
+                            }
+                            updateGridButtons();
+                        });
+                    }
+                } else {
                 const stateAtual = (selectedOpt && typeof selectedOpt === 'object')
                     ? selectedOpt
                     : {
@@ -1917,6 +1979,7 @@
                         renderQuestion(index);
                     });
                 });
+                }
             } else if (q.opcoes) {
                 Object.keys(q.opcoes).forEach(letra => {
                     const isSelected = selectedOpt === letra;
