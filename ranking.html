@@ -211,10 +211,15 @@
             if (simItem) {
                 return simItem === codigoEsperado.toLowerCase();
             }
-            // Registos antigos do Simulado 02 (20/11/2026) não trazem campo 'simulado' no JSON:
-            // Se estamos a consultar o Simulado 05, exige etiqueta explícita 'simulado05'
+            // Compatibilidade com Apps Script antigo (sem coluna 'simulado'):
+            // Exclui explicitamente os registos antigos do Simulado 02 (20/11/2026)
+            // e exibe os novos envios do Simulado 05 (a partir de 26/11/2026)
+            const dataReg = String(item.horaFim || item.horaInicio || item.data || '').toLowerCase();
             if (codigoEsperado.toLowerCase() === 'simulado05') {
-                return false;
+                if (dataReg.includes('nov 20 2026') || dataReg.includes('20/11/2026') || dataReg.includes('20 de novembro de 2026')) {
+                    return false;
+                }
+                return true;
             }
             return true;
         }
