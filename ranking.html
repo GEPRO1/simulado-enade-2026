@@ -227,13 +227,28 @@
         // Cálculo da Opção A: Bônus de Dedicação & Completude (até +5,0 pts)
         function calcularMetricasOpcaoA(item, totalPadrao) {
             const notaBase = Number(item.notaEnade || 0);
-            const totalQ = Number(item.totalQuestoesProva || totalPadrao || 46);
-            // Estima respondidas pelo campo explícito ou, em registros legados, assume completude proporcional
-            let respondidas = Number(item.questoesRespondidas);
-            if (isNaN(respondidas) || respondidas <= 0) {
-                respondidas = item.acertosTotal != null ? totalQ : 0;
+            let totalQ = Number(item.totalQuestoesProva || totalPadrao || 46);
+            let respondidas = NaN;
+
+            // 1. Verifica campo direto questoesRespondidas
+            if (item.questoesRespondidas !== undefined && item.questoesRespondidas !== null && item.questoesRespondidas !== '') {
+                respondidas = Number(item.questoesRespondidas);
             }
-            respondidas = Math.min(respondidas, totalQ);
+
+            // 2. Fallback compatível com Apps Script antigo: extrai [R:X/Y] embutido no campo turma
+            if (isNaN(respondidas) && typeof item.turma === 'string') {
+                const matchR = item.turma.match(/\[R:(\d+)\/(\d+)\]/i);
+                if (matchR) {
+                    respondidas = Number(matchR[1]);
+                    if (Number(matchR[2]) > 0) totalQ = Number(matchR[2]);
+                }
+            }
+
+            // 3. Se ainda não existir contagem explícita, usa no mínimo o total de acertos conhecidos (nunca inventa 100% da prova)
+            if (isNaN(respondidas)) {
+                respondidas = Math.max(0, Number(item.acertosTotal || 0));
+            }
+            respondidas = Math.max(0, Math.min(respondidas, totalQ));
 
             const taxaCompletude = totalQ > 0 ? (respondidas / totalQ) : 0;
             const bonusCompletude = Number((3.0 * taxaCompletude).toFixed(2));
